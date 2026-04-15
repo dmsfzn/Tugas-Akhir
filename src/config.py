@@ -8,7 +8,7 @@ MODEL_DIR = os.path.join(BASE_DIR, "model")
 # File paths
 INPUT_FILE      = os.path.join(DATA_DIR, "dataset_TA.xlsx")
 PREPROCESSED    = os.path.join(DATA_DIR, "dataset_preprocessed.csv")
-MODEL_FILE      = os.path.join(MODEL_DIR, "model_mnb.pkl")
+MODEL_FILE      = os.path.join(MODEL_DIR, "model.pkl")
 VECTORIZER_FILE = os.path.join(MODEL_DIR, "vectorizer.pkl")
 TEST_DATA_FILE  = os.path.join(DATA_DIR, "data_ujian.csv")
 
