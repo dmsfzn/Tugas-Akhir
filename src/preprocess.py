@@ -1,0 +1,54 @@
+# =============================================================
+# preprocess.py  —  Step 1: Load raw dataset, clean & stem text
+# Output : ../data/dataset_preprocessed.csv
+# =============================================================
+
+import re
+import pandas as pd
+from stemmid import Stemmer
+from config import INPUT_FILE, PREPROCESSED, RANDOM_STATE, EMOJI_MAP
+
+
+def normalisasi_emoji(text: str) -> str:
+    for emoji, token in EMOJI_MAP.items():
+        text = text.replace(emoji, token)
+    return text
+
+
+def normalisasi_teks(text: str, stemmer: Stemmer) -> str:
+    text = str(text).lower()
+    text = normalisasi_emoji(text)
+    text = re.sub(r"http\S+|www\S+", "", text)   # Hapus URL
+    text = re.sub(r"[^a-zA-Z\s]", "", text)       # Hapus simbol/angka
+    text = re.sub(r"\s+", " ", text).strip()       # Hapus spasi berlebih
+    return stemmer.loads(text)                     # Stemming
+
+
+def main():
+    # 1. Load dataset
+    print("Membaca dataset...")
+    df = pd.read_excel(INPUT_FILE)
+    df["Label"] = df["Label"].str.lower()
+
+    print("\nDistribusi Data Natural:")
+    print(df["Label"].value_counts())
+
+    # 2. Inisialisasi stemmer
+    print("\nMenyiapkan Stemmer stemmid...")
+    stemmer = Stemmer()
+
+    # 3. Preprocessing
+    print("Memulai proses pembersihan teks...")
+    df["text_processed"] = df["Ulasan"].apply(lambda t: normalisasi_teks(t, stemmer))
+
+    # Hapus baris kosong setelah cleaning
+    df = df[df["text_processed"].str.strip() != ""]
+
+    # 4. Shuffle & simpan
+    df = df.sample(frac=1, random_state=RANDOM_STATE).reset_index(drop=True)
+    df.to_csv(PREPROCESSED, index=False)
+    print(f"\nSelesai! Dataset tersimpan sebagai '{PREPROCESSED}'")
+
+
+if __name__ == "__main__":
+    main()
