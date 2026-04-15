@@ -13,8 +13,5 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Model files (optional kalau besar)
-*.pkl
-
 # Dataset (optional kalau sensitif / besar)
 data/
