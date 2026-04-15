@@ -14,7 +14,7 @@ venv/
 Thumbs.db
 
 # Model files (optional kalau besar)
-*.pkl
+# *.pkl
 
 # Dataset (optional kalau sensitif / besar)
-data/
+# data/
