@@ -12,10 +12,12 @@ from config import MODEL_FILE, VECTORIZER_FILE
 
 # Kamus kustom (di aplikasi web diambil dari database)
 KAMUS_KUSTOM = {
-    "kacau":  "negatif",
-    "lelet":  "negatif",
-    "parah":  "negatif",
-    "nyaman": "positif",
+    "kacau":  -1,
+    "lelet":  -1,
+    "parah":  -1,
+    "kotor":  -1,
+    "lama":   -1,
+    "nyaman":  1,
 }
 
 
@@ -47,28 +49,56 @@ def get_xai_explanation(text: str, model, vectorizer) -> list:
 
 
 def hybrid_prediction(text: str, model, vectorizer, stemmer: Stemmer, custom_dict: dict):
-    """Prediksi sentimen dengan boosting dari kamus kustom."""
-    # a. Bersihkan & transform
+    # a. Preprocessing
     teks_bersih = stemmer.loads(text.lower())
     vec         = vectorizer.transform([teks_bersih])
 
-    # b. Prediksi dasar (MNB)
+    # b. Prediksi ML
     prob      = model.predict_proba(vec)[0]
     label_mnb = model.predict(vec)[0]
     conf_mnb  = max(prob) * 100
 
-    # c. Cek kamus kustom (boosting)
-    boost_label = None
-    for word in teks_bersih.split():
-        if word in custom_dict:
-            boost_label = custom_dict[word]
-            break
+    # c. Lexicon scoring
+    lex_score, neg_count, pos_count = lexicon_scoring(text.lower(), custom_dict)
 
-    final_label = boost_label if boost_label else label_mnb
-    final_conf  = 99.9       if boost_label else conf_mnb
+    # d. Hybrid logic (combine, bukan overwrite)
+    final_label = label_mnb
+    final_conf  = conf_mnb
 
-    return final_label, final_conf, teks_bersih
+    if lex_score > 0 and label_mnb == "negatif":
+        final_label = "positif"
+        final_conf += 5
+    elif lex_score < 0 and label_mnb == "positif":
+        final_label = "negatif"
+        final_conf += 5
 
+    return {
+        "label": final_label,
+        "confidence": final_conf,
+        "clean_text": teks_bersih,
+        "lexicon_score": lex_score,
+        "neg_count": neg_count,
+        "pos_count": pos_count
+    }
+
+def lexicon_scoring(text: str, lexicon: dict):
+    words = text.split()
+    
+    score = 0
+    neg_count = 0
+    pos_count = 0
+
+    for w in words:
+        if w in lexicon:
+            val = lexicon[w]
+            score += val
+
+            if val < 0:
+                neg_count += 1
+            else:
+                pos_count += 1
+
+    return score, neg_count, pos_count
 
 def main():
     # 1. Load model
@@ -82,14 +112,35 @@ def main():
         if ulasan.lower() == "exit":
             break
 
-        label, conf, bersih = hybrid_prediction(ulasan, model, vectorizer, stemmer, KAMUS_KUSTOM)
+        result = hybrid_prediction(ulasan, model, vectorizer, stemmer, KAMUS_KUSTOM)
+
+        label   = result["label"]
+        conf    = result["confidence"]
+        bersih  = result["clean_text"]
+        lex_sc  = result["lexicon_score"]
+        neg_cnt = result["neg_count"]
+        pos_cnt = result["pos_count"]
         expl = get_xai_explanation(bersih, model, vectorizer)
 
         print(f"\n[ HASIL DASHBOARD ]")
         print(f"> Sentimen : {label.upper()}")
         print(f"> Keyakinan: {conf:.2f}%")
+        print(f"> Lexicon Score: {lex_sc}")
+        print(f"> Kata Negatif : {neg_cnt}")
+        print(f"> Kata Positif : {pos_cnt}")
+        if lex_sc < 0:
+            print("→ Terdapat indikasi sentimen NEGATIF dari kamus leksikon")
+        elif lex_sc > 0:
+            print("→ Terdapat indikasi sentimen POSITIF dari kamus leksikon")
+        else:
+            print("→ Tidak ditemukan kata dalam kamus leksikon")
 
-        print(f"\n[ ANALISIS XAI (SKOR FITUR) ]")
+        print(f"\n[ ANALISIS XAI - LEKSIKON ]")
+        for word in bersih.split():
+            if word in KAMUS_KUSTOM:
+                print(f"- Kata '{word}' → Skor: {KAMUS_KUSTOM[word]}")
+
+        print(f"\n[ ANALISIS XAI - MACHINE LEARNING ]")
         for item in expl:
             print(f"- Fitur '{item['fitur']}' cenderung {item['arah']} (Kekuatan: {item['kekuatan']})")
 
