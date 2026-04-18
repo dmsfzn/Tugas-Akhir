@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% block title %}Owner Dashboard{% endblock %}
+{% block page_label %}MOTORMIND · DASHBOARD · OVERVIEW{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <div class="live-badge">
+      <span class="live-dot"></span> Live Laboratory Feed
+    </div>
+    <h1>Operations Overview</h1>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <a href="{{ url_for('owner_insight') }}" class="btn-mm btn-mm-ghost">
+      <i class="bi bi-graph-up-arrow"></i> Insight
+    </a>
+    <button class="btn-mm btn-mm-primary"
+            onclick="openReport('/report/statistik')">
+      <i class="bi bi-file-earmark-bar-graph"></i> Laporan Statistik
+    </button>
+  </div>
+</div>
+
+<!-- ── ROW 1: MAIN METRICS ─────────────────── -->
+<div class="grid-4 mb-4">
+
+  <!-- Total Reviews -->
+  <div class="mm-card" style="grid-column: span 2;">
+    <div class="card-label">Total Reviews (Monthly)</div>
+    <div class="stat-value" style="font-size:42px;letter-spacing:-.03em;">
+      {{ "{:,}".format(total) }}
+    </div>
+    <div class="stat-delta positive"><i class="bi bi-arrow-up-short"></i> +12.4%</div>
+  </div>
+
+  <!-- Negative Pulse -->
+  <div class="mm-card">
+    <div class="stat-icon-card">
+      <div class="stat-icon orange"><i class="bi bi-exclamation-triangle-fill"></i></div>
+      <div>
+        <div class="card-label">Negative Pulse</div>
+        <div class="stat-value" style="font-size:20px;">
+          {{ "{:,}".format(negatif) }} Hits
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Neural Latency -->
+  <div class="mm-card">
+    <div class="stat-icon-card">
+      <div class="stat-icon blue"><i class="bi bi-lightning-charge-fill"></i></div>
+      <div>
+        <div class="card-label">Neural Latency</div>
+        <div class="stat-value" style="font-size:20px;">24ms avg</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ROW 2: CHART + PIE + LAB ──────────── -->
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;">
+
+  <!-- Sentiment Velocity Trend -->
+  <div class="mm-card" style="grid-column:span 2;">
+    <div class="card-label">Sentiment Velocity Trend</div>
+    <div style="font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:16px;">
+      Engine Response Dynamics
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:10px;">
+      <button class="page-btn" id="btn7d"  onclick="switchRange(7)"  style="width:auto;padding:0 10px;font-size:11px;">7D</button>
+      <button class="page-btn active" id="btn30d" onclick="switchRange(30)" style="width:auto;padding:0 10px;font-size:11px;">30D</button>
+    </div>
+    <div class="bar-chart" id="mainChart" style="height:100px;"></div>
+    <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;">
+      <span style="display:flex;align-items:center;gap:5px;">
+        <span style="width:8px;height:8px;background:var(--accent);border-radius:50%;"></span>
+        <span class="text-dim">Analyses Peak</span>
+      </span>
+      <span style="display:flex;align-items:center;gap:5px;">
+        <span style="width:8px;height:8px;background:var(--text-3);border-radius:50%;"></span>
+        <span class="text-dim">Baseline</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Sentiment Distribution (Pie) -->
+  <div class="mm-card">
+    <div class="card-label">Sentiment Distribution</div>
+    <div class="donut-wrap" style="flex-direction:column;align-items:flex-start;gap:16px;">
+      <!-- SVG Donut -->
+      <svg width="100" height="100" viewBox="0 0 100 100" style="display:block;margin:0 auto;">
+        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--bg-root)" stroke-width="14"/>
+        {% set circ = 239 %}
+        {% set pos_arc = (pos_pct / 100 * circ)|round %}
+        {% set neg_arc = circ - pos_arc %}
+        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--accent)" stroke-width="14"
+                stroke-dasharray="{{ pos_arc }} {{ circ }}"
+                transform="rotate(-90 50 50)"/>
+        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--negative)" stroke-width="14"
+                stroke-dasharray="{{ neg_arc }} {{ circ }}"
+                stroke-dashoffset="{{ -pos_arc }}"
+                transform="rotate(-90 50 50)"/>
+      </svg>
+      <!-- Labels -->
+      <div style="width:100%;">
+        <div class="donut-label-item mb-2">
+          <span class="donut-dot" style="background:var(--accent);"></span>
+          <div>
+            <div class="val" style="font-size:18px;">{{ positif }}</div>
+            <div class="pct text-dim">POSITIF · {{ pos_pct }}%</div>
+          </div>
+        </div>
+        <div class="donut-label-item">
+          <span class="donut-dot" style="background:var(--negative);"></span>
+          <div>
+            <div class="val" style="font-size:18px;">{{ negatif }}</div>
+            <div class="pct text-dim">NEGATIF · {{ neg_pct }}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ROW 3: LATEST + DEEP LAB ───────────── -->
+<div class="grid-2-3" style="gap:16px;">
+
+  <!-- Latest Findings -->
+  <div class="mm-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="card-label mb-0">Latest Findings</div>
+      <span class="text-dimmer" style="font-size:10px;">— — —</span>
+    </div>
+
+    {% for row in latest %}
+    <div class="d-flex align-items-start gap-3 mb-3 pb-3"
+         style="border-bottom:1px solid var(--border);">
+      <span style="width:6px;height:6px;border-radius:50%;margin-top:6px;flex-shrink:0;
+                   background:{% if row.sentiment=='positif' %}var(--accent){% else %}var(--negative){% endif %};">
+      </span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:2px;">
+          {{ row.analyst }} Feedback
+        </div>
+        <div style="font-size:12px;color:var(--text-1);
+                    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          "{{ row.snippet }}…"
+        </div>
+      </div>
+      <span class="badge-{{ row.sentiment }}">{{ row.sentiment|upper }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Deep Learning Lab CTA -->
+  <div class="mm-card accent-border" style="display:flex;flex-direction:column;justify-content:flex-end;">
+    <!-- Decorative arc -->
+    <div style="text-align:right;margin-bottom:auto;">
+      <svg width="120" height="80" viewBox="0 0 120 80">
+        <circle cx="100" cy="80" r="70" fill="none" stroke="rgba(67,97,238,.2)" stroke-width="1"/>
+        <circle cx="100" cy="80" r="50" fill="none" stroke="rgba(67,97,238,.12)" stroke-width="1"/>
+        <circle cx="100" cy="80" r="30" fill="none" stroke="rgba(67,97,238,.08)" stroke-width="1"/>
+      </svg>
+    </div>
+
+    <div>
+      <div style="font-size:10px;letter-spacing:.1em;color:var(--accent);
+                  text-transform:uppercase;font-weight:700;margin-bottom:8px;">
+        ● Systems Ready
+      </div>
+      <h3 style="font-size:22px;font-weight:700;color:var(--text-1);margin-bottom:10px;">
+        Deep Learning Lab
+      </h3>
+      <p style="font-size:12px;color:var(--text-2);margin-bottom:20px;line-height:1.6;">
+        Initialize a new high-precision sentiment analysis session. Our neural
+        engine is recalibrated for Q4 manufacturing linguistics.
+      </p>
+      <a href="{{ url_for('report_export_csv') }}" class="btn-mm btn-mm-ghost w-100"
+         style="justify-content:center;">
+        Open Analysis Workspace <i class="bi bi-arrow-right ms-2"></i>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── ROW 4: REPORT BUTTONS ──────────────── -->
+<div class="grid-2 mt-4">
+  <button class="btn-mm btn-mm-ghost" style="justify-content:center;padding:14px;"
+          onclick="openReport('/report/statistik')">
+    <i class="bi bi-file-earmark-bar-graph"></i> Download Laporan Statistik
+  </button>
+  <a href="{{ url_for('report_export_csv') }}" class="btn-mm btn-mm-primary"
+     style="justify-content:center;padding:14px;" target="_blank">
+    <i class="bi bi-file-earmark-spreadsheet"></i> Export Full Data CSV
+  </a>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let chartData = [];
+
+async function loadChart() {
+  try {
+    chartData = await fetch('/api/chart/sentiment').then(r => r.json());
+    renderChart(30);
+  } catch(e) {}
+}
+
+function renderChart(days) {
+  const el = document.getElementById('mainChart');
+  const slice = chartData.slice(-days);
+  if (!slice.length) return;
+  const max = Math.max(...slice.map(d => d.pos + d.neg), 1);
+  el.innerHTML = slice.map(d => {
+    const h = Math.round(((d.pos + d.neg) / max) * 100);
+    const isNeg = d.neg > d.pos;
+    return `<div class="bar-col"
+      style="height:${Math.max(h,4)}%;
+             background:${isNeg ? 'var(--negative)' : 'var(--accent)'};
+             opacity:.75;"
+      title="${d.day}: +${d.pos} / -${d.neg}">
+    </div>`;
+  }).join('');
+}
+
+function switchRange(days) {
+  document.getElementById('btn7d').classList.toggle('active', days === 7);
+  document.getElementById('btn30d').classList.toggle('active', days === 30);
+  renderChart(days);
+}
+
+loadChart();
+</script>
+{% endblock %}

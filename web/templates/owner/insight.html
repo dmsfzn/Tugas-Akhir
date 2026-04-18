@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% block title %}Insight — Analisis Negatif{% endblock %}
+{% block page_label %}OWNER · INSIGHT · NEGATIF ANALYSIS{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Insight Sentimen</h1>
+  <div style="display:flex;gap:10px;">
+    <button class="btn-mm btn-mm-ghost"
+            onclick="openReport('/report/statistik')">
+      <i class="bi bi-file-earmark-bar-graph"></i> Laporan Insight
+    </button>
+    <a href="{{ url_for('report_export_csv') }}" class="btn-mm btn-mm-primary" target="_blank">
+      <i class="bi bi-download"></i> Export CSV
+    </a>
+  </div>
+</div>
+
+<!-- ── TOP STATS ──────────────────────────── -->
+<div class="grid-3 mb-4">
+  <div class="mm-card">
+    <div class="card-label">Total Kata Negatif Unik</div>
+    <div class="stat-value text-mono" style="color:var(--negative);">
+      {{ top_words|length }}+
+    </div>
+    <div class="stat-sub">Terdeteksi dari corpus</div>
+  </div>
+  <div class="mm-card">
+    <div class="card-label">Top Kata Negatif</div>
+    <div class="stat-value text-mono" style="color:var(--negative);">
+      {% if top_words %}{{ top_words[0][0] }}{% else %}—{% endif %}
+    </div>
+    <div class="stat-sub">
+      {% if top_words %}{{ top_words[0][1] }} kemunculan{% endif %}
+    </div>
+  </div>
+  <div class="mm-card">
+    <div class="card-label">Kata Paling Sering</div>
+    <div class="stat-value text-mono" style="color:var(--negative);font-size:22px;">
+      {% if top_words %}{{ top_words[0][1] }} hits{% else %}0{% endif %}
+    </div>
+    <div class="stat-sub">Kemunculan tertinggi</div>
+  </div>
+</div>
+
+<!-- ── MAIN INSIGHT PANELS ───────────────── -->
+<div class="grid-2-3" style="gap:16px;margin-bottom:16px;">
+
+  <!-- Top Negative Words -->
+  <div class="mm-card">
+    <div class="card-label">Top Kata Negatif</div>
+    <div style="font-size:16px;font-weight:700;color:var(--text-1);margin-bottom:16px;">
+      Frequently Detected Issues
+    </div>
+
+    {% if top_words %}
+      {% set max_count = top_words[0][1] %}
+      {% for word, count in top_words[:12] %}
+      <div class="word-bar-item">
+        <div class="word-bar-label">
+          <span style="color:var(--negative);font-family:var(--font-mono);font-size:12px;">
+            {{ word }}
+          </span>
+        </div>
+        <div class="word-bar-track">
+          <div class="word-bar-fill"
+               style="width:{{ (count/max_count*100)|round }}%;
+                      background:{% if loop.index <= 3 %}var(--negative){% else %}rgba(249,115,22,.5){% endif %};">
+          </div>
+        </div>
+        <div class="word-bar-count">{{ count }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center py-4 text-dimmer">
+        <i class="bi bi-bar-chart" style="font-size:28px;display:block;margin-bottom:8px;"></i>
+        Tidak ada data negatif
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Negative Trend + Analysis -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- Negative Trend Chart -->
+    <div class="mm-card">
+      <div class="card-label">Tren Sentimen Negatif (8 Minggu)</div>
+      <div class="bar-chart" id="negTrend" style="height:80px;"></div>
+      {% if neg_trend %}
+        <div style="font-size:10px;color:var(--text-3);margin-top:8px;text-align:right;">
+          REF: 8-WEEK DYNAMIC CYCLE
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Word Cloud (visual list) -->
+    <div class="mm-card">
+      <div class="card-label">Kata Cloud — Negatif</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:4px;">
+        {% if top_words %}
+          {% for word, count in top_words %}
+            {% set size = [11 + (count / top_words[0][1] * 10)|int, 22]|min %}
+            <span style="font-family:var(--font-mono);
+                         font-size:{{ size }}px;
+                         color:rgba(249,115,22,{{ 0.4 + (count/top_words[0][1]*0.6)|round(2) }});
+                         cursor:default;"
+                  title="{{ count }} kemunculan">
+              {{ word }}
+            </span>
+          {% endfor %}
+        {% else %}
+          <span class="text-dimmer">Tidak ada data</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Action Panel -->
+    <div class="mm-card accent-border">
+      <div style="font-size:10px;letter-spacing:.1em;color:var(--accent);
+                  text-transform:uppercase;font-weight:700;margin-bottom:8px;">
+        ● Recommendation Engine
+      </div>
+      <div style="font-size:16px;font-weight:700;color:var(--text-1);margin-bottom:8px;">
+        Action Required
+      </div>
+      <p style="font-size:12px;color:var(--text-2);margin-bottom:16px;line-height:1.6;">
+        {% if top_words %}
+          Kata "{{ top_words[0][0] }}" terdeteksi sebagai isu dominan.
+          Rekomendasikan review operasional terkait area ini.
+        {% else %}
+          Tidak ada isu kritis yang terdeteksi saat ini.
+        {% endif %}
+      </p>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-mm btn-mm-danger flex-fill"
+                style="justify-content:center;"
+                onclick="openReport('/report/statistik')">
+          <i class="bi bi-exclamation-triangle"></i> Lihat Laporan
+        </button>
+        <a href="{{ url_for('report_export_csv') }}"
+           class="btn-mm btn-mm-ghost flex-fill"
+           style="justify-content:center;" target="_blank">
+          <i class="bi bi-download"></i> Export
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DATA TABLE — TOP WORDS ─────────────── -->
+<div class="mm-card">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="card-label mb-0">Detail Kata Negatif</div>
+    <span class="text-dimmer" style="font-size:10px;">
+      Total: {{ top_words|length }} kata unik
+    </span>
+  </div>
+  <div class="mm-table-wrap" style="border:none;">
+    <table class="mm-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Kata</th>
+          <th>Frekuensi</th>
+          <th>Proporsi</th>
+          <th>Level</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if top_words %}
+          {% set total_occ = top_words|map(attribute=1)|sum %}
+          {% for word, count in top_words %}
+          <tr>
+            <td class="ts">{{ loop.index }}</td>
+            <td>
+              <span style="font-family:var(--font-mono);color:var(--negative);">
+                {{ word }}
+              </span>
+            </td>
+            <td>
+              <span style="font-family:var(--font-mono);">{{ count }}</span>
+            </td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="flex:1;height:4px;background:var(--bg-root);border-radius:2px;min-width:60px;">
+                  <div style="height:100%;background:var(--negative);border-radius:2px;
+                              width:{{ (count/top_words[0][1]*100)|round }}%;"></div>
+                </div>
+                <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);">
+                  {{ "%.1f"|format(count/total_occ*100 if total_occ else 0) }}%
+                </span>
+              </div>
+            </td>
+            <td>
+              {% if loop.index <= 3 %}
+                <span class="badge-negatif">CRITICAL</span>
+              {% elif loop.index <= 7 %}
+                <span style="background:rgba(250,204,21,.1);color:#fbbf24;border:1px solid rgba(250,204,21,.2);
+                             font-family:var(--font-mono);font-size:10px;padding:3px 10px;border-radius:20px;">
+                  WARNING
+                </span>
+              {% else %}
+                <span class="badge-netral">MONITOR</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5" class="text-center py-4 text-dimmer">
+              Tidak ada data negatif tersedia
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* Negative trend chart */
+(function() {
+  const data = {{ neg_trend|tojson }};
+  const el = document.getElementById('negTrend');
+  if (!data || !data.length) {
+    el.innerHTML = '<span class="text-dimmer" style="font-size:11px;">Tidak ada data tren</span>';
+    return;
+  }
+  const max = Math.max(...data.map(d => d.cnt), 1);
+  el.innerHTML = data.map(d => {
+    const h = Math.round((d.cnt / max) * 100);
+    return `<div class="bar-col"
+      style="height:${Math.max(h,4)}%;
+             background:${h > 70 ? 'var(--negative)' : 'rgba(249,115,22,.4)'};
+             border-radius:3px 3px 0 0;"
+      title="Minggu ${d.wk}: ${d.cnt} negatif">
+    </div>`;
+  }).join('');
+})();
+</script>
+{% endblock %}
