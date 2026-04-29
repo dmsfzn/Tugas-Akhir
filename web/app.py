@@ -7,9 +7,108 @@ from datetime import datetime, date
 import hashlib
 import re
 from collections import Counter
+import os
+import joblib
+import numpy as np
+from stemmid import Stemmer
 
 app = Flask(__name__)
 app.secret_key = 'motormind_secret_2024_ta'
+
+# ─────────────────────────────────────────────
+# GLOBAL MODEL & NLP HELPERS
+# ─────────────────────────────────────────────
+MODEL_PATH = os.path.join(app.root_path, '..', 'model', 'model.pkl')
+VECTORIZER_PATH = os.path.join(app.root_path, '..', 'model', 'vectorizer.pkl')
+
+try:
+    _global_model = joblib.load(MODEL_PATH)
+    _global_vectorizer = joblib.load(VECTORIZER_PATH)
+    _global_stemmer = Stemmer()
+    print("✅ ML Models and Stemmer loaded successfully.")
+except Exception as e:
+    print(f"❌ Error loading ML models: {e}")
+    _global_model, _global_vectorizer, _global_stemmer = None, None, None
+
+def get_xai_explanation(text: str, model, vectorizer) -> list:
+    """Kembalikan daftar fitur beserta arah & kekuatan kontribusinya."""
+    if not model or not vectorizer: return []
+    try:
+        feature_names = vectorizer.get_feature_names_out()
+        classes = model.classes_
+        idx_neg = np.where(classes == "negatif")[0][0]
+        idx_pos = np.where(classes == "positif")[0][0]
+    except AttributeError:
+        return []
+
+    explanation = []
+    for feature in feature_names:
+        if re.search(r"\b" + re.escape(feature) + r"\b", text):
+            idx_f   = np.where(feature_names == feature)[0][0]
+            w_neg   = model.feature_log_prob_[idx_neg][idx_f]
+            w_pos   = model.feature_log_prob_[idx_pos][idx_f]
+
+            if w_neg < w_pos:
+                arah     = "Positif"
+                kekuatan = round(w_pos - w_neg, 2)
+            else:
+                arah     = "Negatif"
+                kekuatan = round(w_neg - w_pos, 2)
+
+            explanation.append({"fitur": feature, "arah": arah, "kekuatan": kekuatan})
+
+    return sorted(explanation, key=lambda x: x["kekuatan"], reverse=True)
+
+def lexicon_scoring(text: str, lexicon: dict):
+    words = text.split()
+    score = 0
+    neg_count = 0
+    pos_count = 0
+    for w in words:
+        if w in lexicon:
+            val = lexicon[w]
+            score += val
+            if val < 0:
+                neg_count += 1
+            else:
+                pos_count += 1
+    return score, neg_count, pos_count
+
+def hybrid_prediction(text: str, model, vectorizer, stemmer, custom_dict: dict):
+    if not model or not stemmer:
+        return {"label": "netral", "confidence": 0, "clean_text": text.lower(), "lexicon_score": 0, "neg_count": 0, "pos_count": 0}
+    
+    # a. Preprocessing
+    teks_bersih = stemmer.loads(text.lower())
+    vec         = vectorizer.transform([teks_bersih])
+
+    # b. Prediksi ML
+    prob      = model.predict_proba(vec)[0]
+    label_mnb = model.predict(vec)[0]
+    conf_mnb  = max(prob) * 100
+
+    # c. Lexicon scoring (menggunakan original text words, atau teks_bersih. Kita pakai lower original)
+    lex_score, neg_count, pos_count = lexicon_scoring(text.lower(), custom_dict)
+
+    # d. Hybrid logic (combine, bukan overwrite)
+    final_label = label_mnb
+    final_conf  = conf_mnb
+
+    if lex_score > 0 and label_mnb == "negatif":
+        final_label = "positif"
+        final_conf += 5
+    elif lex_score < 0 and label_mnb == "positif":
+        final_label = "negatif"
+        final_conf += 5
+
+    return {
+        "label": final_label,
+        "confidence": min(100.0, final_conf),
+        "clean_text": teks_bersih,
+        "lexicon_score": lex_score,
+        "neg_count": neg_count,
+        "pos_count": pos_count
+    }
 
 # ─────────────────────────────────────────────
 # DATABASE
@@ -150,23 +249,41 @@ def pegawai_analisis():
         input_text = request.form.get('text', '').strip()
 
         if input_text:
-            # ─── PLACEHOLDER PIPELINE ───────────────────────
-            # Ganti blok ini dengan pipeline TF-IDF + NB + Lexicon Hybrid asli
-            words         = re.findall(r'\b\w+\b', input_text.lower())
-            word_count    = len(words)
-            sentiment     = 'positif'   # hasil model
-            confidence    = 0.89        # hasil model
-            lexicon_score = 2.5         # hasil lexicon
+            # Load custom dictionary from DB
+            db = get_db()
+            cur = db.cursor(dictionary=True)
+            cur.execute("SELECT word, score FROM lexicon")
+            lexicon_rows = cur.fetchall()
+            KAMUS_KUSTOM = {row['word']: row['score'] for row in lexicon_rows}
+            
+            # ─── REAL PIPELINE ───────────────────────
+            pred_result = hybrid_prediction(input_text, _global_model, _global_vectorizer, _global_stemmer, KAMUS_KUSTOM)
+            
+            words         = re.findall(r'\b\w+\b', pred_result['clean_text'])
+            word_count    = len(re.findall(r'\b\w+\b', input_text.lower()))
+            sentiment     = pred_result['label']
+            confidence    = pred_result['confidence'] / 100.0  # Scale 0-1 untuk UI
+            lexicon_score = pred_result['lexicon_score']
+            clean_text    = pred_result['clean_text']
             highlights    = []
 
-            # Simulasi word-level highlighting
-            pos_keywords = {'bagus','baik','hebat','luar biasa','puas','senang','meningkat','optimal'}
-            neg_keywords = {'buruk','jelek','lambat','rusak','masalah','error','gagal','kurang'}
-            for w in set(words):
-                if w in pos_keywords:
-                    highlights.append({'word': w, 'label': 'positive'})
-                elif w in neg_keywords:
-                    highlights.append({'word': w, 'label': 'negative'})
+            # Generate highlights based on XAI and Lexicon
+            xai_expl = get_xai_explanation(clean_text, _global_model, _global_vectorizer)
+            xai_dict = {item['fitur']: item['arah'] for item in xai_expl}
+            
+            # Untuk highlight UI, kita iterate lewat kata-kata asli agar highlight match persis
+            orig_words = re.findall(r'\b\w+\b', input_text.lower())
+            for w in set(orig_words):
+                # Prioritas: Lexicon -> ML XAI
+                if w in KAMUS_KUSTOM:
+                    lbl = 'positive' if KAMUS_KUSTOM[w] > 0 else 'negative'
+                    highlights.append({'word': w, 'label': lbl})
+                else:
+                    # Cek hasil stemming-nya apakah ada di XAI
+                    stemmed_w = _global_stemmer.loads(w) if _global_stemmer else w
+                    if stemmed_w in xai_dict:
+                        lbl = 'positive' if xai_dict[stemmed_w] == 'Positif' else 'negative'
+                        highlights.append({'word': w, 'label': lbl})
             # ────────────────────────────────────────────────
 
             # Simpan ke DB
