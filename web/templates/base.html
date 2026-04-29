@@ -22,11 +22,13 @@
 <!-- ── FLASH MESSAGES → auto toast ──────────── -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
+    <script type="application/json" id="flashMessages">
+      {{ messages | tojson }}
+    </script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        {% for cat, msg in messages %}
-          showToast({{ msg|tojson }}, '{{ cat }}');
-        {% endfor %}
+        const flashData = JSON.parse(document.getElementById('flashMessages').textContent);
+        flashData.forEach(([cat, msg]) => showToast(msg, cat));
       });
     </script>
   {% endif %}
