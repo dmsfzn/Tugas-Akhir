@@ -66,8 +66,7 @@ INSERT IGNORE INTO lexicon (word, score, category) VALUES
 ('parah',  -1, 'negatif'),
 ('kotor',  -1, 'negatif'),
 ('lama',   -1, 'negatif'),
-('nyaman',  1, 'positif'),
-}
+('nyaman',  1, 'positif');
 
 -- Sample analyses
 INSERT IGNORE INTO analyses (user_id, text, sentiment, confidence, lexicon_score, word_count, created_at) VALUES
