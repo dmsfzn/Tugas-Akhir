@@ -6,26 +6,50 @@
 import re
 import pandas as pd
 from stemmid import Stemmer
-from config import INPUT_FILE, PREPROCESSED, RANDOM_STATE, EMOJI_MAP
+from config import INPUT_FILE, PREPROCESSED, RANDOM_STATE
+from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 
 
-def normalisasi_emoji(text: str) -> str:
-    for emoji, token in EMOJI_MAP.items():
-        text = text.replace(emoji, token)
+# =========================
+# STOPWORD (Sastrawi)
+# =========================
+factory = StopWordRemoverFactory()
+STOPWORDS = set(factory.get_stop_words())
+
+# Pertahankan kata penting untuk sentimen
+STOPWORDS -= {"tidak", "kurang", "belum"}
+
+
+# =========================
+# FUNGSI PREPROCESSING
+# =========================
+def normalisasi_teks(text: str, stemmer: Stemmer) -> str:
+    text = str(text).lower()
+
+    # cleaning
+    text = re.sub(r"http\S+|www\S+", "", text)
+    text = re.sub(r"[^a-zA-Z\s]", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    # tokenizing
+    tokens = text.split()
+
+    # stopword removal
+    tokens = [t for t in tokens if t not in STOPWORDS]
+
+    # gabung kembali
+    text = " ".join(tokens)
+
+    # stemming
+    text = stemmer.loads(text)
+
     return text
 
 
-def normalisasi_teks(text: str, stemmer: Stemmer) -> str:
-    text = str(text).lower()
-    text = normalisasi_emoji(text)
-    text = re.sub(r"http\S+|www\S+", "", text)   # Hapus URL
-    text = re.sub(r"[^a-zA-Z\s]", "", text)       # Hapus simbol/angka
-    text = re.sub(r"\s+", " ", text).strip()       # Hapus spasi berlebih
-    return stemmer.loads(text)                     # Stemming
-
-
+# =========================
+# MAIN
+# =========================
 def main():
-    # 1. Load dataset
     print("Membaca dataset...")
     df = pd.read_excel(INPUT_FILE)
     df["Label"] = df["Label"].str.lower()
@@ -33,19 +57,18 @@ def main():
     print("\nDistribusi Data Natural:")
     print(df["Label"].value_counts())
 
-    # 2. Inisialisasi stemmer
     print("\nMenyiapkan Stemmer stemmid...")
     stemmer = Stemmer()
 
-    # 3. Preprocessing
     print("Memulai proses pembersihan teks...")
     df["text_processed"] = df["Ulasan"].apply(lambda t: normalisasi_teks(t, stemmer))
 
-    # Hapus baris kosong setelah cleaning
+    # hapus kosong
     df = df[df["text_processed"].str.strip() != ""]
 
-    # 4. Shuffle & simpan
+    # shuffle
     df = df.sample(frac=1, random_state=RANDOM_STATE).reset_index(drop=True)
+
     df.to_csv(PREPROCESSED, index=False)
     print(f"\nSelesai! Dataset tersimpan sebagai '{PREPROCESSED}'")
 

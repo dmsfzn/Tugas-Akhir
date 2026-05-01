@@ -14,13 +14,3 @@ TEST_DATA_FILE  = os.path.join(DATA_DIR, "data_ujian.csv")
 
 # Shared settings
 RANDOM_STATE = 42
-
-# Emoji → sentiment token map
-EMOJI_MAP = {
-    "😡": " emosi_negatif ", "😠": " emosi_negatif ", "😤": " emosi_negatif ",
-    "😞": " emosi_negatif ", "😢": " emosi_negatif ", "😭": " emosi_negatif ",
-    "👎": " emosi_negatif ", "💔": " emosi_negatif ",
-    "🙂": " emosi_positif ", "😊": " emosi_positif ", "😄": " emosi_positif ",
-    "😁": " emosi_positif ", "😍": " emosi_positif ", "👍": " emosi_positif ",
-    "❤️": " emosi_positif ",
-}

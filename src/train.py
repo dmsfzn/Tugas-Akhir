@@ -33,22 +33,21 @@ def main():
     X_train_vec = vectorizer.fit_transform(X_train)
     X_test_vec  = vectorizer.transform(X_test)
 
+    # 4. Oversampling
+    ros = RandomOverSampler(random_state=RANDOM_STATE)
+    X_train_bal, y_train_bal = ros.fit_resample(X_train_vec, y_train)
 
     # === CROSS VALIDATION ===
     cv_scores = cross_val_score(
-        MultinomialNB(alpha=1.0),
-        X_train_vec,
-        y_train,
+        MultinomialNB(alpha=0.5),
+        X_train_bal,
+        y_train_bal,
         cv=5
     )
 
     print("\n=== CROSS VALIDATION ===")
     print("Skor tiap fold:", cv_scores)
     print(f"Rata-rata CV: {cv_scores.mean()*100:.2f}%")
-
-    # 4. Oversampling
-    ros = RandomOverSampler(random_state=RANDOM_STATE)
-    X_train_bal, y_train_bal = ros.fit_resample(X_train_vec, y_train)
 
     # 5. Training
     model = MultinomialNB(alpha=1.0)
