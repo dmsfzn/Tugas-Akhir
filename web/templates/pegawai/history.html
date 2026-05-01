@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% block title %}History — Laboratory Records{% endblock %}
+{% block page_label %}HISTORY · LABORATORY RECORDS · LOGS{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Laboratory Records</h1>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <a href="{{ url_for('report_export_csv') }}"
+       class="btn-mm btn-mm-primary" target="_blank">
+      <i class="bi bi-file-earmark-arrow-down"></i> Export CSV
+    </a>
+  </div>
+</div>
+
+<!-- ── FILTER BAR ─────────────────────────── -->
+<form method="GET" action="{{ url_for('pegawai_history') }}" id="filterForm">
+  <div class="mm-card mb-3" style="padding:16px;">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+
+      <!-- Date Range -->
+      <div>
+        <label class="mm-label">Date Range</label>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input type="date" name="date_from" class="mm-input" style="width:155px;"
+                 value="{{ date_from }}">
+          <span class="text-dim" style="font-size:12px;">to</span>
+          <input type="date" name="date_to" class="mm-input" style="width:155px;"
+                 value="{{ date_to }}">
+        </div>
+      </div>
+
+      <!-- Sentiment Filter -->
+      <div>
+        <label class="mm-label">Sentiment Filter</label>
+        <select name="sentiment" class="mm-input" style="width:160px;">
+          <option value="all"     {% if sentiment=='all'     %}selected{% endif %}>All Sentiments</option>
+          <option value="positif" {% if sentiment=='positif' %}selected{% endif %}>POSITIF</option>
+          <option value="negatif" {% if sentiment=='negatif' %}selected{% endif %}>NEGATIF</option>
+        </select>
+      </div>
+
+      <!-- Search -->
+      <div style="flex:1;min-width:200px;">
+        <label class="mm-label">Search</label>
+        <input type="text" name="q" class="mm-input"
+               placeholder="Cari teks..." value="{{ q }}">
+      </div>
+
+      <!-- Buttons -->
+      <div style="display:flex;gap:8px;padding-top:18px;">
+        <button type="submit" class="btn-mm btn-mm-primary">
+          <i class="bi bi-search"></i> Filter
+        </button>
+        <a href="{{ url_for('pegawai_history') }}" class="btn-mm btn-mm-ghost">
+          <i class="bi bi-x"></i> Reset
+        </a>
+      </div>
+    </div>
+  </div>
+</form>
+
+<!-- ── TABLE ─────────────────────────────── -->
+<div class="mm-table-wrap mb-3">
+  <!-- Table header with row count -->
+  <div style="padding:12px 16px;border-bottom:1px solid var(--border);
+              display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-size:11px;color:var(--text-3);">
+      Viewing {{ analyses|length }} of
+      <span style="color:var(--text-1);font-family:var(--font-mono);">{{ total_rows|default('—') }}</span>
+      analysed
+    </span>
+    <!-- Pagination info -->
+    <span style="font-size:11px;color:var(--text-3);font-family:var(--font-mono);">
+      {{ page }} / {{ total_pages }}
+    </span>
+  </div>
+
+  <table class="mm-table">
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Review Snippet</th>
+        <th>Sentiment</th>
+        <th>Confidence</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if analyses %}
+        {% for row in analyses %}
+        <tr>
+          <!-- Timestamp -->
+          <td class="ts" style="white-space:nowrap;">
+            {{ row.created_at.strftime('%Y.%m.%d | %H:%M:%S') if row.created_at else '—' }}
+          </td>
+
+          <!-- Snippet -->
+          <td class="snippet">
+            "{{ row.snippet }}…"
+          </td>
+
+          <!-- Sentiment -->
+          <td>
+            <span class="badge-{{ row.sentiment }}">
+              {{ row.sentiment|upper }}
+            </span>
+          </td>
+
+          <!-- Confidence -->
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;min-width:120px;">
+              <div style="flex:1;">
+                <div class="confidence-bar">
+                  <div class="confidence-fill {% if row.sentiment=='negatif' %}neg{% endif %}"
+                       style="width:{{ (row.confidence*100)|round if row.confidence else 0 }}%">
+                  </div>
+                </div>
+              </div>
+              <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-2);width:36px;text-align:right;">
+                {{ "%.1f"|format(row.confidence*100) if row.confidence else '—' }}%
+              </span>
+            </div>
+          </td>
+
+          <!-- Actions -->
+          <td>
+            <div style="display:flex;gap:6px;">
+              <button class="icon-btn"
+                      style="width:28px;height:28px;border-radius:6px;"
+                      onclick="openReport('/report/single/{{ row.id }}')"
+                      title="Laporan">
+                <i class="bi bi-file-earmark-text" style="font-size:12px;"></i>
+              </button>
+              <a href="{{ url_for('pegawai_analisis') }}?id={{ row.id }}"
+                 class="icon-btn"
+                 style="width:28px;height:28px;border-radius:6px;"
+                 title="Detail">
+                <i class="bi bi-eye" style="font-size:12px;"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="5" class="text-center py-5 text-dimmer">
+            <i class="bi bi-inbox" style="font-size:28px;display:block;margin-bottom:8px;"></i>
+            Tidak ada data sesuai filter
+          </td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<!-- ── PAGINATION ─────────────────────────── -->
+{% if total_pages > 1 %}
+<div style="display:flex;justify-content:space-between;align-items:center;">
+  <span style="font-size:12px;color:var(--text-3);">
+    Halaman {{ page }} dari {{ total_pages }}
+  </span>
+  <div class="mm-pagination">
+    <a href="{{ url_for('pegawai_history', page=page-1, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}"
+       class="page-btn {% if page <= 1 %}disabled{% endif %}">
+      <i class="bi bi-chevron-left"></i>
+    </a>
+    {% for p in range([1, page-2]|max, [total_pages+1, page+3]|min) %}
+      <a href="{{ url_for('pegawai_history', page=p, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}"
+         class="page-btn {% if p == page %}active{% endif %}">
+        {{ p }}
+      </a>
+    {% endfor %}
+    <a href="{{ url_for('pegawai_history', page=page+1, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}"
+       class="page-btn {% if page >= total_pages %}disabled{% endif %}">
+      <i class="bi bi-chevron-right"></i>
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- ── BOTTOM CHARTS ──────────────────────── -->
+<div class="grid-2 mt-4">
+  <!-- Sentiment Distribution -->
+  <div class="mm-card">
+    <div class="card-label">Sentiment Distribution</div>
+    {% if total_rows and total_rows > 0 %}
+      {% set pos_count = analyses|selectattr('sentiment','equalto','positif')|list|length %}
+      {% set neg_count = analyses|selectattr('sentiment','equalto','negatif')|list|length %}
+      <div class="donut-wrap">
+        <!-- CSS donut -->
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="30" fill="none" stroke="var(--bg-root)" stroke-width="12"/>
+          {% set pos_pct = (pos_count / (pos_count + neg_count) * 100)|round if (pos_count + neg_count) > 0 else 50 %}
+          {% set circ = 188 %}
+          <circle cx="40" cy="40" r="30" fill="none" stroke="var(--accent)" stroke-width="12"
+                  stroke-dasharray="{{ (pos_pct/100*circ)|round }} {{ circ }}"
+                  stroke-dashoffset="{{ circ // 4 }}"
+                  transform="rotate(-90 40 40)"/>
+          <circle cx="40" cy="40" r="30" fill="none" stroke="var(--negative)" stroke-width="12"
+                  stroke-dasharray="{{ ((100-pos_pct)/100*circ)|round }} {{ circ }}"
+                  stroke-dashoffset="{{ -(pos_pct/100*circ - circ//4)|round }}"
+                  transform="rotate(-90 40 40)"/>
+        </svg>
+        <div class="donut-labels">
+          <div class="donut-label-item">
+            <span class="donut-dot" style="background:var(--accent);"></span>
+            <div>
+              <div class="val">{{ pos_count }}</div>
+              <div class="pct text-dim">POSITIF · {{ pos_pct }}%</div>
+            </div>
+          </div>
+          <div class="donut-label-item">
+            <span class="donut-dot" style="background:var(--negative);"></span>
+            <div>
+              <div class="val">{{ neg_count }}</div>
+              <div class="pct text-dim">NEGATIF · {{ (100-pos_pct) }}%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="text-dimmer text-center py-3">Tidak ada data</div>
+    {% endif %}
+  </div>
+
+  <!-- Laboratory Activity -->
+  <div class="mm-card">
+    <div class="card-label">Laboratory Activity</div>
+    <div class="bar-chart" id="actChart" style="height:80px;"></div>
+    <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;">
+      <span style="display:flex;align-items:center;gap:5px;">
+        <span style="width:8px;height:8px;background:var(--accent);border-radius:50%;"></span>
+        <span class="text-dim">Analyses Peak</span>
+      </span>
+      <span style="display:flex;align-items:center;gap:5px;">
+        <span style="width:8px;height:8px;background:var(--text-3);border-radius:50%;"></span>
+        <span class="text-dim">Baseline</span>
+      </span>
+      <span class="text-dimmer ms-auto" style="font-size:10px;">REF: 7-DAY DYNAMIC CYCLE</span>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* Activity bar chart */
+async function renderActivity() {
+  try {
+    const data = await fetch('/api/chart/sentiment').then(r => r.json());
+    const chart = document.getElementById('actChart');
+    if (!data.length) return;
+    const max = Math.max(...data.map(d => d.pos + d.neg), 1);
+    chart.innerHTML = data.slice(-7).map(d => {
+      const total = d.pos + d.neg;
+      const h = Math.round((total / max) * 100);
+      return `<div class="bar-col"
+               style="height:${Math.max(h,4)}%;
+                      background:var(--bg-card-2);
+                      border-top: 2px solid ${total > max*0.6 ? 'var(--accent)' : 'var(--text-3)'};"
+               title="${d.day}"></div>`;
+    }).join('');
+  } catch(e) {}
+}
+renderActivity();
+</script>
+{% endblock %}
