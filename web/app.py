@@ -11,7 +11,11 @@ import os
 import joblib
 import numpy as np
 from stemmid import Stemmer
+import sys
 
+# Tambahkan path ke folder src agar bisa import predict.py
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+from predict import get_xai_explanation, hybrid_prediction  # type: ignore
 app = Flask(__name__)
 app.secret_key = 'motormind_secret_2024_ta'
 
@@ -25,90 +29,10 @@ try:
     _global_model = joblib.load(MODEL_PATH)
     _global_vectorizer = joblib.load(VECTORIZER_PATH)
     _global_stemmer = Stemmer()
-    print("✅ ML Models and Stemmer loaded successfully.")
+    print("[SUCCESS] ML Models and Stemmer loaded successfully.")
 except Exception as e:
-    print(f"❌ Error loading ML models: {e}")
+    print(f"[ERROR] Error loading ML models: {e}")
     _global_model, _global_vectorizer, _global_stemmer = None, None, None
-
-def get_xai_explanation(text: str, model, vectorizer) -> list:
-    """Kembalikan daftar fitur beserta arah & kekuatan kontribusinya."""
-    if not model or not vectorizer: return []
-    try:
-        feature_names = vectorizer.get_feature_names_out()
-        classes = model.classes_
-        idx_neg = np.where(classes == "negatif")[0][0]
-        idx_pos = np.where(classes == "positif")[0][0]
-    except AttributeError:
-        return []
-
-    explanation = []
-    for feature in feature_names:
-        if re.search(r"\b" + re.escape(feature) + r"\b", text):
-            idx_f   = np.where(feature_names == feature)[0][0]
-            w_neg   = model.feature_log_prob_[idx_neg][idx_f]
-            w_pos   = model.feature_log_prob_[idx_pos][idx_f]
-
-            if w_neg < w_pos:
-                arah     = "Positif"
-                kekuatan = round(w_pos - w_neg, 2)
-            else:
-                arah     = "Negatif"
-                kekuatan = round(w_neg - w_pos, 2)
-
-            explanation.append({"fitur": feature, "arah": arah, "kekuatan": kekuatan})
-
-    return sorted(explanation, key=lambda x: x["kekuatan"], reverse=True)
-
-def lexicon_scoring(text: str, lexicon: dict):
-    words = text.split()
-    score = 0
-    neg_count = 0
-    pos_count = 0
-    for w in words:
-        if w in lexicon:
-            val = lexicon[w]
-            score += val
-            if val < 0:
-                neg_count += 1
-            else:
-                pos_count += 1
-    return score, neg_count, pos_count
-
-def hybrid_prediction(text: str, model, vectorizer, stemmer, custom_dict: dict):
-    if not model or not stemmer:
-        return {"label": "netral", "confidence": 0, "clean_text": text.lower(), "lexicon_score": 0, "neg_count": 0, "pos_count": 0}
-    
-    # a. Preprocessing
-    teks_bersih = stemmer.loads(text.lower())
-    vec         = vectorizer.transform([teks_bersih])
-
-    # b. Prediksi ML
-    prob      = model.predict_proba(vec)[0]
-    label_mnb = model.predict(vec)[0]
-    conf_mnb  = max(prob) * 100
-
-    # c. Lexicon scoring (menggunakan original text words, atau teks_bersih. Kita pakai lower original)
-    lex_score, neg_count, pos_count = lexicon_scoring(text.lower(), custom_dict)
-
-    # d. Hybrid logic (combine, bukan overwrite)
-    final_label = label_mnb
-    final_conf  = conf_mnb
-
-    if lex_score > 0 and label_mnb == "negatif":
-        final_label = "positif"
-        final_conf += 5
-    elif lex_score < 0 and label_mnb == "positif":
-        final_label = "negatif"
-        final_conf += 5
-
-    return {
-        "label": final_label,
-        "confidence": min(100.0, final_conf),
-        "clean_text": teks_bersih,
-        "lexicon_score": lex_score,
-        "neg_count": neg_count,
-        "pos_count": pos_count
-    }
 
 # ─────────────────────────────────────────────
 # DATABASE
