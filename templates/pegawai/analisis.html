@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% block title %}Analysis Engine{% endblock %}
+{% block page_label %}ANALYSIS ENGINE · MODULE MT-100{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Analysis Engine</h1>
+</div>
+
+<div class="grid-2" style="gap:20px; align-items:start;">
+
+  <!-- ── LEFT COLUMN ──────────────────────── -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    <!-- Single Text Entry -->
+    <div class="mm-card">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <div class="card-label mb-0">⚙ Single Text Entry</div>
+        </div>
+        <span style="font-size:10px;color:var(--text-3);font-family:var(--font-mono);">MODULE MT-100</span>
+      </div>
+
+      <form method="POST" action="{{ url_for('pegawai_analisis') }}" id="analysisForm">
+        <div class="mm-input-group">
+          <textarea name="text"
+                    class="mm-input mm-textarea"
+                    id="inputText"
+                    placeholder="Masukkan teks untuk dianalisis..."
+                    required>{{ input_text }}</textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;">
+          <button type="button" class="btn-mm btn-mm-ghost" onclick="clearInput()">
+            <i class="bi bi-x-lg"></i> Clear
+          </button>
+          <button type="submit" class="btn-mm btn-mm-primary" id="submitBtn">
+            <i class="bi bi-play-fill"></i> Execute Analysis
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Word-Level Sentiment -->
+    {% if result %}
+    <div class="mm-card">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="card-label mb-0">⊞ Word-Level Sentiment Analysis</div>
+        <span style="font-size:10px;color:var(--text-3);font-family:var(--font-mono);">ATTRIBUTION MAP</span>
+      </div>
+
+      <div id="wordHighlight"
+           style="line-height:2;font-size:14px;color:var(--text-1);
+                  background:var(--bg-input);border:1px solid var(--border);
+                  border-radius:8px;padding:14px;min-height:60px;">
+        {% set highlight_words = result.highlights|map(attribute='word')|list if result.highlights else [] %}
+        {% set highlight_map = {} %}
+        {% for h in (result.highlights or []) %}
+          {% set _ = highlight_map.update({h.word: h.label}) %}
+        {% endfor %}
+        {% for word in result.text.split() %}
+          {% set clean = word|lower|replace('.','') %}
+          {% if clean in highlight_map %}
+            <span class="word-highlight {{ highlight_map[clean] }}">{{ word }}</span>
+          {% else %}
+            {{ word }}
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- Legend -->
+      <div style="display:flex;gap:20px;margin-top:12px;font-size:11px;">
+        <span style="display:flex;align-items:center;gap:6px;">
+          <span style="width:10px;height:10px;background:rgba(67,97,238,.18);border:1px solid var(--accent);border-radius:2px;"></span>
+          <span class="text-dim">Positive Influence</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;">
+          <span style="width:10px;height:10px;background:rgba(249,115,22,.12);border:1px solid var(--negative);border-radius:2px;"></span>
+          <span class="text-dim">Negative Influence</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;">
+          <span style="width:10px;height:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;"></span>
+          <span class="text-dim">Neutral Word</span>
+        </span>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Bulk Upload -->
+    <div class="mm-card" style="text-align:center;">
+      <i class="bi bi-file-earmark-arrow-up"
+         style="font-size:28px;color:var(--text-3);display:block;margin-bottom:8px;"></i>
+      <div style="font-weight:600;color:var(--text-1);margin-bottom:4px;">Bulk File Upload</div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:14px;">
+        Drag &amp; drop .CSV, .JSON, or .TXT archives
+      </div>
+      <label class="btn-mm btn-mm-ghost" style="cursor:pointer;">
+        <i class="bi bi-folder2-open"></i> Select Laboratory Files
+        <input type="file" accept=".csv,.json,.txt" style="display:none;"
+               onchange="handleBulkFile(this)">
+      </label>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- ── RIGHT COLUMN ─────────────────────── -->
+  <div style="display:flex;flex-direction:column;gap:16px;">
+
+    {% if result %}
+    <!-- Classification Card -->
+    <div class="mm-card accent-border">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="card-label">Current Classification</div>
+          <div style="font-size:36px;font-weight:700;
+                      color:{% if result.sentiment=='positif' %}var(--accent){% elif result.sentiment=='negatif' %}var(--negative){% else %}var(--neutral){% endif %};
+                      text-transform:capitalize;margin-bottom:8px;">
+            {{ result.sentiment }}
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div class="card-label">Confidence</div>
+          <div style="font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--text-1);">
+            {{ "%.2f"|format(result.confidence) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Confidence bar -->
+      <div class="confidence-bar" style="height:5px;margin-bottom:16px;">
+        <div class="confidence-fill {% if result.sentiment=='negatif' %}neg{% endif %}"
+             style="width:{{ (result.confidence*100)|round }}%"></div>
+      </div>
+
+      <!-- Meta -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <div class="card-label">Model Version</div>
+          <div style="font-family:var(--font-mono);font-size:13px;color:var(--text-1);">Neural X2.4</div>
+        </div>
+        <div>
+          <div class="card-label">Processing Time</div>
+          <div style="font-family:var(--font-mono);font-size:13px;color:var(--text-1);">12.4ms</div>
+        </div>
+        <div>
+          <div class="card-label">Lexicon Score</div>
+          <div style="font-family:var(--font-mono);font-size:13px;
+                      color:{% if result.lexicon_score >= 0 %}#6b87f5{% else %}var(--negative){% endif %};">
+            {{ "%+.2f"|format(result.lexicon_score) }}
+          </div>
+        </div>
+        <div>
+          <div class="card-label">Word Count</div>
+          <div style="font-family:var(--font-mono);font-size:13px;color:var(--text-1);">
+            {{ result.text.split()|length }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Button -->
+      <hr class="mm-hr">
+      <button class="btn-mm btn-mm-ghost w-100" style="justify-content:center;"
+              onclick="openReport('/report/single/{{ result.id }}')">
+        <i class="bi bi-file-earmark-text"></i> Generate Laporan Tunggal
+      </button>
+    </div>
+    {% else %}
+    <!-- Placeholder when no result -->
+    <div class="mm-card" style="text-align:center;padding:40px 20px;">
+      <i class="bi bi-cpu" style="font-size:36px;color:var(--text-3);display:block;margin-bottom:12px;"></i>
+      <div style="font-size:15px;font-weight:600;color:var(--text-2);margin-bottom:6px;">
+        Engine Ready
+      </div>
+      <div style="font-size:12px;color:var(--text-3);">
+        Masukkan teks dan klik Execute Analysis
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Pre-Processing Log -->
+    <div class="mm-card">
+      <div class="card-label">● Pre-Processing Log</div>
+      <div class="proc-log" id="procLog">
+        {% if result %}
+          <div class="log-line log-ok">✓ Cleaning</div>
+          <div class="log-line log-ok">✓ Tokenization</div>
+          <div class="log-line log-spin">⟳ Stemming … PROCESSING</div>
+          <div class="log-line" style="margin-top:8px;color:var(--text-3);">
+            [{{ result.id }}] INIT TOKENIZATION PIPELINE ...<br>
+            [MEM:2GB] BUFFER ALLOCATED (24MB)<br>
+            [OK:3.1] VALIDATION TEST PASSED...
+          </div>
+        {% else %}
+          <div class="log-line text-dimmer">Menunggu input analisis...</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Mini Bar Chart -->
+    <div class="mm-card">
+      <div class="card-label">Distribusi Confidence (7 Hari)</div>
+      <div class="bar-chart" id="confChart" style="height:70px;"></div>
+    </div>
+
+  </div><!-- /right -->
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* Form submit loading state */
+document.getElementById('analysisForm').addEventListener('submit', function() {
+  const btn = document.getElementById('submitBtn');
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+  btn.disabled = true;
+});
+
+function clearInput() {
+  document.getElementById('inputText').value = '';
+}
+
+function handleBulkFile(inp) {
+  if (inp.files.length > 0) {
+    showToast(`File "${inp.files[0].name}" siap untuk diproses.`, 'info');
+  }
+}
+
+/* Demo mini chart */
+(function() {
+  const vals = [0.72,0.88,0.91,0.65,0.94,0.83,0.89];
+  const el = document.getElementById('confChart');
+  if (!el) return;
+  const max = Math.max(...vals);
+  el.innerHTML = vals.map(v => {
+    const h = Math.round((v/max)*100);
+    const isHigh = v > 0.85;
+    return `<div class="bar-col" style="height:${h}%;background:${isHigh?'var(--accent)':'var(--bg-card-2)'};opacity:.9;" title="${(v*100).toFixed(0)}%"></div>`;
+  }).join('');
+})();
+</script>
+{% endblock %}

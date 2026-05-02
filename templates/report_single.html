@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan Analisis #{{ row.id }} — MotorMind</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+</head>
+<body>
+
+<!-- ── TOOLBAR ───────────────────────────────────────────────── -->
+<div class="report-toolbar">
+  <span class="toolbar-brand">⚡ MotorMind</span>
+  <button class="btn-toolbar btn-print" onclick="doPrint()">
+    ⎙ Cetak / Simpan PDF
+  </button>
+  <button class="btn-toolbar btn-close" onclick="doClose()">✕ Tutup</button>
+</div>
+
+<!-- ── PAGES ─────────────────────────────────────────────────── -->
+<div class="report-pages">
+<div class="report-page">
+
+  <!-- Header -->
+  <div class="report-header">
+    <div class="report-brand">
+      ⚡ MotorMind
+      <small>Sentiment Analysis System</small>
+    </div>
+    <div class="report-meta">
+      <strong>Laporan ID: #{{ row.id }}</strong><br>
+      {{ row.created_at.strftime('%d %B %Y, %H:%M') if row.created_at else '—' }}<br>
+      Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}
+    </div>
+  </div>
+
+  <div class="report-title">Laporan Analisis Sentimen Tunggal</div>
+
+  <!-- Stat cards -->
+  <div class="stats-row cols-3">
+    <div class="stat-box {% if row.sentiment == 'positif' %}blue{% else %}orange{% endif %}">
+      <div class="stat-label">Hasil Sentimen</div>
+      <div class="stat-value {% if row.sentiment == 'positif' %}blue{% else %}orange{% endif %}" style="font-size:22px;text-transform:capitalize;">
+        {{ row.sentiment }}
+      </div>
+    </div>
+    <div class="stat-box blue">
+      <div class="stat-label">Confidence Score</div>
+      <div class="stat-value blue">{{ "%.1f"|format((row.confidence or 0)*100) }}%</div>
+      <div class="conf-cell" style="margin-top:8px;">
+        <div class="conf-track">
+          <div class="conf-fill {{ row.sentiment }}"
+               data-width="{{ ((row.confidence or 0)*100)|round }}"
+               style="width:0%;transition:width .6s ease;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-box {% if (row.lexicon_score or 0) >= 0 %}blue{% else %}orange{% endif %}">
+      <div class="stat-label">Lexicon Score</div>
+      <div class="stat-value {% if (row.lexicon_score or 0) >= 0 %}blue{% else %}orange{% endif %}">
+        {{ "%+.2f"|format(row.lexicon_score or 0) }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Text -->
+  <div class="section-heading">Teks Analisis</div>
+  <div style="background:#f8f9ff;border:1px solid #dde3ff;border-radius:8px;padding:18px;font-size:14px;line-height:1.7;color:#374151;margin-bottom:20px;">
+    {{ row.text }}
+  </div>
+
+  <!-- Meta -->
+  <div style="font-size:12px;color:#6b7280;line-height:1.8;">
+    <strong style="color:#374151;">Model:</strong> Neural X2.4 TF-IDF + Naive Bayes + Lexicon Hybrid<br>
+    <strong style="color:#374151;">Jumlah Kata:</strong> {{ row.word_count or row.text.split()|length }}<br>
+    <strong style="color:#374151;">Waktu Analisis:</strong> {{ row.created_at.strftime('%d %B %Y pukul %H:%M:%S') if row.created_at else '—' }}
+  </div>
+
+  <!-- Footer + Signature -->
+  <div class="report-footer">
+    <div class="footer-left">
+      MotorMind Sentiment Analysis System — Tugas Akhir<br>
+      <strong>Dicetak oleh:</strong> {{ session.get('username', '—') }}
+      ({{ session.get('role', '')|capitalize }})
+    </div>
+    <div class="signature-block">
+      <div class="signature-name">{{ session.get('username', '—') }}</div>
+      <div class="signature-role">{{ session.get('role', '')|capitalize }}</div>
+      <div class="signature-line"></div>
+      <div class="signature-label">Tanda Tangan</div>
+    </div>
+  </div>
+
+</div><!-- .report-page -->
+</div><!-- .report-pages -->
+
+<script src="{{ url_for('static', filename='js/report.js') }}"></script>
+</body>
+</html>
