@@ -7,32 +7,14 @@ from datetime import datetime, date
 import hashlib
 import re
 from collections import Counter
-import os
-import joblib
-import numpy as np
-from stemmid import Stemmer
-import sys
 
-# Tambahkan path ke folder src agar bisa import predict.py
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
-from predict import get_xai_explanation, hybrid_prediction  # type: ignore
 app = Flask(__name__)
 app.secret_key = 'motormind_secret_2024_ta'
 
-# ─────────────────────────────────────────────
-# GLOBAL MODEL & NLP HELPERS
-# ─────────────────────────────────────────────
-MODEL_PATH = os.path.join(app.root_path, '..', 'model', 'model.pkl')
-VECTORIZER_PATH = os.path.join(app.root_path, '..', 'model', 'vectorizer.pkl')
-
-try:
-    _global_model = joblib.load(MODEL_PATH)
-    _global_vectorizer = joblib.load(VECTORIZER_PATH)
-    _global_stemmer = Stemmer()
-    print("[SUCCESS] ML Models and Stemmer loaded successfully.")
-except Exception as e:
-    print(f"[ERROR] Error loading ML models: {e}")
-    _global_model, _global_vectorizer, _global_stemmer = None, None, None
+# Inject current datetime into all templates
+@app.context_processor
+def inject_now():
+    return {'now': datetime.now}
 
 # ─────────────────────────────────────────────
 # DATABASE
@@ -173,41 +155,23 @@ def pegawai_analisis():
         input_text = request.form.get('text', '').strip()
 
         if input_text:
-            # Load custom dictionary from DB
-            db = get_db()
-            cur = db.cursor(dictionary=True)
-            cur.execute("SELECT word, score FROM lexicon")
-            lexicon_rows = cur.fetchall()
-            KAMUS_KUSTOM = {row['word']: row['score'] for row in lexicon_rows}
-            
-            # ─── REAL PIPELINE ───────────────────────
-            pred_result = hybrid_prediction(input_text, _global_model, _global_vectorizer, _global_stemmer, KAMUS_KUSTOM)
-            
-            words         = re.findall(r'\b\w+\b', pred_result['clean_text'])
-            word_count    = len(re.findall(r'\b\w+\b', input_text.lower()))
-            sentiment     = pred_result['label']
-            confidence    = pred_result['confidence'] / 100.0  # Scale 0-1 untuk UI
-            lexicon_score = pred_result['lexicon_score']
-            clean_text    = pred_result['clean_text']
+            # ─── PLACEHOLDER PIPELINE ───────────────────────
+            # Ganti blok ini dengan pipeline TF-IDF + NB + Lexicon Hybrid asli
+            words         = re.findall(r'\b\w+\b', input_text.lower())
+            word_count    = len(words)
+            sentiment     = 'positif'   # hasil model
+            confidence    = 0.89        # hasil model
+            lexicon_score = 2.5         # hasil lexicon
             highlights    = []
 
-            # Generate highlights based on XAI and Lexicon
-            xai_expl = get_xai_explanation(clean_text, _global_model, _global_vectorizer)
-            xai_dict = {item['fitur']: item['arah'] for item in xai_expl}
-            
-            # Untuk highlight UI, kita iterate lewat kata-kata asli agar highlight match persis
-            orig_words = re.findall(r'\b\w+\b', input_text.lower())
-            for w in set(orig_words):
-                # Prioritas: Lexicon -> ML XAI
-                if w in KAMUS_KUSTOM:
-                    lbl = 'positive' if KAMUS_KUSTOM[w] > 0 else 'negative'
-                    highlights.append({'word': w, 'label': lbl})
-                else:
-                    # Cek hasil stemming-nya apakah ada di XAI
-                    stemmed_w = _global_stemmer.loads(w) if _global_stemmer else w
-                    if stemmed_w in xai_dict:
-                        lbl = 'positive' if xai_dict[stemmed_w] == 'Positif' else 'negative'
-                        highlights.append({'word': w, 'label': lbl})
+            # Simulasi word-level highlighting
+            pos_keywords = {'bagus','baik','hebat','luar biasa','puas','senang','meningkat','optimal'}
+            neg_keywords = {'buruk','jelek','lambat','rusak','masalah','error','gagal','kurang'}
+            for w in set(words):
+                if w in pos_keywords:
+                    highlights.append({'word': w, 'label': 'positive'})
+                elif w in neg_keywords:
+                    highlights.append({'word': w, 'label': 'negative'})
             # ────────────────────────────────────────────────
 
             # Simpan ke DB
@@ -470,11 +434,133 @@ def report_single(analysis_id):
     return render_template('report_single.html', row=row)
 
 
+@app.route('/report/all-analyses')
+@login_required
+def report_all_analyses():
+    """Popup laporan semua analisis milik user (range dari filter history)"""
+    date_from = request.args.get('date_from', '')
+    date_to   = request.args.get('date_to', '')
+    sentiment = request.args.get('sentiment', 'all')
+    q         = request.args.get('q', '').strip()
+
+    db  = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cond   = ["1=1"]
+    params = []
+    if session['role'] == 'pegawai':
+        cond.append("user_id = %s"); params.append(session['user_id'])
+    if q:
+        cond.append("text LIKE %s"); params.append(f'%{q}%')
+    if sentiment != 'all':
+        cond.append("sentiment = %s"); params.append(sentiment)
+    if date_from:
+        cond.append("DATE(created_at) >= %s"); params.append(date_from)
+    if date_to:
+        cond.append("DATE(created_at) <= %s"); params.append(date_to)
+
+    where = " AND ".join(cond)
+    cur.execute(f"SELECT * FROM analyses WHERE {where} ORDER BY created_at DESC", params)
+    rows = cur.fetchall()
+
+    cur.execute(f"SELECT COUNT(*) AS tot, SUM(sentiment='positif') AS pos, SUM(sentiment='negatif') AS neg FROM analyses WHERE {where}", params)
+    stats = cur.fetchone()
+    cur.close(); db.close()
+
+    return render_template('report_all_analyses.html',
+                           rows=rows, stats=stats,
+                           date_from=date_from, date_to=date_to,
+                           sentiment=sentiment, q=q)
+
+
+@app.route('/report/owner-statistik')
+@login_required
+@role_required('owner')
+def report_owner_statistik():
+    """Popup laporan statistik lengkap untuk owner"""
+    db  = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cur.execute("SELECT COUNT(*) AS total FROM analyses")
+    total = cur.fetchone()['total']
+    cur.execute("SELECT COUNT(*) AS cnt FROM analyses WHERE sentiment='positif'")
+    positif = cur.fetchone()['cnt']
+    cur.execute("SELECT COUNT(*) AS cnt FROM analyses WHERE sentiment='negatif'")
+    negatif = cur.fetchone()['cnt']
+
+    # Trend per hari (30 hari)
+    cur.execute("""SELECT DATE(created_at) AS day,
+                          SUM(sentiment='positif') AS pos,
+                          SUM(sentiment='negatif') AS neg,
+                          COUNT(*) AS total
+                   FROM analyses WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                   GROUP BY DATE(created_at) ORDER BY day ASC""")
+    trend = cur.fetchall()
+
+    # Top 10 analyst
+    cur.execute("""SELECT u.name, COUNT(*) AS cnt
+                   FROM analyses a JOIN users u ON a.user_id=u.id
+                   GROUP BY u.id ORDER BY cnt DESC LIMIT 10""")
+    analysts = cur.fetchall()
+
+    cur.close(); db.close()
+
+    pos_pct = round((positif / total * 100) if total else 0, 1)
+    neg_pct = round(100 - pos_pct, 1)
+
+    return render_template('report_owner_statistik.html',
+                           total=total, positif=positif, negatif=negatif,
+                           pos_pct=pos_pct, neg_pct=neg_pct,
+                           trend=trend, analysts=analysts)
+
+
+@app.route('/report/insight')
+@login_required
+@role_required('owner')
+def report_insight():
+    """Popup laporan insight kata negatif untuk owner"""
+    db  = get_db()
+    cur = db.cursor(dictionary=True)
+    cur.execute("SELECT text FROM analyses WHERE sentiment='negatif'")
+    rows = cur.fetchall()
+
+    stopwords = {'yang','dan','di','ke','dari','untuk','dengan','pada','ini','itu',
+                 'tidak','ada','juga','sudah','atau','bisa','lebih','dalam','saat','kami'}
+    word_freq = Counter()
+    for row in rows:
+        words = re.findall(r'\b[a-z]{3,}\b', row['text'].lower())
+        word_freq.update([w for w in words if w not in stopwords])
+    top_words = word_freq.most_common(20)
+
+    cur.execute("SELECT COUNT(*) AS total FROM analyses")
+    total = cur.fetchone()['total']
+    cur.execute("SELECT COUNT(*) AS cnt FROM analyses WHERE sentiment='negatif'")
+    negatif = cur.fetchone()['cnt']
+    cur.close(); db.close()
+
+    return render_template('report_insight.html',
+                           top_words=top_words, total=total, negatif=negatif)
+
+
+@app.route('/report/lexicon-list')
+@login_required
+def report_lexicon_list():
+    """Popup daftar lexicon lengkap"""
+    db  = get_db()
+    cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM lexicon ORDER BY category, score ASC")
+    lexicons = cur.fetchall()
+    cur.execute("SELECT COUNT(*) AS tot, SUM(category='positif') AS pos, SUM(category='negatif') AS neg FROM lexicon")
+    stats = cur.fetchone()
+    cur.close(); db.close()
+    return render_template('report_lexicon_list.html', lexicons=lexicons, stats=stats)
+
+
 @app.route('/report/statistik')
 @login_required
 @role_required('owner')
 def report_statistik():
-    return redirect(url_for('report_export_csv'))
+    return redirect(url_for('report_owner_statistik'))
 
 
 # ─────────────────────────────────────────────

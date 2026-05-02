@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan Insight Sentimen — MotorMind</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+</head>
+<body>
+
+<!-- ── TOOLBAR ───────────────────────────────────────────────── -->
+<div class="report-toolbar">
+  <span class="toolbar-brand">⚡ MotorMind · Laporan Insight</span>
+  <button class="btn-toolbar btn-print" onclick="doPrint()">⎙ Cetak / PDF</button>
+  <button class="btn-toolbar btn-close" onclick="doClose()">✕ Tutup</button>
+</div>
+
+<div class="report-pages">
+
+  {# ── PAGE 1: Ringkasan + Top Word Bars ── #}
+  <div class="report-page">
+
+    <div class="report-header">
+      <div class="report-brand">⚡ MotorMind <small>Sentiment Analysis System</small></div>
+      <div class="report-meta">
+        <strong>Laporan Insight Sentimen Negatif</strong><br>
+        Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}<br>
+        Oleh: {{ session.get('username','—') }}
+      </div>
+    </div>
+
+    <div class="report-title">Laporan Insight Sentimen Negatif</div>
+
+    <!-- Stats -->
+    <div class="stats-row cols-3">
+      <div class="stat-box orange">
+        <div class="stat-label">Total Kata Unik Negatif</div>
+        <div class="stat-value orange">{{ top_words|length }}+</div>
+        <div class="stat-sub">Terdeteksi dari corpus</div>
+      </div>
+      <div class="stat-box orange">
+        <div class="stat-label">Kata Paling Sering</div>
+        <div class="stat-value orange" style="font-size:18px;">
+          {% if top_words %}{{ top_words[0][0] }}{% else %}—{% endif %}
+        </div>
+        {% if top_words %}
+        <div class="stat-sub">{{ top_words[0][1] }} kemunculan</div>
+        {% endif %}
+      </div>
+      <div class="stat-box orange">
+        <div class="stat-label">Total Analisis Negatif</div>
+        <div class="stat-value orange">{{ negatif }}</div>
+        <div class="stat-sub">dari {{ total }} total</div>
+      </div>
+    </div>
+
+    <!-- Word bars -->
+    <div class="section-heading">Top Kata Negatif Terdeteksi</div>
+    {% if top_words %}
+      {% set max_c = top_words[0][1] %}
+      {% for word, count in top_words %}
+      <div class="word-bar-row">
+        <div class="word-bar-name">{{ word }}</div>
+        <div class="word-bar-track">
+          <div class="word-bar-fill"
+               data-width="{{ (count / max_c * 100)|round }}"
+               style="width:0%;transition:width .5s ease;
+                      opacity:{% if loop.index <= 3 %}1{% else %}0.6{% endif %};"></div>
+        </div>
+        <div class="word-bar-count">{{ count }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color:#9ca3af;text-align:center;padding:24px;">Tidak ada data kata negatif</p>
+    {% endif %}
+
+    <!-- Word cloud -->
+    <div class="section-heading">Visualisasi Kata Negatif</div>
+    <div class="word-cloud-wrap">
+      {% if top_words %}
+        {% for word, count in top_words %}
+          {% set sz = [11 + (count / top_words[0][1] * 12)|int, 24]|min %}
+          <span style="font-family:'Space Mono',monospace;
+                       font-size:{{ sz }}px;
+                       color:rgba(249,115,22,{{ (0.4 + count / top_words[0][1] * 0.6)|round(2) }});"
+                title="{{ count }} kemunculan">{{ word }}</span>
+        {% endfor %}
+      {% else %}
+        <span style="color:#9ca3af;">Tidak ada data</span>
+      {% endif %}
+    </div>
+
+    <!-- Footer page 1 -->
+    <div class="report-footer">
+      <div class="footer-left">
+        MotorMind Sentiment Analysis System — Tugas Akhir<br>
+        <strong>Dicetak oleh:</strong> {{ session.get('username','—') }}
+        ({{ session.get('role','')|capitalize }})
+      </div>
+      <div class="signature-block">
+        <div class="signature-name">{{ session.get('username','—') }}</div>
+        <div class="signature-role">{{ session.get('role','')|capitalize }}</div>
+        <div class="signature-line"></div>
+        <div class="signature-label">Tanda Tangan</div>
+      </div>
+    </div>
+
+  </div>{# /page 1 #}
+
+  {# ── PAGE 2: Detail table + Recommendation ── #}
+  <div class="report-page">
+
+    <div class="report-header">
+      <div class="report-brand">⚡ MotorMind <small>Laporan Insight — Halaman 2</small></div>
+      <div class="report-meta">Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}</div>
+    </div>
+
+    <div class="section-heading">Tabel Detail Kata Negatif</div>
+    <table class="report-table">
+      <thead class="head-neg">
+        <tr>
+          <th>#</th>
+          <th>Kata</th>
+          <th>Frekuensi</th>
+          <th>Proporsi</th>
+          <th class="hide-mobile">Level Urgensi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if top_words %}
+          {% set total_occ = top_words|map(attribute=1)|sum %}
+          {% for word, count in top_words %}
+          <tr class="neg-row">
+            <td class="ts-cell">{{ loop.index }}</td>
+            <td style="font-family:'Space Mono',monospace;font-weight:700;color:#f97316;">{{ word }}</td>
+            <td style="font-family:'Space Mono',monospace;font-weight:700;">{{ count }}</td>
+            <td>
+              <div class="conf-cell">
+                <div class="conf-track">
+                  <div class="conf-fill negatif"
+                       data-width="{{ (count / top_words[0][1] * 100)|round }}"
+                       style="width:0%;transition:width .4s ease;"></div>
+                </div>
+                <span class="conf-label">{{ "%.1f"|format(count / total_occ * 100 if total_occ else 0) }}%</span>
+              </div>
+            </td>
+            <td class="hide-mobile">
+              {% if loop.index <= 3 %}<span class="badge-r critical">CRITICAL</span>
+              {% elif loop.index <= 7 %}<span class="badge-r warning">WARNING</span>
+              {% else %}<span class="badge-r monitor">MONITOR</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr><td colspan="5" style="text-align:center;padding:24px;color:#9ca3af;">Tidak ada data</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+
+    <!-- Recommendation -->
+    {% if top_words %}
+    <div class="rec-box">
+      <div class="rec-label">● Rekomendasi</div>
+      <p>
+        Berdasarkan analisis corpus, kata <strong style="color:#f97316;">"{{ top_words[0][0] }}"</strong>
+        terdeteksi sebagai isu dominan dengan {{ top_words[0][1] }} kemunculan.
+        Disarankan untuk melakukan review operasional terkait area ini.
+        {% if top_words|length > 2 %}
+        Kata <strong style="color:#f97316;">"{{ top_words[1][0] }}"</strong> dan
+        <strong style="color:#f97316;">"{{ top_words[2][0] }}"</strong>
+        juga memerlukan perhatian segera.
+        {% endif %}
+      </p>
+    </div>
+    {% endif %}
+
+    <!-- Footer page 2 -->
+    <div class="report-footer">
+      <div class="footer-left">
+        MotorMind Sentiment Analysis System — Tugas Akhir<br>
+        <strong>Dicetak oleh:</strong> {{ session.get('username','—') }}
+        ({{ session.get('role','')|capitalize }})
+        &nbsp;·&nbsp; Halaman 2 dari 2
+      </div>
+      <div class="signature-block">
+        <div class="signature-name">{{ session.get('username','—') }}</div>
+        <div class="signature-role">{{ session.get('role','')|capitalize }}</div>
+        <div class="signature-line"></div>
+        <div class="signature-label">Tanda Tangan</div>
+      </div>
+    </div>
+
+  </div>{# /page 2 #}
+
+</div>{# .report-pages #}
+
+<script src="{{ url_for('static', filename='js/report.js') }}"></script>
+</body>
+</html>

@@ -61,12 +61,22 @@ INSERT IGNORE INTO users (employee_id, name, email, password, role) VALUES
 
 -- Sample lexicon
 INSERT IGNORE INTO lexicon (word, score, category) VALUES
-('kacau',  -1, 'negatif'),
-('lelet',  -1, 'negatif'),
-('parah',  -1, 'negatif'),
-('kotor',  -1, 'negatif'),
-('lama',   -1, 'negatif'),
-('nyaman',  1, 'positif');
+('bagus',       2.0, 'positif'),
+('baik',        1.5, 'positif'),
+('puas',        2.0, 'positif'),
+('memuaskan',   1.8, 'positif'),
+('optimal',     1.7, 'positif'),
+('hebat',       2.2, 'positif'),
+('canggih',     1.9, 'positif'),
+('responsif',   1.6, 'positif'),
+('buruk',      -2.0, 'negatif'),
+('lambat',     -1.5, 'negatif'),
+('rusak',      -2.2, 'negatif'),
+('masalah',    -1.8, 'negatif'),
+('error',      -2.0, 'negatif'),
+('gagal',      -2.1, 'negatif'),
+('kecewa',     -1.9, 'negatif'),
+('bermasalah', -1.7, 'negatif');
 
 -- Sample analyses
 INSERT IGNORE INTO analyses (user_id, text, sentiment, confidence, lexicon_score, word_count, created_at) VALUES
