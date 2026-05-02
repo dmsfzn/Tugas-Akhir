@@ -7,9 +7,33 @@ from datetime import datetime, date
 import hashlib
 import re
 from collections import Counter
+import os
+import sys
+import joblib
+import numpy as np
+from stemmid import Stemmer
+
+# Tambahkan path ke folder src agar bisa import predict.py
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+from predict import get_xai_explanation, hybrid_prediction  # type: ignore
 
 app = Flask(__name__)
 app.secret_key = 'motormind_secret_2024_ta'
+
+# ─────────────────────────────────────────────
+# GLOBAL MODEL & NLP HELPERS
+# ─────────────────────────────────────────────
+MODEL_PATH = os.path.join(app.root_path, '..', 'model', 'model.pkl')
+VECTORIZER_PATH = os.path.join(app.root_path, '..', 'model', 'vectorizer.pkl')
+
+try:
+    _global_model = joblib.load(MODEL_PATH)
+    _global_vectorizer = joblib.load(VECTORIZER_PATH)
+    _global_stemmer = Stemmer()
+    print("[SUCCESS] ML Models and Stemmer loaded successfully.")
+except Exception as e:
+    print(f"[ERROR] Error loading ML models: {e}")
+    _global_model, _global_vectorizer, _global_stemmer = None, None, None
 
 # Inject current datetime into all templates
 @app.context_processor
@@ -155,23 +179,40 @@ def pegawai_analisis():
         input_text = request.form.get('text', '').strip()
 
         if input_text:
-            # ─── PLACEHOLDER PIPELINE ───────────────────────
-            # Ganti blok ini dengan pipeline TF-IDF + NB + Lexicon Hybrid asli
-            words         = re.findall(r'\b\w+\b', input_text.lower())
-            word_count    = len(words)
-            sentiment     = 'positif'   # hasil model
-            confidence    = 0.89        # hasil model
-            lexicon_score = 2.5         # hasil lexicon
+            # Load custom dictionary from DB
+            db = get_db()
+            cur = db.cursor(dictionary=True)
+            cur.execute("SELECT word, score FROM lexicon")
+            lexicon_rows = cur.fetchall()
+            KAMUS_KUSTOM = {row['word']: row['score'] for row in lexicon_rows}
+            
+            # ─── REAL PIPELINE ───────────────────────
+            pred_result = hybrid_prediction(input_text, _global_model, _global_vectorizer, _global_stemmer, KAMUS_KUSTOM)
+            
+            word_count    = len(re.findall(r'\b\w+\b', input_text.lower()))
+            sentiment     = pred_result['label']
+            confidence    = pred_result['confidence'] / 100.0  # Scale 0-1 untuk UI
+            lexicon_score = pred_result['lexicon_score']
+            clean_text    = pred_result['clean_text']
             highlights    = []
 
-            # Simulasi word-level highlighting
-            pos_keywords = {'bagus','baik','hebat','luar biasa','puas','senang','meningkat','optimal'}
-            neg_keywords = {'buruk','jelek','lambat','rusak','masalah','error','gagal','kurang'}
-            for w in set(words):
-                if w in pos_keywords:
-                    highlights.append({'word': w, 'label': 'positive'})
-                elif w in neg_keywords:
-                    highlights.append({'word': w, 'label': 'negative'})
+            # Generate highlights based on XAI and Lexicon
+            xai_expl = get_xai_explanation(clean_text, _global_model, _global_vectorizer)
+            xai_dict = {item['fitur']: item['arah'] for item in xai_expl}
+            
+            # Untuk highlight UI, kita iterate lewat kata-kata asli agar highlight match persis
+            orig_words = re.findall(r'\b\w+\b', input_text.lower())
+            for w in set(orig_words):
+                # Prioritas: Lexicon -> ML XAI
+                if w in KAMUS_KUSTOM:
+                    lbl = 'positive' if KAMUS_KUSTOM[w] > 0 else 'negative'
+                    highlights.append({'word': w, 'label': lbl})
+                else:
+                    # Cek hasil stemming-nya apakah ada di XAI
+                    stemmed_w = _global_stemmer.loads(w) if _global_stemmer else w
+                    if stemmed_w in xai_dict:
+                        lbl = 'positive' if xai_dict[stemmed_w] == 'Positif' else 'negative'
+                        highlights.append({'word': w, 'label': lbl})
             # ────────────────────────────────────────────────
 
             # Simpan ke DB
