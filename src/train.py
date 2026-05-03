@@ -50,7 +50,7 @@ def main():
     print(f"Rata-rata CV: {cv_scores.mean()*100:.2f}%")
 
     # 5. Training
-    model = MultinomialNB(alpha=1.0)
+    model = MultinomialNB(alpha=0.5)
     model.fit(X_train_bal, y_train_bal)
 
     # 6. Simpan model & data uji
