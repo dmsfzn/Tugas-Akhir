@@ -8,91 +8,114 @@
 </head>
 <body>
 
-<!-- ── TOOLBAR ───────────────────────────────────────────────── -->
-<div class="report-toolbar">
-  <span class="toolbar-brand">⚡ MotorMind</span>
-  <button class="btn-toolbar btn-print" onclick="doPrint()">
-    ⎙ Cetak / Simpan PDF
-  </button>
-  <button class="btn-toolbar btn-close" onclick="doClose()">✕ Tutup</button>
+<!-- ── TOOLBAR (layar saja) ── -->
+<div class="print-toolbar">
+  <div class="tb-info">Laporan Analisis Tunggal #{{ row.id }}</div>
+  <button class="btn-print primary" onclick="doPrint()">⎙ Cetak / Simpan PDF</button>
+  <button class="btn-print secondary" onclick="doClose()">✕ Tutup</button>
 </div>
 
-<!-- ── PAGES ─────────────────────────────────────────────────── -->
-<div class="report-pages">
 <div class="report-page">
 
-  <!-- Header -->
-  <div class="report-header">
-    <div class="report-brand">
-      ⚡ MotorMind
-      <small>Sentiment Analysis System</small>
+  <!-- ── KOP SURAT ── -->
+  <div class="kop-surat">
+    <div class="kop-left">
+      <div class="kop-logo">⚡</div>
+      <div class="kop-company">
+        <div class="kop-company-name">BENGKEL STEAM MOTOR SENTOSA</div>
+        <div class="kop-company-tagline">Perawatan & Analisis Sentimen Pelanggan</div>
+      </div>
     </div>
-    <div class="report-meta">
-      <strong>Laporan ID: #{{ row.id }}</strong><br>
-      {{ row.created_at.strftime('%d %B %Y, %H:%M') if row.created_at else '—' }}<br>
-      Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}
+    <div class="kop-right">
+      <div class="kop-doctype">Laporan Analisis Sentimen Tunggal</div>
+      Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}<br>
+      ID Laporan: #{{ row.id }}
     </div>
   </div>
 
-  <div class="report-title">Laporan Analisis Sentimen Tunggal</div>
+  <!-- Alamat -->
+  <div class="kop-address-bar">
+    <span>📍 Jl. Raya Magelang KM 5, Beran, Tegalrejo, Yogyakarta 55244</span>
+    <span>📞 (0274) 555-1234</span>
+    <span>📱 0812-3456-7890</span>
+    <span>✉ info@steamsentosa.id</span>
+  </div>
 
-  <!-- Stat cards -->
-  <div class="stats-row cols-3">
-    <div class="stat-box {% if row.sentiment == 'positif' %}blue{% else %}orange{% endif %}">
+  <!-- ── JUDUL ── -->
+  <div class="report-title-block">
+    <h2>Laporan Analisis Sentimen Tunggal</h2>
+  </div>
+
+  <!-- ── STAT BOXES ── -->
+  <div class="stats-row">
+    <div class="stat-box {% if row.sentiment=='positif' %}blue{% else %}orange{% endif %}">
       <div class="stat-label">Hasil Sentimen</div>
-      <div class="stat-value {% if row.sentiment == 'positif' %}blue{% else %}orange{% endif %}" style="font-size:22px;text-transform:capitalize;">
-        {{ row.sentiment }}
+      <div class="stat-val {% if row.sentiment=='positif' %}accent{% else %}orange{% endif %}">
+        {{ row.sentiment|upper }}
       </div>
     </div>
     <div class="stat-box blue">
       <div class="stat-label">Confidence Score</div>
-      <div class="stat-value blue">{{ "%.1f"|format((row.confidence or 0)*100) }}%</div>
-      <div class="conf-cell" style="margin-top:8px;">
-        <div class="conf-track">
-          <div class="conf-fill {{ row.sentiment }}"
-               data-width="{{ ((row.confidence or 0)*100)|round }}"
-               style="width:0%;transition:width .6s ease;"></div>
-        </div>
+      <div class="stat-val accent">{{ "%.1f"|format(row.confidence*100 if row.confidence else 0) }}%</div>
+      <div class="conf-bar" style="display:block;width:100%;margin-top:8px;">
+        <span class="conf-fill {{ row.sentiment }}"
+              style="width:{{ (row.confidence*100)|round if row.confidence else 0 }}%;"></span>
       </div>
     </div>
-    <div class="stat-box {% if (row.lexicon_score or 0) >= 0 %}blue{% else %}orange{% endif %}">
+    <div class="stat-box gray">
       <div class="stat-label">Lexicon Score</div>
-      <div class="stat-value {% if (row.lexicon_score or 0) >= 0 %}blue{% else %}orange{% endif %}">
+      <div class="stat-val {% if (row.lexicon_score or 0) >= 0 %}accent{% else %}orange{% endif %}">
         {{ "%+.2f"|format(row.lexicon_score or 0) }}
       </div>
     </div>
   </div>
 
-  <!-- Text -->
-  <div class="section-heading">Teks Analisis</div>
-  <div style="background:#f8f9ff;border:1px solid #dde3ff;border-radius:8px;padding:18px;font-size:14px;line-height:1.7;color:#374151;margin-bottom:20px;">
+  <!-- ── TEKS ANALISIS ── -->
+  <div class="section-title">Teks Analisis</div>
+  <div style="background:#f8f9ff;border:1px solid #e5e8f5;border-radius:8px;padding:18px 20px;
+              font-size:14px;line-height:1.8;color:#1a1a2e;margin-bottom:6px;">
     {{ row.text }}
   </div>
 
-  <!-- Meta -->
-  <div style="font-size:12px;color:#6b7280;line-height:1.8;">
-    <strong style="color:#374151;">Model:</strong> Neural X2.4 TF-IDF + Naive Bayes + Lexicon Hybrid<br>
-    <strong style="color:#374151;">Jumlah Kata:</strong> {{ row.word_count or row.text.split()|length }}<br>
-    <strong style="color:#374151;">Waktu Analisis:</strong> {{ row.created_at.strftime('%d %B %Y pukul %H:%M:%S') if row.created_at else '—' }}
-  </div>
+  <!-- ── META ── -->
+  <div class="section-title">Informasi Model</div>
+  <table class="report-table dark" style="margin-bottom:0;">
+    <thead>
+      <tr>
+        <th>Model</th><th>Processing Time</th><th>Jumlah Kata</th><th>Tanggal Analisis</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Neural X2.4 TF-IDF + Naive Bayes + Lexicon Hybrid</td>
+        <td>12.4 ms</td>
+        <td>{{ row.word_count or row.text.split()|length }}</td>
+        <td>{{ row.created_at.strftime('%d %B %Y, %H:%M') if row.created_at else '—' }}</td>
+      </tr>
+    </tbody>
+  </table>
 
-  <!-- Footer + Signature -->
-  <div class="report-footer">
+  <!-- ── FOOTER & TANDA TANGAN ── -->
+  <div class="report-footer-section">
     <div class="footer-left">
       MotorMind Sentiment Analysis System — Tugas Akhir<br>
-      <strong>Dicetak oleh:</strong> {{ session.get('username', '—') }}
-      ({{ session.get('role', '')|capitalize }})
+      <strong>Bengkel Steam Motor Sentosa</strong><br>
+      Jl. Raya Magelang KM 5, Yogyakarta
     </div>
+
     <div class="signature-block">
+      <div class="signature-place-date">
+        Yogyakarta, {{ now().strftime('%d %B %Y') }}
+      </div>
       <div class="signature-name">{{ session.get('username', '—') }}</div>
       <div class="signature-role">{{ session.get('role', '')|capitalize }}</div>
-      <div class="signature-line"></div>
-      <div class="signature-label">Tanda Tangan</div>
+      <!-- Area tanda tangan -->
+      <div class="signature-space"></div>
+      <div class="signature-caption">Tanda Tangan</div>
     </div>
   </div>
 
 </div><!-- .report-page -->
-</div><!-- .report-pages -->
 
 <script src="{{ url_for('static', filename='js/report.js') }}"></script>
 </body>

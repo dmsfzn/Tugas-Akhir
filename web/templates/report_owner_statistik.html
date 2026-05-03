@@ -8,195 +8,147 @@
 </head>
 <body>
 
-<!-- ── TOOLBAR ───────────────────────────────────────────────── -->
-<div class="report-toolbar">
-  <span class="toolbar-brand">⚡ MotorMind · Laporan Statistik</span>
-  <button class="btn-toolbar btn-print" onclick="doPrint()">⎙ Cetak / PDF</button>
-  <a class="btn-toolbar btn-csv"
-     href="{{ url_for('report_export_csv') }}" target="_blank">↓ Download CSV</a>
-  <button class="btn-toolbar btn-close" onclick="doClose()">✕ Tutup</button>
+<!-- ── TOOLBAR ── -->
+<div class="print-toolbar">
+  <div class="tb-info">Laporan Statistik Eksekutif</div>
+  <button class="btn-print primary" onclick="doPrint()">⎙ Cetak / Simpan PDF</button>
+  <button class="btn-print secondary" onclick="doClose()">✕ Tutup</button>
 </div>
 
-<div class="report-pages">
+<div class="report-page">
 
-  {# ── PAGE 1: Ringkasan & Chart ── #}
-  <div class="report-page">
-
-    <div class="report-header">
-      <div class="report-brand">⚡ MotorMind <small>Sentiment Analysis System</small></div>
-      <div class="report-meta">
-        <strong>Laporan Statistik Eksekutif</strong><br>
-        Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}<br>
-        Oleh: {{ session.get('username','—') }}
+  <!-- ── KOP SURAT ── -->
+  <div class="kop-surat">
+    <div class="kop-left">
+      <div class="kop-logo">⚡</div>
+      <div class="kop-company">
+        <div class="kop-company-name">BENGKEL STEAM MOTOR SENTOSA</div>
+        <div class="kop-company-tagline">Perawatan & Analisis Sentimen Pelanggan</div>
       </div>
     </div>
-
-    <div class="report-title">Laporan Statistik Operasional</div>
-
-    <!-- Summary stats -->
-    <div class="stats-row cols-3">
-      <div class="stat-box blue">
-        <div class="stat-label">Total Analisis</div>
-        <div class="stat-value blue">{{ "{:,}".format(total) }}</div>
-        <div class="stat-sub">Sepanjang waktu</div>
-      </div>
-      <div class="stat-box blue">
-        <div class="stat-label">Sentimen Positif</div>
-        <div class="stat-value blue">{{ "{:,}".format(positif) }}</div>
-        <div class="stat-sub">{{ pos_pct }}% dari total</div>
-      </div>
-      <div class="stat-box orange">
-        <div class="stat-label">Sentimen Negatif</div>
-        <div class="stat-value orange">{{ "{:,}".format(negatif) }}</div>
-        <div class="stat-sub">{{ neg_pct }}% dari total</div>
-      </div>
+    <div class="kop-right">
+      <div class="kop-doctype">Laporan Statistik Operasional</div>
+      Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}
     </div>
+  </div>
+  <div class="kop-address-bar">
+    <span>📍 Jl. Raya Magelang KM 5, Beran, Tegalrejo, Yogyakarta 55244</span>
+    <span>📞 (0274) 555-1234</span>
+    <span>📱 0812-3456-7890</span>
+    <span>✉ info@steamsentosa.id</span>
+  </div>
 
-    <!-- Pie chart (SVG) -->
-    <div class="section-heading">Distribusi Sentimen</div>
-    <div class="pie-section">
-      <svg width="110" height="110" viewBox="0 0 100 100"
-           style="-webkit-print-color-adjust:exact;print-color-adjust:exact;">
-        <circle cx="50" cy="50" r="38" fill="none" stroke="#f0f2f7" stroke-width="16"/>
-        {% set circ = 239 %}
-        {% set pos_arc = (pos_pct / 100 * circ)|round %}
-        {% set neg_arc = circ - pos_arc %}
-        <circle cx="50" cy="50" r="38" fill="none" stroke="#4361EE" stroke-width="16"
-                stroke-dasharray="{{ pos_arc }} {{ circ }}"
-                transform="rotate(-90 50 50)"/>
-        <circle cx="50" cy="50" r="38" fill="none" stroke="#f97316" stroke-width="16"
-                stroke-dasharray="{{ neg_arc }} {{ circ }}"
-                stroke-dashoffset="{{ -pos_arc }}"
-                transform="rotate(-90 50 50)"/>
-      </svg>
-      <div class="pie-legend">
-        <div class="legend-item">
-          <span class="legend-dot" style="background:#4361EE;"></span>
-          <div>
-            <div class="legend-val" style="color:#4361EE;">{{ positif }}</div>
-            <div class="legend-pct">POSITIF &middot; {{ pos_pct }}%</div>
-          </div>
+  <div class="report-title-block">
+    <h2>Laporan Statistik Operasional</h2>
+    <div class="report-meta">Periode: Semua waktu</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-box blue">
+      <div class="stat-label">Total Analisis</div>
+      <div class="stat-val accent">{{ "{:,}".format(total) }}</div>
+      <div class="stat-sub">Sepanjang waktu</div>
+    </div>
+    <div class="stat-box green">
+      <div class="stat-label">Sentimen Positif</div>
+      <div class="stat-val green">{{ "{:,}".format(positif) }}</div>
+      <div class="stat-sub">{{ pos_pct }}% dari total</div>
+    </div>
+    <div class="stat-box orange">
+      <div class="stat-label">Sentimen Negatif</div>
+      <div class="stat-val orange">{{ "{:,}".format(negatif) }}</div>
+      <div class="stat-sub">{{ neg_pct }}% dari total</div>
+    </div>
+  </div>
+
+  <!-- Pie Chart -->
+  <div class="section-title">Distribusi Sentimen</div>
+  <div class="pie-section avoid-break">
+    <svg width="120" height="120" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#f0f2f5" stroke-width="16"/>
+      {% set circ = 239 %}
+      {% set pos_arc = (pos_pct / 100 * circ)|round %}
+      {% set neg_arc = circ - pos_arc %}
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#4361EE" stroke-width="16"
+              stroke-dasharray="{{ pos_arc }} {{ circ }}" transform="rotate(-90 50 50)"/>
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#f97316" stroke-width="16"
+              stroke-dasharray="{{ neg_arc }} {{ circ }}" stroke-dashoffset="{{ -pos_arc }}"
+              transform="rotate(-90 50 50)"/>
+    </svg>
+    <div class="pie-legend">
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#4361EE;"></span>
+        <div>
+          <div class="legend-val" style="color:#4361EE;">{{ positif }}</div>
+          <div class="legend-pct">POSITIF · {{ pos_pct }}%</div>
         </div>
-        <div class="legend-item">
-          <span class="legend-dot" style="background:#f97316;"></span>
-          <div>
-            <div class="legend-val" style="color:#f97316;">{{ negatif }}</div>
-            <div class="legend-pct">NEGATIF &middot; {{ neg_pct }}%</div>
-          </div>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#f97316;"></span>
+        <div>
+          <div class="legend-val" style="color:#f97316;">{{ negatif }}</div>
+          <div class="legend-pct">NEGATIF · {{ neg_pct }}%</div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Trend chart (stacked bar) -->
-    {% if trend %}
-    <div class="section-heading">Tren Analisis 30 Hari Terakhir</div>
-    {% set max_day = trend|map(attribute='total')|max %}
-    {% for row in trend %}
-    <div class="bar-trend-row">
-      <div class="bar-date">{{ row.day.strftime('%d %b') if row.day else '—' }}</div>
-      <div class="bar-track">
-        {% if max_day > 0 %}
-          <div class="bar-seg-pos"
-               data-width="{{ (row.pos / max_day * 100)|round }}"
-               style="width:0%;transition:width .4s ease;"></div>
-          <div class="bar-seg-neg"
-               data-width="{{ (row.neg / max_day * 100)|round }}"
-               style="width:0%;transition:width .4s ease .1s;"></div>
-        {% endif %}
-      </div>
-      <div class="bar-nums">+{{ row.pos }} / -{{ row.neg }}</div>
+  <!-- Trend -->
+  {% if trend %}
+  <div class="section-title">Tren Analisis 30 Hari Terakhir</div>
+  {% set max_day = trend|map(attribute='total')|max %}
+  {% for row in trend %}
+  <div class="bar-row">
+    <div class="bar-date">{{ row.day.strftime('%d %b') if row.day else '—' }}</div>
+    <div class="bar-stacked">
+      {% if max_day > 0 %}
+        <div class="bar-pos" style="width:{{ (row.pos / max_day * 100)|round }}%;"></div>
+        <div class="bar-neg" style="width:{{ (row.neg / max_day * 100)|round }}%;"></div>
+      {% endif %}
     </div>
-    {% endfor %}
-    <div style="display:flex;gap:18px;margin-top:8px;font-size:11px;color:#6b7280;">
-      <span style="display:flex;align-items:center;gap:6px;">
-        <span style="width:10px;height:10px;background:#4361EE;border-radius:2px;display:inline-block;"></span> Positif
-      </span>
-      <span style="display:flex;align-items:center;gap:6px;">
-        <span style="width:10px;height:10px;background:#f97316;border-radius:2px;display:inline-block;"></span> Negatif
-      </span>
-    </div>
-    {% endif %}
-
-    <!-- Footer page 1 -->
-    <div class="report-footer">
-      <div class="footer-left">
-        MotorMind Sentiment Analysis System — Tugas Akhir<br>
-        <strong>Dicetak oleh:</strong> {{ session.get('username','—') }}
-        ({{ session.get('role','')|capitalize }})
-      </div>
-      <div class="signature-block">
-        <div class="signature-name">{{ session.get('username','—') }}</div>
-        <div class="signature-role">{{ session.get('role','')|capitalize }}</div>
-        <div class="signature-line"></div>
-        <div class="signature-label">Tanda Tangan</div>
-      </div>
-    </div>
-
-  </div>{# /page 1 #}
-
-  {# ── PAGE 2: Analyst Productivity ── #}
-  {% if analysts %}
-  <div class="report-page">
-
-    <div class="report-header">
-      <div class="report-brand">⚡ MotorMind <small>Laporan Statistik — Halaman 2</small></div>
-      <div class="report-meta">Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}</div>
-    </div>
-
-    <div class="section-heading">Produktivitas Analyst</div>
-    <table class="report-table">
-      <thead class="head-dark">
-        <tr>
-          <th>#</th>
-          <th>Nama Analyst</th>
-          <th>Total Analisis</th>
-          <th>Kontribusi</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for a in analysts %}
-        <tr>
-          <td class="ts-cell">{{ loop.index }}</td>
-          <td style="font-weight:600;">{{ a.name }}</td>
-          <td>
-            <span style="font-family:'Space Mono',monospace;font-weight:700;">{{ a.cnt }}</span>
-          </td>
-          <td>
-            <div class="conf-cell">
-              <div class="conf-track">
-                <div class="conf-fill positif"
-                     data-width="{{ (a.cnt / analysts[0].cnt * 100)|round if analysts[0].cnt else 0 }}"
-                     style="width:0%;transition:width .5s ease;"></div>
-              </div>
-              <span class="conf-label">
-                {{ "%.1f"|format(a.cnt / (analysts|map(attribute='cnt')|sum) * 100) if analysts else 0 }}%
-              </span>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-    <div class="report-footer">
-      <div class="footer-left">
-        MotorMind Sentiment Analysis System — Tugas Akhir<br>
-        <strong>Dicetak oleh:</strong> {{ session.get('username','—') }}
-        ({{ session.get('role','')|capitalize }})
-        &nbsp;·&nbsp; Halaman 2 dari 2
-      </div>
-      <div class="signature-block">
-        <div class="signature-name">{{ session.get('username','—') }}</div>
-        <div class="signature-role">{{ session.get('role','')|capitalize }}</div>
-        <div class="signature-line"></div>
-        <div class="signature-label">Tanda Tangan</div>
-      </div>
-    </div>
-
-  </div>{# /page 2 #}
+    <div class="bar-nums">+{{ row.pos }} / -{{ row.neg }}</div>
+  </div>
+  {% endfor %}
   {% endif %}
 
-</div>{# .report-pages #}
+  <!-- Analyst Productivity -->
+  {% if analysts %}
+  <div class="section-title">Produktivitas Analyst</div>
+  <table class="report-table blue">
+    <thead>
+      <tr><th>#</th><th>Nama Analyst</th><th>Total Analisis</th></tr>
+    </thead>
+    <tbody>
+      {% for a in analysts %}
+      <tr class="avoid-break">
+        <td style="font-family:'Space Mono',monospace;font-size:10px;color:#9ca3af;">{{ loop.index }}</td>
+        <td>{{ a.name }}</td>
+        <td style="font-family:'Space Mono',monospace;font-weight:700;color:#4361EE;">{{ a.cnt }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <!-- ── FOOTER & TANDA TANGAN ── -->
+  <div class="report-footer-section">
+    <div class="footer-left">
+      MotorMind Sentiment Analysis System — Tugas Akhir<br>
+      <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Raya Magelang KM 5, Yogyakarta<br>
+      Model: Neural X2.4 TF-IDF + Naive Bayes + Lexicon Hybrid
+    </div>
+
+    <div class="signature-block">
+      <div class="signature-place-date">Yogyakarta, {{ now().strftime('%d %B %Y') }}</div>
+      <div class="signature-name">{{ session.get('username', '—') }}</div>
+      <div class="signature-role">{{ session.get('role', '')|capitalize }}</div>
+      <div class="signature-space"></div>
+      <div class="signature-caption">Tanda Tangan</div>
+    </div>
+  </div>
+
+</div><!-- .report-page -->
 
 <script src="{{ url_for('static', filename='js/report.js') }}"></script>
 </body>

@@ -208,35 +208,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-/* Form submit loading state */
-document.getElementById('analysisForm').addEventListener('submit', function() {
-  const btn = document.getElementById('submitBtn');
-  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
-  btn.disabled = true;
-});
-
-function clearInput() {
-  document.getElementById('inputText').value = '';
-}
-
-function handleBulkFile(inp) {
-  if (inp.files.length > 0) {
-    showToast(`File "${inp.files[0].name}" siap untuk diproses.`, 'info');
-  }
-}
-
-/* Demo mini chart */
-(function() {
-  const vals = [0.72,0.88,0.91,0.65,0.94,0.83,0.89];
-  const el = document.getElementById('confChart');
-  if (!el) return;
-  const max = Math.max(...vals);
-  el.innerHTML = vals.map(v => {
-    const h = Math.round((v/max)*100);
-    const isHigh = v > 0.85;
-    return `<div class="bar-col" style="height:${h}%;background:${isHigh?'var(--accent)':'var(--bg-card-2)'};opacity:.9;" title="${(v*100).toFixed(0)}%"></div>`;
-  }).join('');
-})();
-</script>
+<script src="{{ url_for('static', filename='js/analisis.js') }}"></script>
 {% endblock %}

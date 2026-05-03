@@ -224,25 +224,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-function openAddModal() {
-  document.getElementById('addModal').style.display = 'flex';
-}
-function openEditModal(id, word, score, category) {
-  document.getElementById('editId').value      = id;
-  document.getElementById('editWord').value    = word;
-  document.getElementById('editScore').value   = score;
-  document.getElementById('editCategory').value = category;
-  document.getElementById('editModal').style.display = 'flex';
-}
-function closeModal(id) {
-  document.getElementById(id).style.display = 'none';
-}
-// Close on backdrop click
-document.querySelectorAll('.mm-modal-backdrop').forEach(el => {
-  el.addEventListener('click', function(e) {
-    if (e.target === this) this.style.display = 'none';
-  });
-});
-</script>
+<script src="{{ url_for('static', filename='js/lexicon.js') }}"></script>
 {% endblock %}

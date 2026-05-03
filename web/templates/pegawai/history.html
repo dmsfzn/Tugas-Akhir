@@ -174,32 +174,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-/* Buka popup laporan semua analisis dengan range filter aktif */
-function openAllReport() {
-  const form   = document.getElementById('filterForm');
-  const params = new URLSearchParams({
-    date_from : form.querySelector('[name=date_from]').value,
-    date_to   : form.querySelector('[name=date_to]').value,
-    sentiment : form.querySelector('[name=sentiment]').value,
-    q         : form.querySelector('[name=q]').value,
-  });
-  openReport('/report/all-analyses?' + params.toString());
-}
-
-async function renderActivity() {
-  try {
-    const data = await fetch('/api/chart/sentiment').then(r => r.json());
-    const chart = document.getElementById('actChart');
-    if (!data.length) return;
-    const max = Math.max(...data.map(d => d.pos + d.neg), 1);
-    chart.innerHTML = data.slice(-7).map(d => {
-      const total = d.pos + d.neg;
-      const h = Math.round((total / max) * 100);
-      return `<div class="bar-col" style="height:${Math.max(h,4)}%;background:var(--bg-card-2);border-top:2px solid ${total > max*0.6 ? 'var(--accent)' : 'var(--text-3)'};" title="${d.day}"></div>`;
-    }).join('');
-  } catch(e) {}
-}
-renderActivity();
-</script>
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
 {% endblock %}

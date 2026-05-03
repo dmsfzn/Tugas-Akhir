@@ -62,6 +62,8 @@
       <div class="card-label">Tren Sentimen Negatif (8 Minggu)</div>
       <div class="bar-chart" id="negTrend" style="height:80px;"></div>
       {% if neg_trend %}<div style="font-size:10px;color:var(--text-3);margin-top:8px;text-align:right;">REF: 8-WEEK DYNAMIC CYCLE</div>{% endif %}
+      <!-- Data untuk insight.js -->
+      <script type="application/json" id="negTrendData">{{ neg_trend|tojson }}</script>
     </div>
 
     <div class="mm-card">
@@ -137,16 +139,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-(function() {
-  const data = {{ neg_trend|tojson }};
-  const el = document.getElementById('negTrend');
-  if (!data || !data.length) { el.innerHTML = '<span class="text-dimmer" style="font-size:11px;">Tidak ada data tren</span>'; return; }
-  const max = Math.max(...data.map(d => d.cnt), 1);
-  el.innerHTML = data.map(d => {
-    const h = Math.round((d.cnt / max) * 100);
-    return `<div class="bar-col" style="height:${Math.max(h,4)}%;background:${h > 70 ? 'var(--negative)' : 'rgba(249,115,22,.4)'};border-radius:3px 3px 0 0;" title="Minggu ${d.wk}: ${d.cnt} negatif"></div>`;
-  }).join('');
-})();
-</script>
+<script src="{{ url_for('static', filename='js/insight.js') }}"></script>
 {% endblock %}

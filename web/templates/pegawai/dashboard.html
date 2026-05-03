@@ -168,29 +168,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-/* Simple bar chart using /api/chart/sentiment */
-async function renderTrend() {
-  try {
-    const data = await fetch('/api/chart/sentiment').then(r => r.json());
-    const chart = document.getElementById('trendChart');
-    if (!data.length) return;
-    const maxVal = Math.max(...data.map(d => d.pos + d.neg), 1);
-    chart.innerHTML = data.slice(-14).map(d => {
-      const pct = Math.round(((d.pos + d.neg) / maxVal) * 100);
-      return `<div class="bar-col"
-        style="height:${Math.max(pct,4)}%;
-               background:${d.neg > d.pos ? 'var(--negative)' : 'var(--accent)'};
-               opacity:.8;"
-        title="${d.day}: ${d.pos} pos, ${d.neg} neg">
-      </div>`;
-    }).join('');
-  } catch(e) {
-    // Chart not critical — fail silently
-    document.getElementById('trendChart').innerHTML =
-      '<span class="text-dimmer" style="font-size:11px;">Tidak ada data chart</span>';
-  }
-}
-renderTrend();
-</script>
+<script src="{{ url_for('static', filename='js/dashboard-pegawai.js') }}"></script>
 {% endblock %}

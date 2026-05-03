@@ -126,26 +126,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-let chartData = [];
-async function loadChart() {
-  try { chartData = await fetch('/api/chart/sentiment').then(r => r.json()); renderChart(30); } catch(e) {}
-}
-function renderChart(days) {
-  const el = document.getElementById('mainChart');
-  const slice = chartData.slice(-days);
-  if (!slice.length) return;
-  const max = Math.max(...slice.map(d => d.pos + d.neg), 1);
-  el.innerHTML = slice.map(d => {
-    const h = Math.round(((d.pos + d.neg) / max) * 100);
-    return `<div class="bar-col" style="height:${Math.max(h,4)}%;background:${d.neg > d.pos ? 'var(--negative)' : 'var(--accent)'};opacity:.75;" title="${d.day}: +${d.pos} / -${d.neg}"></div>`;
-  }).join('');
-}
-function switchRange(days) {
-  document.getElementById('btn7d').classList.toggle('active', days === 7);
-  document.getElementById('btn30d').classList.toggle('active', days === 30);
-  renderChart(days);
-}
-loadChart();
-</script>
+<script src="{{ url_for('static', filename='js/dashboard-owner.js') }}"></script>
 {% endblock %}
