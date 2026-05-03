@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<!-- ── TOOLBAR ── -->
+<!-- TOOLBAR -->
 <div class="print-toolbar">
   <div class="tb-info">Daftar Lexicon · {{ lexicons|length }} kata</div>
   <button class="btn-print primary" onclick="doPrint()">⎙ Cetak / Simpan PDF</button>
@@ -17,7 +17,7 @@
 
 <div class="report-page">
 
-  <!-- ── KOP SURAT ── -->
+  <!-- KOP SURAT -->
   <div class="kop-surat">
     <div class="kop-left">
       <div class="kop-logo">⚡</div>
@@ -32,8 +32,8 @@
     </div>
   </div>
   <div class="kop-address-bar">
-    <span>📍 Jl. Raya Magelang KM 5, Beran, Tegalrejo, Yogyakarta 55244</span>
-    <span>📞 (0274) 555-1234</span>
+    <span>📍 Jl. Kemang Raya No. 10, Mampang Prapatan, Jakarta Selatan 12730</span>
+    <span>📞 (021) 719-1234</span>
     <span>📱 0812-3456-7890</span>
     <span>✉ info@steamsentosa.id</span>
   </div>
@@ -138,16 +138,16 @@
     </tbody>
   </table>
 
-  <!-- ── FOOTER & TANDA TANGAN ── -->
+  <!-- FOOTER & TANDA TANGAN -->
   <div class="report-footer-section">
     <div class="footer-left">
       MotorMind Sentiment Analysis System — Tugas Akhir<br>
-      <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Raya Magelang KM 5, Yogyakarta<br>
+      <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Kemang Raya No. 10, Jakarta Selatan<br>
       Total: {{ lexicons|length }} kata · Positif: {{ stats.pos or 0 }} · Negatif: {{ stats.neg or 0 }}
     </div>
 
     <div class="signature-block">
-      <div class="signature-place-date">Yogyakarta, {{ now().strftime('%d %B %Y') }}</div>
+      <div class="signature-place-date">Jakarta, {{ now().strftime('%d %B %Y') }}</div>
       <div class="signature-name">{{ session.get('username', '—') }}</div>
       <div class="signature-role">{{ session.get('role', '')|capitalize }}</div>
       <div class="signature-space"></div>
