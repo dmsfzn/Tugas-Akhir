@@ -17,8 +17,13 @@ factory = StopWordRemoverFactory()
 STOPWORDS = set(factory.get_stop_words())
 
 # Pertahankan kata penting untuk sentimen
-STOPWORDS -= {"tidak", "kurang", "belum"}
+STOPWORDS -= {"tidak", "kurang", "belum", "ga", "tak", "udah", "ada"}
 
+FIX_KATA = {
+    "nyuci": "cuci",
+    "mencuci": "cuci",
+    "dicuci": "cuci"
+}
 
 # =========================
 # FUNGSI PREPROCESSING
@@ -33,6 +38,8 @@ def normalisasi_teks(text: str, stemmer: Stemmer) -> str:
 
     # tokenizing
     tokens = text.split()
+
+    tokens = [FIX_KATA.get(t, t) for t in tokens]
 
     # stopword removal
     tokens = [t for t in tokens if t not in STOPWORDS]
