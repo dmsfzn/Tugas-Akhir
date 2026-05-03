@@ -19,3 +19,5 @@ model/
 
 # Dataset (optional kalau sensitif / besar)
 data/
+
+.vscode/
