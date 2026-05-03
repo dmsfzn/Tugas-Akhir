@@ -22,7 +22,9 @@ STOPWORDS -= {"tidak", "kurang", "belum", "ga", "tak", "udah", "ada"}
 FIX_KATA = {
     "nyuci": "cuci",
     "mencuci": "cuci",
-    "dicuci": "cuci"
+    "dicuci": "cuci",
+    "nyuci": "cuci",
+    "nyucinya": "cuci"
 }
 
 # =========================
