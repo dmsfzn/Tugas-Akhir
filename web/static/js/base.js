@@ -1,4 +1,4 @@
-/* ── MotorMind Base JS ── */
+/* MotorMind Base JS */
 
 /* Toast notification */
 function showToast(msg, type) {

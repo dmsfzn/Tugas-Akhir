@@ -15,7 +15,7 @@
   </div>
 </div>
 
-<!-- ── FILTER BAR ─────────────────────────── -->
+<!-- FILTER BAR -->
 <form method="GET" action="{{ url_for('pegawai_history') }}" id="filterForm">
   <div class="mm-card mb-3" style="padding:16px;">
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
@@ -47,7 +47,7 @@
   </div>
 </form>
 
-<!-- ── TABLE ─────────────────────────────── -->
+<!-- TABLE -->
 <div class="mm-table-wrap mb-3">
   <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
     <span style="font-size:11px;color:var(--text-3);">
@@ -109,7 +109,7 @@
   </table>
 </div>
 
-<!-- ── PAGINATION ─────────────────────────── -->
+<!-- PAGINATION -->
 {% if total_pages > 1 %}
 <div style="display:flex;justify-content:space-between;align-items:center;">
   <span style="font-size:12px;color:var(--text-3);">Halaman {{ page }} dari {{ total_pages }}</span>
@@ -126,7 +126,7 @@
 </div>
 {% endif %}
 
-<!-- ── BOTTOM CHARTS ──────────────────────── -->
+<!-- BOTTOM CHARTS -->
 <div class="grid-2 mt-4">
   <div class="mm-card">
     <div class="card-label">Sentiment Distribution</div>

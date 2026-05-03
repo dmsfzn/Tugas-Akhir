@@ -1,4 +1,4 @@
-/* ── Halaman Lexicon JS ── */
+/* Halaman Lexicon JS */
 
 function openAddModal() {
   var m = document.getElementById('addModal');

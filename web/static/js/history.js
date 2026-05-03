@@ -1,4 +1,4 @@
-/* ── Halaman History JS ── */
+/* Halaman History JS */
 
 /* Buka popup laporan semua analisis dengan filter aktif */
 function openAllReport() {

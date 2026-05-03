@@ -16,10 +16,10 @@
 </head>
 <body>
 
-<!-- ── TOAST CONTAINER ─────────────────────── -->
+<!-- TOAST CONTAINER -->
 <div class="mm-toast-container" id="toastContainer"></div>
 
-<!-- ── FLASH MESSAGES → auto toast ──────────── -->
+<!-- FLASH MESSAGES → auto toast -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <script>
@@ -34,7 +34,7 @@
 
 <div class="mm-wrapper">
 
-  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <!-- SIDEBAR -->
   <aside class="mm-sidebar">
     <!-- Brand -->
     <div class="brand">
@@ -45,7 +45,7 @@
     <!-- Nav -->
     <nav>
       {% if session.get('role') == 'pegawai' %}
-        <!-- ── PEGAWAI NAV ── -->
+        <!-- PEGAWAI NAV -->
         <div class="nav-section">
           <div class="nav-label">Operasional</div>
 
@@ -84,7 +84,7 @@
         </div>
 
       {% elif session.get('role') == 'owner' %}
-        <!-- ── OWNER NAV ── -->
+        <!-- OWNER NAV -->
         <div class="nav-section">
           <div class="nav-label">Monitoring</div>
 
@@ -130,9 +130,8 @@
       </a>
     </div>
   </aside>
-  <!-- ═══════════════════════════════════════ -->
 
-  <!-- ═══════════════ MAIN ═════════════════ -->
+  <!-- MAIN -->
   <main class="mm-main">
 
     <!-- TOPBAR -->
@@ -162,7 +161,6 @@
     </div>
 
   </main>
-  <!-- ═══════════════════════════════════════ -->
 
 </div><!-- .mm-wrapper -->
 
