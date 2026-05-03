@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan Insight Sentimen — MotorMind</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="print-toolbar">
+  <div class="tb-info">Laporan Insight Sentimen Negatif</div>
+  <button class="btn-print primary" onclick="doPrint()">⎙ Cetak / Simpan PDF</button>
+  <button class="btn-print secondary" onclick="doClose()">✕ Tutup</button>
+</div>
+
+<div class="report-page">
+
+  <!-- KOP SURAT -->
+  <div class="kop-surat">
+    <div class="kop-left">
+      <div class="kop-logo">⚡</div>
+      <div class="kop-company">
+        <div class="kop-company-name">BENGKEL STEAM MOTOR SENTOSA</div>
+        <div class="kop-company-tagline">Perawatan & Analisis Sentimen Pelanggan</div>
+      </div>
+    </div>
+    <div class="kop-right">
+      <div class="kop-doctype">Laporan Insight Sentimen Negatif</div>
+      Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}
+    </div>
+  </div>
+  <div class="kop-address-bar">
+    <span>📍 Jl. Kemang Raya No. 10, Mampang Prapatan, Jakarta Selatan 12730</span>
+    <span>📞 (021) 719-1234</span>
+    <span>📱 0812-3456-7890</span>
+    <span>✉ info@steamsentosa.id</span>
+  </div>
+
+  <div class="report-title-block">
+    <h2>Laporan Insight Sentimen Negatif</h2>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-box orange">
+      <div class="stat-label">Total Kata Unik Negatif</div>
+      <div class="stat-val orange">{{ top_words|length }}+</div>
+      <div class="stat-sub">Terdeteksi dari corpus</div>
+    </div>
+    <div class="stat-box orange">
+      <div class="stat-label">Kata Paling Sering</div>
+      <div class="stat-val orange" style="font-size:20px;">
+        {% if top_words %}{{ top_words[0][0] }}{% else %}—{% endif %}
+      </div>
+      {% if top_words %}<div class="stat-sub">{{ top_words[0][1] }} kemunculan</div>{% endif %}
+    </div>
+    <div class="stat-box gray">
+      <div class="stat-label">Total Analisis Negatif</div>
+      <div class="stat-val orange">{{ negatif }}</div>
+      <div class="stat-sub">dari {{ total }} total analisis</div>
+    </div>
+  </div>
+
+  <!-- TOP KATA (bar chart) -->
+  <div class="section-title">Top Kata Negatif Terdeteksi</div>
+  {% if top_words %}
+    {% set max_c = top_words[0][1] %}
+    {% for word, count in top_words %}
+    <div class="word-row avoid-break">
+      <div class="word-name orange">{{ word }}</div>
+      <div class="bar-track">
+        <div class="bar-fill orange"
+             data-width="{{ (count/max_c*100)|round }}%" data-opacity="{% if loop.index <= 3 %}1{% else %}0.55{% endif %}"></div>
+      </div>
+      <div class="bar-count">{{ count }}</div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p style="color:#9ca3af;text-align:center;padding:20px;">Tidak ada data kata negatif</p>
+  {% endif %}
+
+  <!-- WORD CLOUD -->
+  <div class="section-title">Visualisasi Kata Negatif</div>
+  <div class="word-cloud-box avoid-break">
+    {% if top_words %}
+      {% for word, count in top_words %}
+        {% set size = [11 + (count / top_words[0][1] * 12)|int, 24]|min %}
+        <span style="font-family:'Space Mono',monospace;"
+              data-size="{{ size }}px"
+              data-color="rgba(249,115,22,{{ 0.4 + (count/top_words[0][1]*0.6)|round(2) }})"
+              title="{{ count }} kemunculan">{{ word }}</span>
+      {% endfor %}
+    {% else %}
+      <span style="color:#9ca3af;">Tidak ada data</span>
+    {% endif %}
+  </div>
+
+  <!-- TABEL DETAIL -->
+  <div class="section-title">Tabel Detail Kata Negatif</div>
+  <table class="report-table orange">
+    <thead>
+      <tr><th>#</th><th>Kata</th><th>Frekuensi</th><th>Proporsi</th><th>Level Urgensi</th></tr>
+    </thead>
+    <tbody>
+      {% if top_words %}
+        {% set total_occ = top_words|map(attribute=1)|sum %}
+        {% for word, count in top_words %}
+        <tr class="avoid-break">
+          <td style="font-family:'Space Mono',monospace;font-size:10px;color:#9ca3af;">{{ loop.index }}</td>
+          <td style="font-family:'Space Mono',monospace;color:#f97316;font-weight:700;">{{ word }}</td>
+          <td style="font-family:'Space Mono',monospace;font-weight:700;">{{ count }}</td>
+          <td>
+            <span class="conf-bar">
+              <span class="conf-fill negatif" data-width="{{ (count/top_words[0][1]*100)|round }}%"></span>
+            </span>
+            {{ "%.1f"|format(count/total_occ*100 if total_occ else 0) }}%
+          </td>
+          <td>
+            {% if loop.index <= 3 %}<span class="badge critical">CRITICAL</span>
+            {% elif loop.index <= 7 %}<span class="badge warning">WARNING</span>
+            {% else %}<span class="badge monitor">MONITOR</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr><td colspan="5" style="text-align:center;padding:20px;color:#9ca3af;">Tidak ada data</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+  <!-- REKOMENDASI -->
+  {% if top_words %}
+  <div class="reco-box avoid-break">
+    <div class="reco-label">● Rekomendasi</div>
+    <p>
+      Berdasarkan analisis corpus, kata <strong>"{{ top_words[0][0] }}"</strong>
+      terdeteksi sebagai isu dominan dengan {{ top_words[0][1] }} kemunculan.
+      Disarankan untuk melakukan review operasional terkait area ini guna meningkatkan
+      kepuasan dan kualitas layanan.
+      {% if top_words|length > 2 %}
+      Kata <strong>"{{ top_words[1][0] }}"</strong> dan
+      <strong>"{{ top_words[2][0] }}"</strong> juga memerlukan perhatian segera.
+      {% endif %}
+    </p>
+  </div>
+  {% endif %}
+
+  <!-- FOOTER & TANDA TANGAN -->
+  <div class="report-footer-section">
+    <div class="footer-left">
+      MotorMind Sentiment Analysis System — Tugas Akhir<br>
+      <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Kemang Raya No. 10, Jakarta Selatan<br>
+      Model: Neural X2.4 TF-IDF + Naive Bayes + Lexicon Hybrid
+    </div>
+
+    <div class="signature-block">
+      <div class="signature-place-date">Jakarta, {{ now().strftime('%d %B %Y') }}</div>
+      <div class="signature-name">{{ session.get('username', '—') }}</div>
+      <div class="signature-role">{{ session.get('role', '')|capitalize }}</div>
+      <div class="signature-space"></div>
+      <div class="signature-caption">Tanda Tangan</div>
+    </div>
+  </div>
+
+</div><!-- .report-page -->
+
+<script src="{{ url_for('static', filename='js/report.js') }}"></script>
+</body>
+</html>

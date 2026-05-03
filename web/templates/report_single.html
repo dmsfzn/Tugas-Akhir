@@ -2,91 +2,121 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Laporan Analisis #{{ row.id }}</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;600;700&display=swap');
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background:#fff; color:#1a1a2e; font-family:'DM Sans',sans-serif; font-size:13px; padding:40px; }
-    .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; padding-bottom:20px; border-bottom:2px solid #4361EE; }
-    .brand { font-family:'Space Mono',monospace; font-size:20px; font-weight:700; color:#4361EE; }
-    .brand small { font-size:11px; color:#666; font-weight:400; display:block; }
-    .report-title { font-size:22px; font-weight:700; margin-bottom:20px; }
-    .meta-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:24px; }
-    .meta-box { background:#f8f9ff; border:1px solid #e8ebff; border-radius:8px; padding:14px; }
-    .meta-label { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#999; margin-bottom:4px; }
-    .meta-value { font-family:'Space Mono',monospace; font-size:18px; font-weight:700; }
-    .meta-value.positif { color:#4361EE; }
-    .meta-value.negatif { color:#f97316; }
-    .text-section { background:#f8f9ff; border-radius:8px; padding:20px; margin-bottom:20px; }
-    .text-section h3 { font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#999; margin-bottom:10px; }
-    .text-content { font-size:14px; line-height:1.7; color:#333; }
-    .conf-bar { height:6px; background:#e5e7eb; border-radius:3px; margin-top:8px; }
-    .conf-fill { height:100%; background:#4361EE; border-radius:3px; }
-    .footer { margin-top:40px; padding-top:16px; border-top:1px solid #eee; font-size:11px; color:#999; display:flex; justify-content:space-between; }
-    @media print { body { padding:20px; } .no-print { display:none; } }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan Analisis #{{ row.id }} — MotorMind</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
 </head>
 <body>
 
-<div class="no-print" style="margin-bottom:20px;">
-  <button onclick="window.print()" style="background:#4361EE;color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:13px;">
-    ⎙ Cetak / Simpan PDF
-  </button>
-  <button onclick="window.close()" style="background:#f3f4f6;color:#666;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:13px;margin-left:8px;">
-    ✕ Tutup
-  </button>
+<!-- TOOLBAR (layar saja) -->
+<div class="print-toolbar">
+  <div class="tb-info">Laporan Analisis Tunggal #{{ row.id }}</div>
+  <button class="btn-print primary" onclick="doPrint()">⎙ Cetak / Simpan PDF</button>
+  <button class="btn-print secondary" onclick="doClose()">✕ Tutup</button>
 </div>
 
-<div class="header">
-  <div>
-    <div class="brand">⚡ MotorMind <small>Sentiment Analysis System</small></div>
-  </div>
-  <div style="text-align:right;font-size:11px;color:#999;">
-    Laporan ID: #{{ row.id }}<br>
-    {{ row.created_at.strftime('%d %B %Y, %H:%M') if row.created_at else '—' }}
-  </div>
-</div>
+<div class="report-page">
 
-<div class="report-title">Laporan Analisis Sentimen Tunggal</div>
-
-<div class="meta-grid">
-  <div class="meta-box">
-    <div class="meta-label">Hasil Sentimen</div>
-    <div class="meta-value {{ row.sentiment }}">
-      {{ row.sentiment|upper }}
+  <!-- KOP SURAT -->
+  <div class="kop-surat">
+    <div class="kop-left">
+      <div class="kop-logo">⚡</div>
+      <div class="kop-company">
+        <div class="kop-company-name">BENGKEL STEAM MOTOR SENTOSA</div>
+        <div class="kop-company-tagline">Perawatan & Analisis Sentimen Pelanggan</div>
+      </div>
+    </div>
+    <div class="kop-right">
+      <div class="kop-doctype">Laporan Analisis Sentimen Tunggal</div>
+      Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}<br>
+      ID Laporan: #{{ row.id }}
     </div>
   </div>
-  <div class="meta-box">
-    <div class="meta-label">Confidence Score</div>
-    <div class="meta-value">
-      {{ "%.1f"|format(row.confidence*100 if row.confidence else 0) }}%
+
+  <!-- Alamat -->
+  <div class="kop-address-bar">
+    <span>📍 Jl. Kemang Raya No. 10, Mampang Prapatan, Jakarta Selatan 12730</span>
+    <span>📞 (021) 719-1234</span>
+    <span>📱 0812-3456-7890</span>
+    <span>✉ info@steamsentosa.id</span>
+  </div>
+
+  <!-- JUDUL -->
+  <div class="report-title-block">
+    <h2>Laporan Analisis Sentimen Tunggal</h2>
+  </div>
+
+  <!-- STAT BOXES -->
+  <div class="stats-row">
+    <div class="stat-box {% if row.sentiment=='positif' %}blue{% else %}orange{% endif %}">
+      <div class="stat-label">Hasil Sentimen</div>
+      <div class="stat-val {% if row.sentiment=='positif' %}accent{% else %}orange{% endif %}">
+        {{ row.sentiment|upper }}
+      </div>
     </div>
-    <div class="conf-bar">
-      <div class="conf-fill" style="width:{{ (row.confidence*100)|round if row.confidence else 0 }}%;
-                                    background:{% if row.sentiment=='negatif' %}#f97316{% else %}#4361EE{% endif %};"></div>
+    <div class="stat-box blue">
+      <div class="stat-label">Confidence Score</div>
+      <div class="stat-val accent">{{ "%.1f"|format(row.confidence*100 if row.confidence else 0) }}%</div>
+      <div class="conf-bar" style="display:block;width:100%;margin-top:8px;">
+        <span class="conf-fill {{ row.sentiment }}"
+              data-width="{{ (row.confidence*100)|round if row.confidence else 0 }}%"></span>
+      </div>
+    </div>
+    <div class="stat-box gray">
+      <div class="stat-label">Lexicon Score</div>
+      <div class="stat-val {% if (row.lexicon_score or 0) >= 0 %}accent{% else %}orange{% endif %}">
+        {{ "%+.2f"|format(row.lexicon_score or 0) }}
+      </div>
     </div>
   </div>
-  <div class="meta-box">
-    <div class="meta-label">Lexicon Score</div>
-    <div class="meta-value" style="color:{% if (row.lexicon_score or 0) >= 0 %}#4361EE{% else %}#f97316{% endif %};">
-      {{ "%+.2f"|format(row.lexicon_score or 0) }}
+
+  <!-- TEKS ANALISIS -->
+  <div class="section-title">Teks Analisis</div>
+  <div style="background:#f8f9ff;border:1px solid #e5e8f5;border-radius:8px;padding:18px 20px;
+              font-size:14px;line-height:1.8;color:#1a1a2e;margin-bottom:6px;">
+    {{ row.text }}
+  </div>
+
+  <!-- META -->
+  <div class="section-title">Informasi Model</div>
+  <table class="report-table dark" style="margin-bottom:0;">
+    <thead>
+      <tr>
+        <th>Model</th><th>Processing Time</th><th>Jumlah Kata</th><th>Tanggal Analisis</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Neural X2.4 TF-IDF + Naive Bayes + Lexicon Hybrid</td>
+        <td>12.4 ms</td>
+        <td>{{ row.word_count or row.text.split()|length }}</td>
+        <td>{{ row.created_at.strftime('%d %B %Y, %H:%M') if row.created_at else '—' }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- FOOTER & TANDA TANGAN -->
+  <div class="report-footer-section">
+    <div class="footer-left">
+      MotorMind Sentiment Analysis System — Tugas Akhir<br>
+      <strong>Bengkel Steam Motor Sentosa</strong><br>
+      Jl. Kemang Raya No. 10, Jakarta Selatan
+    </div>
+
+    <div class="signature-block">
+      <div class="signature-place-date">
+        Jakarta, {{ now().strftime('%d %B %Y') }}
+      </div>
+      <div class="signature-name">{{ session.get('username', '—') }}</div>
+      <div class="signature-role">{{ session.get('role', '')|capitalize }}</div>
+      <!-- Area tanda tangan -->
+      <div class="signature-space"></div>
+      <div class="signature-caption">Tanda Tangan</div>
     </div>
   </div>
-</div>
 
-<div class="text-section">
-  <h3>Teks Analisis</h3>
-  <div class="text-content">{{ row.text }}</div>
-</div>
+</div><!-- .report-page -->
 
-<div style="font-size:12px;color:#999;margin-bottom:8px;">
-  <strong style="color:#333;">Model:</strong> Neural X2.4 TF-IDF + Naive Bayes + Lexicon Hybrid
-</div>
-
-<div class="footer">
-  <span>MotorMind Sentiment Analysis System — Tugas Akhir</span>
-  <span>Dicetak: {{ now().strftime('%d %B %Y %H:%M') if now else '' }}</span>
-</div>
-
+<script src="{{ url_for('static', filename='js/report.js') }}"></script>
 </body>
 </html>

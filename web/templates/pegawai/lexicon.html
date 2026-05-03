@@ -6,12 +6,19 @@
 
 <div class="page-header">
   <h1>Lexicon Database</h1>
-  <button class="btn-mm btn-mm-primary" onclick="openAddModal()">
-    <i class="bi bi-plus-lg"></i> Tambah Kata
-  </button>
+  <div style="display:flex;gap:10px;">
+    <!-- Buka popup daftar lexicon lengkap (printable) -->
+    <button class="btn-mm btn-mm-ghost"
+            onclick="openReport('/report/lexicon-list')">
+      <i class="bi bi-list-ul"></i> Lihat Daftar Lexicon
+    </button>
+    <button class="btn-mm btn-mm-primary" onclick="openAddModal()">
+      <i class="bi bi-plus-lg"></i> Tambah Kata
+    </button>
+  </div>
 </div>
 
-<!-- ── STATS ROW ──────────────────────────── -->
+<!-- STATS ROW -->
 <div class="grid-3 mb-4">
   <div class="mm-card">
     <div class="stat-icon-card">
@@ -46,7 +53,7 @@
   </div>
 </div>
 
-<!-- ── FILTER + SEARCH ────────────────────── -->
+<!-- FILTER + SEARCH -->
 <form method="GET" action="{{ url_for('pegawai_lexicon') }}">
   <div class="filter-bar mb-3">
     <input type="text" name="q" class="mm-input"
@@ -65,7 +72,7 @@
   </div>
 </form>
 
-<!-- ── TABLE ─────────────────────────────── -->
+<!-- TABLE -->
 <div class="mm-table-wrap">
   <table class="mm-table">
     <thead>
@@ -133,9 +140,7 @@
   </table>
 </div>
 
-<!-- ══════════════════════════════════════════
-     MODAL — ADD WORD
-══════════════════════════════════════════ -->
+<!-- MODAL — ADD WORD -->
 <div class="mm-modal-backdrop" id="addModal" style="display:none;">
   <div class="mm-modal">
     <h5><i class="bi bi-plus-circle text-accent me-2"></i> Tambah Kata Lexicon</h5>
@@ -173,9 +178,7 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     MODAL — EDIT WORD
-══════════════════════════════════════════ -->
+<!-- MODAL — EDIT WORD -->
 <div class="mm-modal-backdrop" id="editModal" style="display:none;">
   <div class="mm-modal">
     <h5><i class="bi bi-pencil text-accent me-2"></i> Edit Kata Lexicon</h5>
@@ -217,25 +220,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-function openAddModal() {
-  document.getElementById('addModal').style.display = 'flex';
-}
-function openEditModal(id, word, score, category) {
-  document.getElementById('editId').value      = id;
-  document.getElementById('editWord').value    = word;
-  document.getElementById('editScore').value   = score;
-  document.getElementById('editCategory').value = category;
-  document.getElementById('editModal').style.display = 'flex';
-}
-function closeModal(id) {
-  document.getElementById(id).style.display = 'none';
-}
-// Close on backdrop click
-document.querySelectorAll('.mm-modal-backdrop').forEach(el => {
-  el.addEventListener('click', function(e) {
-    if (e.target === this) this.style.display = 'none';
-  });
-});
-</script>
+<script src="{{ url_for('static', filename='js/lexicon.js') }}"></script>
 {% endblock %}

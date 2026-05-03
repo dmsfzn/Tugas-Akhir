@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Lexicon — MotorMind</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="print-toolbar">
+  <div class="tb-info">Daftar Lexicon · {{ lexicons|length }} kata</div>
+  <button class="btn-print primary" onclick="doPrint()">⎙ Cetak / Simpan PDF</button>
+  <button class="btn-print secondary" onclick="doClose()">✕ Tutup</button>
+</div>
+
+<div class="report-page">
+
+  <!-- KOP SURAT -->
+  <div class="kop-surat">
+    <div class="kop-left">
+      <div class="kop-logo">⚡</div>
+      <div class="kop-company">
+        <div class="kop-company-name">BENGKEL STEAM MOTOR SENTOSA</div>
+        <div class="kop-company-tagline">Perawatan & Analisis Sentimen Pelanggan</div>
+      </div>
+    </div>
+    <div class="kop-right">
+      <div class="kop-doctype">Laporan Daftar Lexicon</div>
+      Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}
+    </div>
+  </div>
+  <div class="kop-address-bar">
+    <span>📍 Jl. Kemang Raya No. 10, Mampang Prapatan, Jakarta Selatan 12730</span>
+    <span>📞 (021) 719-1234</span>
+    <span>📱 0812-3456-7890</span>
+    <span>✉ info@steamsentosa.id</span>
+  </div>
+
+  <div class="report-title-block">
+    <h2>Daftar Lexicon Sentimen</h2>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-box blue">
+      <div class="stat-label">Total Kata</div>
+      <div class="stat-val accent">{{ stats.tot or 0 }}</div>
+    </div>
+    <div class="stat-box green">
+      <div class="stat-label">Kata Positif</div>
+      <div class="stat-val green">{{ stats.pos or 0 }}</div>
+    </div>
+    <div class="stat-box orange">
+      <div class="stat-label">Kata Negatif</div>
+      <div class="stat-val orange">{{ stats.neg or 0 }}</div>
+    </div>
+  </div>
+
+  <!-- Two-column: positif | negatif -->
+  <div class="section-title">Kata Berdasarkan Kategori</div>
+  <div class="two-col">
+
+    <!-- Positif -->
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#4361EE;margin-bottom:8px;
+                  padding-bottom:5px;border-bottom:2px solid #4361EE;">
+        KATA POSITIF ({{ stats.pos or 0 }} kata)
+      </div>
+      <table class="report-table blue">
+        <thead><tr><th>#</th><th>Kata</th><th>Score</th></tr></thead>
+        <tbody>
+          {% set pos_list = lexicons|selectattr('category','equalto','positif')|list %}
+          {% for lex in pos_list %}
+          <tr class="avoid-break">
+            <td style="color:#9ca3af;font-family:'Space Mono',monospace;font-size:10px;">{{ loop.index }}</td>
+            <td style="font-family:'Space Mono',monospace;color:#4361EE;font-weight:700;">{{ lex.word }}</td>
+            <td style="font-family:'Space Mono',monospace;color:#059669;font-weight:700;">{{ "%+.1f"|format(lex.score) }}</td>
+          </tr>
+          {% endfor %}
+          {% if not pos_list %}
+            <tr><td colspan="3" style="text-align:center;color:#9ca3af;padding:14px;">Kosong</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Negatif -->
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#f97316;margin-bottom:8px;
+                  padding-bottom:5px;border-bottom:2px solid #f97316;">
+        KATA NEGATIF ({{ stats.neg or 0 }} kata)
+      </div>
+      <table class="report-table orange">
+        <thead><tr><th>#</th><th>Kata</th><th>Score</th></tr></thead>
+        <tbody>
+          {% set neg_list = lexicons|selectattr('category','equalto','negatif')|list %}
+          {% for lex in neg_list %}
+          <tr class="avoid-break">
+            <td style="color:#9ca3af;font-family:'Space Mono',monospace;font-size:10px;">{{ loop.index }}</td>
+            <td style="font-family:'Space Mono',monospace;color:#f97316;font-weight:700;">{{ lex.word }}</td>
+            <td style="font-family:'Space Mono',monospace;color:#f97316;font-weight:700;">{{ "%+.1f"|format(lex.score) }}</td>
+          </tr>
+          {% endfor %}
+          {% if not neg_list %}
+            <tr><td colspan="3" style="text-align:center;color:#9ca3af;padding:14px;">Kosong</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Full Table -->
+  <div class="section-title" style="margin-top:28px;">Daftar Lengkap (Semua Kata)</div>
+  <table class="report-table dark">
+    <thead>
+      <tr><th>#</th><th>Kata</th><th>Kategori</th><th>Score</th></tr>
+    </thead>
+    <tbody>
+      {% for lex in lexicons %}
+      <tr class="avoid-break">
+        <td style="color:#9ca3af;font-family:'Space Mono',monospace;font-size:10px;">{{ loop.index }}</td>
+        <td style="font-family:'Space Mono',monospace;font-weight:700;
+                   color:{% if lex.category=='positif' %}#4361EE{% else %}#f97316{% endif %};">
+          {{ lex.word }}
+        </td>
+        <td><span class="badge {{ lex.category }}">{{ lex.category|upper }}</span></td>
+        <td style="font-family:'Space Mono',monospace;font-weight:700;
+                   color:{% if lex.score >= 0 %}#4361EE{% else %}#f97316{% endif %};">
+          {{ "%+.1f"|format(lex.score) }}
+        </td>
+      </tr>
+      {% endfor %}
+      {% if not lexicons %}
+        <tr><td colspan="4" style="text-align:center;color:#9ca3af;padding:20px;">Lexicon kosong</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+  <!-- FOOTER & TANDA TANGAN -->
+  <div class="report-footer-section">
+    <div class="footer-left">
+      MotorMind Sentiment Analysis System — Tugas Akhir<br>
+      <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Kemang Raya No. 10, Jakarta Selatan<br>
+      Total: {{ lexicons|length }} kata · Positif: {{ stats.pos or 0 }} · Negatif: {{ stats.neg or 0 }}
+    </div>
+
+    <div class="signature-block">
+      <div class="signature-place-date">Jakarta, {{ now().strftime('%d %B %Y') }}</div>
+      <div class="signature-name">{{ session.get('username', '—') }}</div>
+      <div class="signature-role">{{ session.get('role', '')|capitalize }}</div>
+      <div class="signature-space"></div>
+      <div class="signature-caption">Tanda Tangan</div>
+    </div>
+  </div>
+
+</div><!-- .report-page -->
+
+<script src="{{ url_for('static', filename='js/report.js') }}"></script>
+</body>
+</html>
