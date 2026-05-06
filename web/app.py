@@ -23,7 +23,7 @@ from collections import Counter
 # Impor pipeline ML dari src/predict.py
 import joblib
 from stemmid import Stemmer
-from predict import preprocess_text, hybrid_prediction, get_xai_explanation, lexicon_scoring, KAMUS_KUSTOM, STOPWORDS
+from predict import hybrid_prediction, get_xai_explanation
 from config import MODEL_FILE, VECTORIZER_FILE
 
 app = Flask(__name__)
@@ -194,14 +194,11 @@ def pegawai_analisis():
         input_text = request.form.get('text', '').strip()
 
         if input_text:
-            # ── Ambil lexicon kustom dari DB agar up-to-date ──────────────────
+            # ── Ambil lexicon dari DB sebagai sumber tunggal ──────────────────
             db  = get_db()
             cur = db.cursor(dictionary=True)
             cur.execute("SELECT word, score FROM lexicon")
-            db_lexicon = {row['word']: float(row['score']) for row in cur.fetchall()}
-
-            # Gabungkan lexicon DB dengan kamus kustom bawaan (KAMUS_KUSTOM dari predict.py)
-            combined_lexicon = {**KAMUS_KUSTOM, **db_lexicon}
+            combined_lexicon = {row['word']: float(row['score']) for row in cur.fetchall()}
 
             # ── Jalankan pipeline Hybrid ML + Lexicon ─────────────────────────
             pred = hybrid_prediction(input_text, _model, _vectorizer, _stemmer, combined_lexicon)
