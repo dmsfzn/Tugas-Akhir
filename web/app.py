@@ -1,3 +1,15 @@
+"""
+app.py — Flask entry point untuk aplikasi MotorMind.
+Menangani autentikasi, routing per role, integrasi pipeline ML,
+manajemen lexicon, dan ekspor laporan.
+"""
+
+import sys
+import os
+
+# Tambahkan direktori src ke path agar modul predict dan config dapat diimpor
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash, make_response, jsonify
 import mysql.connector
 from functools import wraps
@@ -8,13 +20,29 @@ import hashlib
 import re
 from collections import Counter
 
+# Impor pipeline ML dari src/predict.py
+import joblib
+from stemmid import Stemmer
+from predict import preprocess_text, hybrid_prediction, get_xai_explanation, lexicon_scoring, KAMUS_KUSTOM, STOPWORDS
+from config import MODEL_FILE, VECTORIZER_FILE
+
 app = Flask(__name__)
 app.secret_key = 'motormind_secret_2024_ta'
 
-# Inject current datetime into all templates
+# Muat model dan vectorizer satu kali saat aplikasi dijalankan (bukan per request)
+_model      = joblib.load(MODEL_FILE)
+_vectorizer = joblib.load(VECTORIZER_FILE)
+_stemmer    = Stemmer()
+
+
+# ─────────────────────────────────────────────
+# CONTEXT PROCESSOR
+# ─────────────────────────────────────────────
 @app.context_processor
 def inject_now():
+    """Inject datetime.now ke semua template agar bisa dipakai langsung."""
     return {'now': datetime.now}
+
 
 # ─────────────────────────────────────────────
 # DATABASE
@@ -27,16 +55,19 @@ DB_CONFIG = {
 }
 
 def get_db():
+    """Buka dan kembalikan koneksi baru ke database MySQL."""
     return mysql.connector.connect(**DB_CONFIG)
 
 def hash_password(pw):
+    """Hash password menggunakan MD5 sebelum disimpan/dibandingkan."""
     return hashlib.md5(pw.encode()).hexdigest()
 
 
 # ─────────────────────────────────────────────
-# DECORATORS
+# DECORATORS (AUTH GUARD)
 # ─────────────────────────────────────────────
 def login_required(f):
+    """Decorator: redirect ke halaman login jika user belum login."""
     @wraps(f)
     def decorated(*args, **kwargs):
         if 'user_id' not in session:
@@ -46,6 +77,7 @@ def login_required(f):
     return decorated
 
 def role_required(*roles):
+    """Decorator: tolak akses jika role user tidak ada dalam daftar roles yang diizinkan."""
     def decorator(f):
         @wraps(f)
         def decorated(*args, **kwargs):
@@ -62,6 +94,7 @@ def role_required(*roles):
 # ─────────────────────────────────────────────
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    """Halaman login: validasi identifier (email/NIP) + password + role ke DB."""
     if 'user_id' in session:
         return redirect(url_for('dashboard_redirect'))
 
@@ -95,6 +128,7 @@ def login():
 
 @app.route('/logout')
 def logout():
+    """Hapus session dan redirect ke halaman login."""
     session.clear()
     return redirect(url_for('login'))
 
@@ -102,6 +136,7 @@ def logout():
 @app.route('/redirect')
 @login_required
 def dashboard_redirect():
+    """Arahkan user ke dashboard sesuai role setelah login."""
     if session['role'] == 'pegawai':
         return redirect(url_for('pegawai_dashboard'))
     return redirect(url_for('owner_dashboard'))
@@ -114,10 +149,10 @@ def dashboard_redirect():
 @login_required
 @role_required('pegawai')
 def pegawai_dashboard():
+    """Dashboard pegawai: statistik personal (total, positif, negatif) + 5 analisis terbaru."""
     db = get_db()
     cur = db.cursor(dictionary=True)
 
-    # Stats personal
     cur.execute("SELECT COUNT(*) AS total FROM analyses WHERE user_id = %s", (session['user_id'],))
     total = cur.fetchone()['total']
 
@@ -127,7 +162,6 @@ def pegawai_dashboard():
     cur.execute("SELECT COUNT(*) AS cnt FROM analyses WHERE user_id = %s AND sentiment = 'negatif'", (session['user_id'],))
     negatif = cur.fetchone()['cnt']
 
-    # 5 terbaru
     cur.execute(
         """SELECT id, LEFT(text,80) AS snippet, sentiment, confidence, created_at
            FROM analyses WHERE user_id = %s ORDER BY created_at DESC LIMIT 5""",
@@ -148,35 +182,50 @@ def pegawai_dashboard():
 @login_required
 @role_required('pegawai')
 def pegawai_analisis():
-    result = None
+    """
+    Halaman analisis sentimen.
+    POST: jalankan pipeline Hybrid (MNB + Lexicon) → simpan hasil ke DB → tampilkan.
+    GET:  tampilkan form input kosong.
+    """
+    result     = None
     input_text = ''
 
     if request.method == 'POST':
         input_text = request.form.get('text', '').strip()
 
         if input_text:
-            # ─── PLACEHOLDER PIPELINE ───────────────────────
-            # Ganti blok ini dengan pipeline TF-IDF + NB + Lexicon Hybrid asli
-            words         = re.findall(r'\b\w+\b', input_text.lower())
-            word_count    = len(words)
-            sentiment     = 'positif'   # hasil model
-            confidence    = 0.89        # hasil model
-            lexicon_score = 2.5         # hasil lexicon
-            highlights    = []
+            # ── Ambil lexicon kustom dari DB agar up-to-date ──────────────────
+            db  = get_db()
+            cur = db.cursor(dictionary=True)
+            cur.execute("SELECT word, score FROM lexicon")
+            db_lexicon = {row['word']: float(row['score']) for row in cur.fetchall()}
 
-            # Simulasi word-level highlighting
-            pos_keywords = {'bagus','baik','hebat','luar biasa','puas','senang','meningkat','optimal'}
-            neg_keywords = {'buruk','jelek','lambat','rusak','masalah','error','gagal','kurang'}
-            for w in set(words):
-                if w in pos_keywords:
-                    highlights.append({'word': w, 'label': 'positive'})
-                elif w in neg_keywords:
-                    highlights.append({'word': w, 'label': 'negative'})
-            # ────────────────────────────────────────────────
+            # Gabungkan lexicon DB dengan kamus kustom bawaan (KAMUS_KUSTOM dari predict.py)
+            combined_lexicon = {**KAMUS_KUSTOM, **db_lexicon}
 
-            # Simpan ke DB
-            db = get_db()
-            cur = db.cursor()
+            # ── Jalankan pipeline Hybrid ML + Lexicon ─────────────────────────
+            pred = hybrid_prediction(input_text, _model, _vectorizer, _stemmer, combined_lexicon)
+
+            sentiment     = pred['label']
+            confidence    = pred['confidence'] / 100   # simpan sebagai 0–1
+            lexicon_score = pred['lexicon_score']
+            clean_text    = pred['clean_text']
+            word_count    = len(input_text.split())
+
+            # ── XAI: highlight kata yang berpengaruh pada prediksi ────────────
+            xai_items  = get_xai_explanation(clean_text, _model, _vectorizer)
+            # Ambil top-10 kata berpengaruh untuk highlight di template
+            top_features = {item['fitur'] for item in xai_items[:10]}
+
+            highlights = []
+            for w in set(clean_text.split()):
+                if w in top_features:
+                    # Tentukan label highlight berdasarkan skor lexicon gabungan
+                    lex_val = combined_lexicon.get(w, 0)
+                    label   = 'positive' if lex_val >= 0 else 'negative'
+                    highlights.append({'word': w, 'label': label})
+
+            # ── Simpan hasil ke tabel analyses ───────────────────────────────
             cur.execute(
                 """INSERT INTO analyses
                    (user_id, text, sentiment, confidence, lexicon_score, word_count, created_at)
@@ -206,6 +255,7 @@ def pegawai_analisis():
 @login_required
 @role_required('pegawai')
 def pegawai_history():
+    """Riwayat analisis pegawai dengan filter (kata kunci, sentimen, rentang tanggal) dan paginasi."""
     q          = request.args.get('q', '').strip()
     sentiment  = request.args.get('sentiment', 'all')
     date_from  = request.args.get('date_from', '')
@@ -216,7 +266,7 @@ def pegawai_history():
     db  = get_db()
     cur = db.cursor(dictionary=True)
 
-    # Build query — pegawai hanya melihat hasil analisisnya sendiri
+    # Pegawai hanya melihat hasil analisisnya sendiri
     conditions = ["user_id = %s"]
     params     = [session['user_id']]
 
@@ -236,7 +286,7 @@ def pegawai_history():
     where = " AND ".join(conditions)
 
     cur.execute(f"SELECT COUNT(*) AS cnt FROM analyses WHERE {where}", params)
-    total_rows = cur.fetchone()['cnt']
+    total_rows  = cur.fetchone()['cnt']
     total_pages = max(1, (total_rows + per_page - 1) // per_page)
 
     offset = (page - 1) * per_page
@@ -262,6 +312,11 @@ def pegawai_history():
 @login_required
 @role_required('pegawai')
 def pegawai_lexicon():
+    """
+    Manajemen kamus lexicon sentimen.
+    POST: tambah / edit / hapus kata lexicon.
+    GET:  tampilkan daftar lexicon dengan filter kata kunci dan kategori.
+    """
     db  = get_db()
     cur = db.cursor(dictionary=True)
 
@@ -320,6 +375,7 @@ def pegawai_lexicon():
 @login_required
 @role_required('owner')
 def owner_dashboard():
+    """Dashboard owner: statistik global, tren harian 7 hari, dan 5 analisis terbaru lintas pegawai."""
     db  = get_db()
     cur = db.cursor(dictionary=True)
 
@@ -332,7 +388,7 @@ def owner_dashboard():
     cur.execute("SELECT COUNT(*) AS cnt FROM analyses WHERE sentiment='negatif'")
     negatif = cur.fetchone()['cnt']
 
-    # Trend per hari (7 hari terakhir)
+    # Tren jumlah analisis per hari dalam 7 hari terakhir
     cur.execute(
         """SELECT DATE(created_at) AS day, COUNT(*) AS cnt
            FROM analyses WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
@@ -340,7 +396,6 @@ def owner_dashboard():
     )
     trend = cur.fetchall()
 
-    # Latest 5
     cur.execute(
         """SELECT a.id, LEFT(a.text,90) AS snippet, a.sentiment, a.confidence, a.created_at, u.name AS analyst
            FROM analyses a JOIN users u ON a.user_id=u.id
@@ -365,13 +420,14 @@ def owner_dashboard():
 @login_required
 @role_required('owner')
 def owner_insight():
+    """Insight owner: frekuensi kata pada ulasan negatif + tren mingguan 8 minggu terakhir."""
     db  = get_db()
     cur = db.cursor(dictionary=True)
 
-    # Ambil semua teks negatif
     cur.execute("SELECT text FROM analyses WHERE sentiment='negatif'")
     rows = cur.fetchall()
 
+    # Hitung frekuensi kata dari teks negatif, kecualikan stopword umum
     stopwords = {'yang','dan','di','ke','dari','untuk','dengan','pada','ini','itu',
                  'tidak','ada','juga','sudah','atau','bisa','lebih','dalam','saat','kami'}
     word_freq = Counter()
@@ -381,7 +437,6 @@ def owner_insight():
 
     top_words = word_freq.most_common(15)
 
-    # Trend negatif per minggu
     cur.execute(
         """SELECT YEARWEEK(created_at,1) AS wk, COUNT(*) AS cnt
            FROM analyses WHERE sentiment='negatif'
@@ -400,6 +455,7 @@ def owner_insight():
 @app.route('/report/export-csv')
 @login_required
 def report_export_csv():
+    """Ekspor data analisis ke file CSV. Pegawai hanya mengekspor datanya sendiri."""
     db  = get_db()
     cur = db.cursor(dictionary=True)
     if session['role'] == 'pegawai':
@@ -424,6 +480,7 @@ def report_export_csv():
 @app.route('/report/single/<int:analysis_id>')
 @login_required
 def report_single(analysis_id):
+    """Laporan cetak satu analisis berdasarkan ID."""
     db  = get_db()
     cur = db.cursor(dictionary=True)
     cur.execute("SELECT * FROM analyses WHERE id=%s", (analysis_id,))
@@ -437,7 +494,7 @@ def report_single(analysis_id):
 @app.route('/report/all-analyses')
 @login_required
 def report_all_analyses():
-    """Popup laporan analisis — filter sama persis dengan halaman history."""
+    """Popup laporan analisis dengan filter identik halaman history. Pegawai hanya melihat datanya sendiri."""
     date_from = request.args.get('date_from', '')
     date_to   = request.args.get('date_to', '')
     sentiment = request.args.get('sentiment', 'all')
@@ -446,8 +503,6 @@ def report_all_analyses():
     db  = get_db()
     cur = db.cursor(dictionary=True)
 
-    # ── Filter identik dengan pegawai_history: pegawai hanya lihat datanya sendiri ──
-    # Gunakan kolom tanpa alias untuk menghindari ambiguity saat JOIN dengan users
     if session['role'] == 'pegawai':
         cond   = ["user_id = %s"]
         params = [session['user_id']]
@@ -465,8 +520,7 @@ def report_all_analyses():
 
     where = " AND ".join(cond)
 
-    # Subquery dulu (filter tanpa JOIN), baru JOIN untuk nama analyst
-    # Ini menghindari ambiguity 'created_at' karena tabel users juga punya kolom itu
+    # Subquery terlebih dahulu untuk menghindari ambiguitas kolom created_at saat JOIN dengan users
     cur.execute(
         f"""SELECT sub.id, sub.user_id, sub.text, sub.sentiment,
                    sub.confidence, sub.lexicon_score, sub.word_count,
@@ -498,7 +552,7 @@ def report_all_analyses():
 @login_required
 @role_required('owner')
 def report_owner_statistik():
-    """Popup laporan statistik lengkap untuk owner"""
+    """Popup laporan statistik lengkap untuk owner: tren 30 hari dan top 10 analyst."""
     db  = get_db()
     cur = db.cursor(dictionary=True)
 
@@ -509,7 +563,6 @@ def report_owner_statistik():
     cur.execute("SELECT COUNT(*) AS cnt FROM analyses WHERE sentiment='negatif'")
     negatif = cur.fetchone()['cnt']
 
-    # Trend per hari (30 hari)
     cur.execute("""SELECT DATE(created_at) AS day,
                           SUM(sentiment='positif') AS pos,
                           SUM(sentiment='negatif') AS neg,
@@ -518,7 +571,6 @@ def report_owner_statistik():
                    GROUP BY DATE(created_at) ORDER BY day ASC""")
     trend = cur.fetchall()
 
-    # Top 10 analyst
     cur.execute("""SELECT u.name, COUNT(*) AS cnt
                    FROM analyses a JOIN users u ON a.user_id=u.id
                    GROUP BY u.id ORDER BY cnt DESC LIMIT 10""")
@@ -539,7 +591,7 @@ def report_owner_statistik():
 @login_required
 @role_required('owner')
 def report_insight():
-    """Popup laporan insight kata negatif untuk owner"""
+    """Popup laporan insight kata negatif untuk owner."""
     db  = get_db()
     cur = db.cursor(dictionary=True)
     cur.execute("SELECT text FROM analyses WHERE sentiment='negatif'")
@@ -566,7 +618,7 @@ def report_insight():
 @app.route('/report/lexicon-list')
 @login_required
 def report_lexicon_list():
-    """Popup daftar lexicon lengkap"""
+    """Popup daftar seluruh kata lexicon beserta statistik ringkas."""
     db  = get_db()
     cur = db.cursor(dictionary=True)
     cur.execute("SELECT * FROM lexicon ORDER BY category, score ASC")
@@ -581,6 +633,7 @@ def report_lexicon_list():
 @login_required
 @role_required('owner')
 def report_statistik():
+    """Alias redirect ke laporan statistik owner."""
     return redirect(url_for('report_owner_statistik'))
 
 
@@ -590,6 +643,7 @@ def report_statistik():
 @app.route('/api/chart/sentiment')
 @login_required
 def api_chart_sentiment():
+    """API endpoint: kembalikan data sentimen harian 30 hari terakhir dalam format JSON untuk chart."""
     db  = get_db()
     cur = db.cursor(dictionary=True)
     cur.execute(
