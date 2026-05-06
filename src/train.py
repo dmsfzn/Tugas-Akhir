@@ -29,7 +29,7 @@ def main():
     )
 
     # 3. TF-IDF vectorization
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2), sublinear_tf=True, min_df=2, max_df=0.95)
+    vectorizer = TfidfVectorizer(ngram_range=(1, 2), sublinear_tf=True, min_df=2, max_df=0.95, max_features=50000)
     X_train_vec = vectorizer.fit_transform(X_train)
     X_test_vec  = vectorizer.transform(X_test)
 
@@ -39,7 +39,7 @@ def main():
 
     # === CROSS VALIDATION ===
     cv_scores = cross_val_score(
-        MultinomialNB(alpha=0.1),
+        MultinomialNB(alpha=0.5),
         X_train_bal,
         y_train_bal,
         cv=5
@@ -50,7 +50,7 @@ def main():
     print(f"Rata-rata CV: {cv_scores.mean()*100:.2f}%")
 
     # 5. Training
-    model = MultinomialNB(alpha=0.1)
+    model = MultinomialNB(alpha=0.5)
     model.fit(X_train_bal, y_train_bal)
 
     # 6. Simpan model & data uji
