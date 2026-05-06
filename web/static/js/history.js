@@ -1,8 +1,11 @@
-/* ── Halaman History JS ── */
+/* history.js — Logika halaman Riwayat Analisis (pegawai). */
 
-/* Buka popup laporan semua analisis dengan filter aktif */
+/**
+ * Buka popup laporan semua analisis dengan filter yang sedang aktif di form.
+ * Mengumpulkan nilai dari setiap input filter lalu meneruskannya sebagai query string.
+ */
 function openAllReport() {
-  var form   = document.getElementById('filterForm');
+  var form = document.getElementById('filterForm');
   if (!form) return;
   var params = new URLSearchParams({
     date_from : form.querySelector('[name=date_from]').value,
@@ -13,7 +16,10 @@ function openAllReport() {
   openReport('/report/all-analyses?' + params.toString());
 }
 
-/* Activity bar chart */
+/**
+ * Render activity bar chart (7 hari terakhir) dari data API sentimen.
+ * Bar lebih tinggi menunjukkan hari dengan lebih banyak analisis.
+ */
 async function renderActivity() {
   try {
     var data  = await fetch('/api/chart/sentiment').then(function(r) { return r.json(); });

@@ -1,7 +1,8 @@
-/* ── Halaman Analisis JS ── */
+/* analisis.js — Logika halaman Analysis Engine (pegawai). */
+
 document.addEventListener('DOMContentLoaded', function() {
 
-  /* Submit loading state */
+  /* Ubah tombol submit menjadi loading state saat form dikirim. */
   var form = document.getElementById('analysisForm');
   if (form) {
     form.addEventListener('submit', function() {
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  /* Mini bar chart */
+  /* Render mini bar chart distribusi confidence (data statis untuk ilustrasi). */
   var vals = [0.72, 0.88, 0.91, 0.65, 0.94, 0.83, 0.89];
   var el   = document.getElementById('confChart');
   if (el) {
@@ -27,11 +28,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+/** Kosongkan textarea input teks. */
 function clearInput() {
   var el = document.getElementById('inputText');
   if (el) el.value = '';
 }
 
+/** Tampilkan notifikasi saat file bulk dipilih. */
 function handleBulkFile(inp) {
   if (inp.files && inp.files.length > 0) {
     showToast('File "' + inp.files[0].name + '" siap untuk diproses.', 'info');

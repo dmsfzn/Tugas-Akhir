@@ -1,6 +1,9 @@
-/* ── Dashboard Owner JS ── */
+/* dashboard-owner.js — Chart sentimen interaktif di dashboard owner. */
+
+/* Data chart yang diambil dari API, disimpan di module scope untuk switch range. */
 var chartData = [];
 
+/** Fetch data dari API lalu render chart dengan range default 30 hari. */
 async function loadChart() {
   try {
     chartData = await fetch('/api/chart/sentiment').then(function(r) { return r.json(); });
@@ -8,6 +11,10 @@ async function loadChart() {
   } catch(e) {}
 }
 
+/**
+ * Render bar chart dari chartData dengan slice N hari terakhir.
+ * @param {number} days - Jumlah hari yang ditampilkan (7 atau 30).
+ */
 function renderChart(days) {
   var el = document.getElementById('mainChart');
   if (!el) return;
@@ -16,7 +23,7 @@ function renderChart(days) {
   var max = Math.max.apply(null, slice.map(function(d) { return d.pos + d.neg; }));
   max = max || 1;
   el.innerHTML = slice.map(function(d) {
-    var h = Math.round(((d.pos + d.neg) / max) * 100);
+    var h     = Math.round(((d.pos + d.neg) / max) * 100);
     var isNeg = d.neg > d.pos;
     return '<div class="bar-col" style="height:' + Math.max(h, 4) + '%;background:' +
       (isNeg ? 'var(--negative)' : 'var(--accent)') + ';opacity:.75;" title="' +
@@ -24,6 +31,10 @@ function renderChart(days) {
   }).join('');
 }
 
+/**
+ * Ganti rentang tampilan chart (tombol 7d / 30d).
+ * @param {number} days - Range hari yang dipilih.
+ */
 function switchRange(days) {
   var btn7  = document.getElementById('btn7d');
   var btn30 = document.getElementById('btn30d');
