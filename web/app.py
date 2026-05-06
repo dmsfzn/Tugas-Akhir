@@ -7,8 +7,11 @@ manajemen lexicon, dan ekspor laporan.
 import sys
 import os
 
-# Tambahkan direktori src ke path agar modul predict dan config dapat diimpor
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+# Tambahkan direktori src ke sys.path agar modul predict dan config dapat diimpor.
+# Gunakan abspath(__file__) agar path selalu absolut, apapun working directory saat Flask dijalankan.
+_SRC_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
+if _SRC_DIR not in sys.path:
+    sys.path.insert(0, _SRC_DIR)
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, make_response, jsonify
 import mysql.connector
