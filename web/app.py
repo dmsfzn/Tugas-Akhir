@@ -533,7 +533,7 @@ def report_all_analyses():
     rows = cur.fetchall()
 
     cur.execute(
-        f"""SELECT COUNT(*) AS tot,
+        f"""SELECT COUNT(*) AS total,
                    SUM(sentiment='positif') AS pos,
                    SUM(sentiment='negatif') AS neg
             FROM analyses WHERE {where}""",
@@ -623,7 +623,7 @@ def report_lexicon_list():
     cur = db.cursor(dictionary=True)
     cur.execute("SELECT * FROM lexicon ORDER BY category, score ASC")
     lexicons = cur.fetchall()
-    cur.execute("SELECT COUNT(*) AS tot, SUM(category='positif') AS pos, SUM(category='negatif') AS neg FROM lexicon")
+    cur.execute("SELECT COUNT(*) AS total, SUM(category='positif') AS pos, SUM(category='negatif') AS neg FROM lexicon")
     stats = cur.fetchone()
     cur.close(); db.close()
     return render_template('report_lexicon_list.html', lexicons=lexicons, stats=stats)
