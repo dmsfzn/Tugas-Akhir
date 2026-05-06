@@ -1,4 +1,4 @@
-/* Dashboard Owner JS */
+/* ── Dashboard Owner JS ── */
 var chartData = [];
 
 async function loadChart() {

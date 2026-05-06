@@ -1,4 +1,4 @@
-/* Dashboard Pegawai JS */
+/* ── Dashboard Pegawai JS ── */
 async function renderTrend() {
   try {
     var data = await fetch('/api/chart/sentiment').then(function(r) { return r.json(); });

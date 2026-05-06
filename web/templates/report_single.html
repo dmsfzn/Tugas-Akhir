@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<!-- TOOLBAR (layar saja) -->
+<!-- ── TOOLBAR (layar saja) ── -->
 <div class="print-toolbar">
   <div class="tb-info">Laporan Analisis Tunggal #{{ row.id }}</div>
   <button class="btn-print primary" onclick="doPrint()">⎙ Cetak / Simpan PDF</button>
@@ -17,7 +17,7 @@
 
 <div class="report-page">
 
-  <!-- KOP SURAT -->
+  <!-- ── KOP SURAT ── -->
   <div class="kop-surat">
     <div class="kop-left">
       <div class="kop-logo">⚡</div>
@@ -35,18 +35,18 @@
 
   <!-- Alamat -->
   <div class="kop-address-bar">
-    <span>📍 Jl. Kemang Raya No. 10, Mampang Prapatan, Jakarta Selatan 12730</span>
-    <span>📞 (021) 719-1234</span>
+    <span>📍 Jl. Raya Magelang KM 5, Beran, Tegalrejo, Yogyakarta 55244</span>
+    <span>📞 (0274) 555-1234</span>
     <span>📱 0812-3456-7890</span>
     <span>✉ info@steamsentosa.id</span>
   </div>
 
-  <!-- JUDUL -->
+  <!-- ── JUDUL ── -->
   <div class="report-title-block">
     <h2>Laporan Analisis Sentimen Tunggal</h2>
   </div>
 
-  <!-- STAT BOXES -->
+  <!-- ── STAT BOXES ── -->
   <div class="stats-row">
     <div class="stat-box {% if row.sentiment=='positif' %}blue{% else %}orange{% endif %}">
       <div class="stat-label">Hasil Sentimen</div>
@@ -59,7 +59,7 @@
       <div class="stat-val accent">{{ "%.1f"|format(row.confidence*100 if row.confidence else 0) }}%</div>
       <div class="conf-bar" style="display:block;width:100%;margin-top:8px;">
         <span class="conf-fill {{ row.sentiment }}"
-              data-width="{{ (row.confidence*100)|round if row.confidence else 0 }}%"></span>
+              style="width:{{ (row.confidence*100)|round if row.confidence else 0 }}%;"></span>
       </div>
     </div>
     <div class="stat-box gray">
@@ -70,14 +70,14 @@
     </div>
   </div>
 
-  <!-- TEKS ANALISIS -->
+  <!-- ── TEKS ANALISIS ── -->
   <div class="section-title">Teks Analisis</div>
   <div style="background:#f8f9ff;border:1px solid #e5e8f5;border-radius:8px;padding:18px 20px;
               font-size:14px;line-height:1.8;color:#1a1a2e;margin-bottom:6px;">
     {{ row.text }}
   </div>
 
-  <!-- META -->
+  <!-- ── META ── -->
   <div class="section-title">Informasi Model</div>
   <table class="report-table dark" style="margin-bottom:0;">
     <thead>
@@ -95,17 +95,17 @@
     </tbody>
   </table>
 
-  <!-- FOOTER & TANDA TANGAN -->
+  <!-- ── FOOTER & TANDA TANGAN ── -->
   <div class="report-footer-section">
     <div class="footer-left">
       MotorMind Sentiment Analysis System — Tugas Akhir<br>
       <strong>Bengkel Steam Motor Sentosa</strong><br>
-      Jl. Kemang Raya No. 10, Jakarta Selatan
+      Jl. Raya Magelang KM 5, Yogyakarta
     </div>
 
     <div class="signature-block">
       <div class="signature-place-date">
-        Jakarta, {{ now().strftime('%d %B %Y') }}
+        Yogyakarta, {{ now().strftime('%d %B %Y') }}
       </div>
       <div class="signature-name">{{ session.get('username', '—') }}</div>
       <div class="signature-role">{{ session.get('role', '')|capitalize }}</div>

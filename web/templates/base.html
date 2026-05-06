@@ -16,10 +16,10 @@
 </head>
 <body>
 
-<!-- TOAST CONTAINER -->
+<!-- ── TOAST CONTAINER ─────────────────────── -->
 <div class="mm-toast-container" id="toastContainer"></div>
 
-<!-- FLASH MESSAGES → auto toast -->
+<!-- ── FLASH MESSAGES → auto toast ──────────── -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <script>
@@ -34,7 +34,7 @@
 
 <div class="mm-wrapper">
 
-  <!-- SIDEBAR -->
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
   <aside class="mm-sidebar">
     <!-- Brand -->
     <div class="brand">
@@ -45,7 +45,7 @@
     <!-- Nav -->
     <nav>
       {% if session.get('role') == 'pegawai' %}
-        <!-- PEGAWAI NAV -->
+        <!-- ── PEGAWAI NAV ── -->
         <div class="nav-section">
           <div class="nav-label">Operasional</div>
 
@@ -84,7 +84,7 @@
         </div>
 
       {% elif session.get('role') == 'owner' %}
-        <!-- OWNER NAV -->
+        <!-- ── OWNER NAV ── -->
         <div class="nav-section">
           <div class="nav-label">Monitoring</div>
 
@@ -130,8 +130,9 @@
       </a>
     </div>
   </aside>
+  <!-- ═══════════════════════════════════════ -->
 
-  <!-- MAIN -->
+  <!-- ═══════════════ MAIN ═════════════════ -->
   <main class="mm-main">
 
     <!-- TOPBAR -->
@@ -140,15 +141,6 @@
         {% block page_label %}MotorMind{% endblock %}
       </div>
       <div class="topbar-actions">
-        <input type="text" class="search-bar"
-               placeholder="Cari instrumen..."
-               id="globalSearch">
-        <a href="#" class="icon-btn" title="Notifikasi">
-          <i class="bi bi-bell"></i>
-        </a>
-        <a href="#" class="icon-btn" title="Bantuan">
-          <i class="bi bi-question-circle"></i>
-        </a>
         <a href="{{ url_for('logout') }}" class="icon-btn" title="Logout">
           <i class="bi bi-power"></i>
         </a>
@@ -161,6 +153,7 @@
     </div>
 
   </main>
+  <!-- ═══════════════════════════════════════ -->
 
 </div><!-- .mm-wrapper -->
 

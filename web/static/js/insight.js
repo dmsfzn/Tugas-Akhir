@@ -1,4 +1,4 @@
-/* Halaman Insight JS */
+/* ── Halaman Insight JS ── */
 
 document.addEventListener('DOMContentLoaded', function() {
   /* Render negative trend chart from inline data */

@@ -10,7 +10,7 @@
 
 <div class="grid-2" style="gap:20px; align-items:start;">
 
-  <!-- LEFT COLUMN: Contains input forms and analysis details -->
+  <!-- ── LEFT COLUMN ──────────────────────── -->
   <div style="display:flex;flex-direction:column;gap:16px;">
 
     <!-- Single Text Entry -->
@@ -22,7 +22,6 @@
         <span style="font-size:10px;color:var(--text-3);font-family:var(--font-mono);">MODULE MT-100</span>
       </div>
 
-      <!-- Form for submitting text to the backend API -->
       <form method="POST" action="{{ url_for('pegawai_analisis') }}" id="analysisForm">
         <div class="mm-input-group">
           <textarea name="text"
@@ -59,7 +58,6 @@
         {% for h in (result.highlights or []) %}
           {% set _ = highlight_map.update({h.word: h.label}) %}
         {% endfor %}
-        <!-- Loop through original text and apply CSS classes to words found in the highlight_map -->
         {% for word in result.text.split() %}
           {% set clean = word|lower|replace('.','') %}
           {% if clean in highlight_map %}
@@ -105,17 +103,18 @@
 
   </div><!-- /left -->
 
-  <!-- RIGHT COLUMN -->
+  <!-- ── RIGHT COLUMN ─────────────────────── -->
   <div style="display:flex;flex-direction:column;gap:16px;">
 
     {% if result %}
-    <!-- Classification Card: Displays the final Positive/Negative result and confidence percentage -->
+    <!-- Classification Card -->
     <div class="mm-card accent-border">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div>
           <div class="card-label">Current Classification</div>
-          <div class="{% if result.sentiment=='positif' %}text-accent{% elif result.sentiment=='negatif' %}text-negative{% else %}text-neutral{% endif %}"
-               style="font-size:36px;font-weight:700;text-transform:capitalize;margin-bottom:8px;">
+          <div style="font-size:36px;font-weight:700;
+                      color:{% if result.sentiment=='positif' %}var(--accent){% elif result.sentiment=='negatif' %}var(--negative){% else %}var(--neutral){% endif %};
+                      text-transform:capitalize;margin-bottom:8px;">
             {{ result.sentiment }}
           </div>
         </div>
@@ -130,7 +129,7 @@
       <!-- Confidence bar -->
       <div class="confidence-bar" style="height:5px;margin-bottom:16px;">
         <div class="confidence-fill {% if result.sentiment=='negatif' %}neg{% endif %}"
-             data-width="{{ (result.confidence*100)|round }}%"></div>
+             style="width:{{ (result.confidence*100)|round }}%"></div>
       </div>
 
       <!-- Meta -->
@@ -145,8 +144,8 @@
         </div>
         <div>
           <div class="card-label">Lexicon Score</div>
-          <div class="{% if result.lexicon_score >= 0 %}text-positive{% else %}text-negative{% endif %}"
-               style="font-family:var(--font-mono);font-size:13px;">
+          <div style="font-family:var(--font-mono);font-size:13px;
+                      color:{% if result.lexicon_score >= 0 %}#6b87f5{% else %}var(--negative){% endif %};">
             {{ "%+.2f"|format(result.lexicon_score) }}
           </div>
         </div>
