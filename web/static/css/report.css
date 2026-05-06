@@ -1,9 +1,11 @@
-/* MotorMind — Report Shared CSS
-   Berlaku untuk semua halaman laporan cetak */
+/* ═══════════════════════════════════════════
+   MotorMind — Report Shared CSS
+   Berlaku untuk semua halaman laporan cetak
+   ═══════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
-/* CSS VARS */
+/* ── CSS VARS ─────────────────────────────── */
 :root {
   --accent   : #4361EE;
   --negative : #f97316;
@@ -18,13 +20,13 @@
   --page-w   : 794px; /* A4 width at 96dpi */
 }
 
-/* PAGE SETUP */
+/* ── PAGE SETUP ───────────────────────────── */
 @page {
   size: A4 portrait;
   margin: 12mm 14mm 14mm 14mm;
 }
 
-/* BASE */
+/* ── BASE ─────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -35,7 +37,7 @@ body {
   line-height: 1.6;
 }
 
-/* PAGE WRAPPER */
+/* ── PAGE WRAPPER ─────────────────────────── */
 .report-page {
   background: #fff;
   max-width: var(--page-w);
@@ -45,7 +47,7 @@ body {
   position: relative;
 }
 
-/* PRINT TOOLBAR (hanya di layar) */
+/* ── PRINT TOOLBAR (hanya di layar) ──────── */
 .print-toolbar {
   background: #fff;
   border-bottom: 1px solid var(--border);
@@ -80,7 +82,7 @@ body {
 .btn-print.secondary:hover { background: #e5e8f5; }
 .btn-print.danger    { background: #fff2f2; color: #ef4444; border: 1px solid #fecaca; }
 
-/* KOP SURAT */
+/* ── KOP SURAT ────────────────────────────── */
 .kop-surat {
   display: flex;
   justify-content: space-between;
@@ -134,7 +136,7 @@ body {
   margin-bottom: 22px;
 }
 
-/* ALAMAT (kop bagian bawah logo) */
+/* ── ALAMAT (kop bagian bawah logo) ─────── */
 .kop-address-bar {
   background: var(--bg-light);
   border: 1px solid var(--border);
@@ -150,7 +152,7 @@ body {
 }
 .kop-address-bar span { display: flex; align-items: center; gap: 5px; }
 
-/* REPEAT HEADER (untuk halaman 2+) */
+/* ── REPEAT HEADER (untuk halaman 2+) ───── */
 .repeat-header {
   display: none; /* hanya muncul saat print di page 2+ via @media print */
   border-bottom: 2px solid var(--accent);
@@ -161,7 +163,7 @@ body {
 }
 .repeat-header strong { color: var(--accent); font-family: var(--font-mono); }
 
-/* PAGE TITLE */
+/* ── PAGE TITLE ────────────────────────── */
 .report-title-block { margin-bottom: 20px; }
 .report-title-block h2 {
   font-size: 20px; font-weight: 700;
@@ -172,7 +174,7 @@ body {
   font-size: 11px; color: var(--text-3); margin-top: 4px;
 }
 
-/* STAT BOXES */
+/* ── STAT BOXES ────────────────────────── */
 .stats-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -203,7 +205,7 @@ body {
 .stat-val.orange   { color: var(--negative); }
 .stat-sub { font-size: 11px; color: var(--text-3); margin-top: 3px; }
 
-/* SECTION TITLE */
+/* ── SECTION TITLE ──────────────────── */
 .section-title {
   font-size: 9px; letter-spacing: .14em;
   text-transform: uppercase; color: var(--text-3);
@@ -213,7 +215,7 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-/* TABLE */
+/* ── TABLE ──────────────────────────── */
 .report-table {
   width: 100%; border-collapse: collapse;
   font-size: 12px; margin-bottom: 6px;
@@ -240,7 +242,7 @@ body {
 /* Prevent row from splitting across pages */
 .report-table tbody tr { page-break-inside: avoid; }
 
-/* BADGE */
+/* ── BADGE ──────────────────────────── */
 .badge {
   display: inline-block;
   padding: 2px 9px;
@@ -255,7 +257,7 @@ body {
 .badge.warning  { background: #fffce8; color: #f59e0b; border: 1px solid #fef3c7; }
 .badge.monitor  { background: #f4f5f7; color: #6b7280; border: 1px solid #e5e7eb; }
 
-/* CONFIDENCE BAR */
+/* ── CONFIDENCE BAR ─────────────────── */
 .conf-bar {
   display: inline-block;
   width: 60px; height: 5px;
@@ -269,7 +271,7 @@ body {
 .conf-fill.positif { background: var(--accent); }
 .conf-fill.negatif { background: var(--negative); }
 
-/* WORD BAR */
+/* ── WORD BAR ───────────────────────── */
 .word-row {
   display: flex; align-items: center; gap: 10px;
   margin-bottom: 8px;
@@ -291,7 +293,7 @@ body {
   color: var(--text-3); width: 28px; text-align: right; flex-shrink: 0;
 }
 
-/* WORD CLOUD */
+/* ── WORD CLOUD ─────────────────────── */
 .word-cloud-box {
   display: flex; flex-wrap: wrap; gap: 10px;
   padding: 16px 18px;
@@ -300,7 +302,7 @@ body {
   border-radius: 8px;
 }
 
-/* PIE SVG WRAPPER */
+/* ── PIE SVG WRAPPER ────────────────── */
 .pie-section {
   display: flex; align-items: center; gap: 28px;
   margin-bottom: 20px;
@@ -313,7 +315,7 @@ body {
 }
 .legend-pct { font-size: 11px; color: var(--text-3); margin-top: 1px; }
 
-/* TREND BAR */
+/* ── TREND BAR ──────────────────────── */
 .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
 .bar-date {
   font-family: var(--font-mono); font-size: 10px;
@@ -327,7 +329,13 @@ body {
   color: var(--text-3); width: 70px; text-align: right; flex-shrink: 0;
 }
 
-/* TWO-COL LAYOUT */
+/* ── UTILITY CLASSES ────────────────── */
+.mono      { font-family: var(--font-mono); }
+.bold      { font-weight: 700; }
+.color-pos { color: var(--accent); }
+.color-neg { color: var(--negative); }
+
+/* ── TWO-COL LAYOUT ─────────────────── */
 .two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -335,7 +343,7 @@ body {
   margin-top: 8px;
 }
 
-/* RECOMMENDATION BOX */
+/* ── RECOMMENDATION BOX ─────────────── */
 .reco-box {
   background: #fffaf7;
   border: 1px solid #fde8d8;
@@ -351,7 +359,7 @@ body {
 }
 .reco-box p { font-size: 13px; color: var(--text-2); line-height: 1.7; }
 
-/* FILTER INFO BOX */
+/* ── FILTER INFO BOX ────────────────── */
 .filter-info {
   background: var(--bg-light);
   border: 1px solid var(--border);
@@ -363,7 +371,9 @@ body {
 }
 .filter-info .fi-label { font-weight: 600; color: var(--text-1); }
 
-/* SIGNATURE BLOCK */
+/* ═══════════════════════════════════════════
+   SIGNATURE BLOCK
+   ═══════════════════════════════════════════ */
 .report-footer-section {
   margin-top: 36px;
   padding-top: 18px;
@@ -406,7 +416,9 @@ body {
   letter-spacing: .06em;
 }
 
-/* RESPONSIVE — layar (popup window) */
+/* ═══════════════════════════════════════════
+   RESPONSIVE — layar (popup window)
+   ═══════════════════════════════════════════ */
 
 /* Tablet / Pad (≤ 768px) */
 @media screen and (max-width: 768px) {
@@ -435,7 +447,9 @@ body {
   .hide-mobile { display: none !important; }
 }
 
-/* PRINT MEDIA */
+/* ═══════════════════════════════════════════
+   PRINT MEDIA
+   ═══════════════════════════════════════════ */
 @media print {
   body { background: #fff; }
   .print-toolbar { display: none !important; }
@@ -469,7 +483,3 @@ body {
   /* Sembunyikan link browser */
   a[href]::after { content: none !important; }
 }
-
-/* UTILITIES */
-.text-positive { color: var(--accent) !important; }
-.text-negative { color: var(--negative) !important; }

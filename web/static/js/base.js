@@ -1,6 +1,6 @@
-/* MotorMind Base JS */
+/* base.js — Fungsi utilitas yang di-load di setiap halaman via base.html. */
 
-/* Toast notification */
+/** Tampilkan notifikasi toast (dipakai oleh flash messages Jinja2 dan JS manual). */
 function showToast(msg, type) {
   type = type || 'info';
   var icons = {
@@ -18,14 +18,14 @@ function showToast(msg, type) {
   setTimeout(function() { t.remove(); }, 4000);
 }
 
-/* Konfirmasi hapus */
+/** Konfirmasi hapus sebelum form di-submit. */
 function confirmDelete(formId) {
   if (confirm('Yakin ingin menghapus data ini?')) {
     document.getElementById(formId).submit();
   }
 }
 
-/* Buka popup laporan */
+/** Buka popup laporan di window terpisah. */
 function openReport(url) {
   window.open(url, '_blank', 'width=960,height=780,scrollbars=yes,resizable=yes');
 }

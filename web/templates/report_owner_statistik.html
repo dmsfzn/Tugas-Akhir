@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<!-- TOOLBAR -->
+<!-- ── TOOLBAR ── -->
 <div class="print-toolbar">
   <div class="tb-info">Laporan Statistik Eksekutif</div>
   <button class="btn-print primary" onclick="doPrint()">⎙ Cetak / Simpan PDF</button>
@@ -17,7 +17,7 @@
 
 <div class="report-page">
 
-  <!-- KOP SURAT -->
+  <!-- ── KOP SURAT ── -->
   <div class="kop-surat">
     <div class="kop-left">
       <div class="kop-logo">⚡</div>
@@ -32,8 +32,8 @@
     </div>
   </div>
   <div class="kop-address-bar">
-    <span>📍 Jl. Kemang Raya No. 10, Mampang Prapatan, Jakarta Selatan 12730</span>
-    <span>📞 (021) 719-1234</span>
+    <span>📍 Jl. Kemang Raya No. 45, Kemang, Pesanggrahan, Jakarta Selatan 12730</span>
+    <span>📞 (021) 719-4567</span>
     <span>📱 0812-3456-7890</span>
     <span>✉ info@steamsentosa.id</span>
   </div>
@@ -103,8 +103,8 @@
     <div class="bar-date">{{ row.day.strftime('%d %b') if row.day else '—' }}</div>
     <div class="bar-stacked">
       {% if max_day > 0 %}
-        <div class="bar-pos" style="width:{{ (row.pos / max_day * 100)|round }}%;"></div>
-        <div class="bar-neg" style="width:{{ (row.neg / max_day * 100)|round }}%;"></div>
+        <div class="bar-pos" data-pct="{{ (row.pos / max_day * 100)|round }}"></div>
+        <div class="bar-neg" data-pct="{{ (row.neg / max_day * 100)|round }}"></div>
       {% endif %}
     </div>
     <div class="bar-nums">+{{ row.pos }} / -{{ row.neg }}</div>
@@ -131,11 +131,11 @@
   </table>
   {% endif %}
 
-  <!-- FOOTER & TANDA TANGAN -->
+  <!-- ── FOOTER & TANDA TANGAN ── -->
   <div class="report-footer-section">
     <div class="footer-left">
       MotorMind Sentiment Analysis System — Tugas Akhir<br>
-      <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Kemang Raya No. 10, Jakarta Selatan<br>
+      <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Kemang Raya No. 45, Jakarta Selatan<br>
       Model: Neural X2.4 TF-IDF + Naive Bayes + Lexicon Hybrid
     </div>
 

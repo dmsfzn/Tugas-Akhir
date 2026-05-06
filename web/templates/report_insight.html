@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<!-- TOOLBAR -->
+<!-- ── TOOLBAR ── -->
 <div class="print-toolbar">
   <div class="tb-info">Laporan Insight Sentimen Negatif</div>
   <button class="btn-print primary" onclick="doPrint()">⎙ Cetak / Simpan PDF</button>
@@ -17,7 +17,7 @@
 
 <div class="report-page">
 
-  <!-- KOP SURAT -->
+  <!-- ── KOP SURAT ── -->
   <div class="kop-surat">
     <div class="kop-left">
       <div class="kop-logo">⚡</div>
@@ -32,8 +32,8 @@
     </div>
   </div>
   <div class="kop-address-bar">
-    <span>📍 Jl. Kemang Raya No. 10, Mampang Prapatan, Jakarta Selatan 12730</span>
-    <span>📞 (021) 719-1234</span>
+    <span>📍 Jl. Kemang Raya No. 45, Kemang, Pesanggrahan, Jakarta Selatan 12730</span>
+    <span>📞 (021) 719-4567</span>
     <span>📱 0812-3456-7890</span>
     <span>✉ info@steamsentosa.id</span>
   </div>
@@ -63,7 +63,7 @@
     </div>
   </div>
 
-  <!-- TOP KATA (bar chart) -->
+  <!-- ── TOP KATA (bar chart) ── -->
   <div class="section-title">Top Kata Negatif Terdeteksi</div>
   {% if top_words %}
     {% set max_c = top_words[0][1] %}
@@ -72,7 +72,8 @@
       <div class="word-name orange">{{ word }}</div>
       <div class="bar-track">
         <div class="bar-fill orange"
-             data-width="{{ (count/max_c*100)|round }}%" data-opacity="{% if loop.index <= 3 %}1{% else %}0.55{% endif %}"></div>
+             data-pct="{{ (count/max_c*100)|round }}"
+             data-opacity="{% if loop.index <= 3 %}1{% else %}0.55{% endif %}"></div>
       </div>
       <div class="bar-count">{{ count }}</div>
     </div>
@@ -81,15 +82,14 @@
     <p style="color:#9ca3af;text-align:center;padding:20px;">Tidak ada data kata negatif</p>
   {% endif %}
 
-  <!-- WORD CLOUD -->
+  <!-- ── WORD CLOUD ── -->
   <div class="section-title">Visualisasi Kata Negatif</div>
   <div class="word-cloud-box avoid-break">
     {% if top_words %}
       {% for word, count in top_words %}
         {% set size = [11 + (count / top_words[0][1] * 12)|int, 24]|min %}
-        <span style="font-family:'Space Mono',monospace;"
-              data-size="{{ size }}px"
-              data-color="rgba(249,115,22,{{ 0.4 + (count/top_words[0][1]*0.6)|round(2) }})"
+        <span data-fsize="{{ size }}"
+              data-alpha="{{ (0.4 + (count/top_words[0][1]*0.6))|round(2) }}"
               title="{{ count }} kemunculan">{{ word }}</span>
       {% endfor %}
     {% else %}
@@ -97,7 +97,7 @@
     {% endif %}
   </div>
 
-  <!-- TABEL DETAIL -->
+  <!-- ── TABEL DETAIL ── -->
   <div class="section-title">Tabel Detail Kata Negatif</div>
   <table class="report-table orange">
     <thead>
@@ -113,7 +113,7 @@
           <td style="font-family:'Space Mono',monospace;font-weight:700;">{{ count }}</td>
           <td>
             <span class="conf-bar">
-              <span class="conf-fill negatif" data-width="{{ (count/top_words[0][1]*100)|round }}%"></span>
+              <span class="conf-fill negatif" data-pct="{{ (count/top_words[0][1]*100)|round }}"></span>
             </span>
             {{ "%.1f"|format(count/total_occ*100 if total_occ else 0) }}%
           </td>
@@ -130,7 +130,7 @@
     </tbody>
   </table>
 
-  <!-- REKOMENDASI -->
+  <!-- ── REKOMENDASI ── -->
   {% if top_words %}
   <div class="reco-box avoid-break">
     <div class="reco-label">● Rekomendasi</div>
@@ -147,11 +147,11 @@
   </div>
   {% endif %}
 
-  <!-- FOOTER & TANDA TANGAN -->
+  <!-- ── FOOTER & TANDA TANGAN ── -->
   <div class="report-footer-section">
     <div class="footer-left">
       MotorMind Sentiment Analysis System — Tugas Akhir<br>
-      <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Kemang Raya No. 10, Jakarta Selatan<br>
+      <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Kemang Raya No. 45, Jakarta Selatan<br>
       Model: Neural X2.4 TF-IDF + Naive Bayes + Lexicon Hybrid
     </div>
 

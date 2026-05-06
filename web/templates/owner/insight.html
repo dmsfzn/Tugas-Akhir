@@ -47,7 +47,9 @@
       <div class="word-bar-item">
         <div class="word-bar-label"><span style="color:var(--negative);font-family:var(--font-mono);font-size:12px;">{{ word }}</span></div>
         <div class="word-bar-track">
-          <div class="word-bar-fill" style="width:{{ (count/max_count*100)|round }}%;background:{% if loop.index <= 3 %}var(--negative){% else %}rgba(249,115,22,.5){% endif %};"></div>
+          <div class="word-bar-fill"
+               data-pct="{{ (count/max_count*100)|round }}"
+               data-bg="{% if loop.index <= 3 %}var(--negative){% else %}rgba(249,115,22,.5){% endif %}"></div>
         </div>
         <div class="word-bar-count">{{ count }}</div>
       </div>
@@ -72,7 +74,9 @@
         {% if top_words %}
           {% for word, count in top_words %}
             {% set size = [11 + (count / top_words[0][1] * 10)|int, 22]|min %}
-            <span style="font-family:var(--font-mono);font-size:{{ size }}px;color:rgba(249,115,22,{{ 0.4 + (count/top_words[0][1]*0.6)|round(2) }});cursor:default;" title="{{ count }} kemunculan">{{ word }}</span>
+            <span data-fsize="{{ size }}"
+                  data-alpha="{{ (0.4 + (count/top_words[0][1]*0.6))|round(2) }}"
+                  title="{{ count }} kemunculan">{{ word }}</span>
           {% endfor %}
         {% else %}
           <span class="text-dimmer">Tidak ada data</span>
@@ -116,7 +120,9 @@
             <td>
               <div style="display:flex;align-items:center;gap:8px;">
                 <div style="flex:1;height:4px;background:var(--bg-root);border-radius:2px;min-width:60px;">
-                  <div style="height:100%;background:var(--negative);border-radius:2px;width:{{ (count/top_words[0][1]*100)|round }}%;"></div>
+                  <div class="proportion-fill"
+                       data-pct="{{ (count/top_words[0][1]*100)|round }}"
+                       style="height:100%;background:var(--negative);border-radius:2px;"></div>
                 </div>
                 <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);">{{ "%.1f"|format(count/total_occ*100 if total_occ else 0) }}%</span>
               </div>

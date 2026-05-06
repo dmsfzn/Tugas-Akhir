@@ -1,32 +1,56 @@
-/* MotorMind Report JS */
+/**
+ * report.js — Fungsi tombol aksi di semua halaman laporan (popup window).
+ *
+ * Juga bertugas menerapkan nilai lebar (width) dan opasitas dinamis
+ * dari atribut data-* ke elemen bar/fill, agar template Jinja2 tidak
+ * perlu menyisipkan ekspresi {{ }} langsung di dalam atribut style="",
+ * yang akan memicu peringatan linter "Do not use empty rulesets".
+ */
 
-/* Cetak halaman */
+/** Cetak halaman laporan menggunakan dialog print browser. */
 function doPrint() {
   window.print();
 }
 
-/* Tutup popup */
+/** Tutup popup window laporan. */
 function doClose() {
   window.close();
 }
 
-/* Download CSV — redirect ke endpoint */
+/**
+ * Download data sebagai file CSV melalui redirect ke endpoint Flask.
+ * @param {string} url - URL endpoint export CSV.
+ */
 function downloadCSV(url) {
   window.location.href = url;
 }
 
-/* Set dynamic styles from data attributes */
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('[data-width]').forEach(function(el) {
-    el.style.width = el.getAttribute('data-width');
+/**
+ * applyDataWidths()
+ * Membaca atribut data-pct (lebar %) dan data-opacity (opsional) pada
+ * setiap elemen bertanda [data-pct], lalu menerapkannya sebagai
+ * style.width dan style.opacity. Dipanggil saat DOM siap.
+ *
+ * Digunakan agar nilai dinamis dari Jinja2 ditempatkan pada data-*
+ * (bukan di dalam style=""), menghindari peringatan CSS linter.
+ */
+function applyDataWidths() {
+  /* Bar / fill elemen dengan lebar dinamis */
+  document.querySelectorAll('[data-pct]').forEach(function(el) {
+    el.style.width = el.getAttribute('data-pct') + '%';
+    var op = el.getAttribute('data-opacity');
+    if (op !== null) el.style.opacity = op;
   });
-  document.querySelectorAll('[data-opacity]').forEach(function(el) {
-    el.style.opacity = el.getAttribute('data-opacity');
+
+  /* Word-cloud span: font-size dan warna dengan alpha dinamis */
+  document.querySelectorAll('[data-fsize]').forEach(function(el) {
+    el.style.fontFamily = "'Space Mono', monospace";
+    el.style.fontSize   = el.getAttribute('data-fsize') + 'px';
+    var alpha = el.getAttribute('data-alpha');
+    if (alpha !== null) {
+      el.style.color = 'rgba(249,115,22,' + alpha + ')';
+    }
   });
-  document.querySelectorAll('[data-size]').forEach(function(el) {
-    el.style.fontSize = el.getAttribute('data-size');
-  });
-  document.querySelectorAll('[data-color]').forEach(function(el) {
-    el.style.color = el.getAttribute('data-color');
-  });
-});
+}
+
+document.addEventListener('DOMContentLoaded', applyDataWidths);

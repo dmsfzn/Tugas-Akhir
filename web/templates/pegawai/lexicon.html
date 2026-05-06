@@ -18,7 +18,7 @@
   </div>
 </div>
 
-<!-- STATS ROW -->
+<!-- ── STATS ROW ──────────────────────────── -->
 <div class="grid-3 mb-4">
   <div class="mm-card">
     <div class="stat-icon-card">
@@ -53,7 +53,7 @@
   </div>
 </div>
 
-<!-- FILTER + SEARCH -->
+<!-- ── FILTER + SEARCH ────────────────────── -->
 <form method="GET" action="{{ url_for('pegawai_lexicon') }}">
   <div class="filter-bar mb-3">
     <input type="text" name="q" class="mm-input"
@@ -72,7 +72,7 @@
   </div>
 </form>
 
-<!-- TABLE -->
+<!-- ── TABLE ─────────────────────────────── -->
 <div class="mm-table-wrap">
   <table class="mm-table">
     <thead>
@@ -90,8 +90,8 @@
         <tr>
           <td class="ts">{{ loop.index }}</td>
           <td>
-            <span style="font-family:var(--font-mono);font-size:13px;
-                         color:{% if lex.category=='positif' %}#6b87f5{% else %}var(--negative){% endif %};">
+          <span class="mono color-{% if lex.category=='positif' %}pos{% else %}neg{% endif %}"
+                style="font-size:13px;">
               {{ lex.word }}
             </span>
           </td>
@@ -99,17 +99,21 @@
             <span class="badge-{{ lex.category }}">{{ lex.category|upper }}</span>
           </td>
           <td>
-            <span style="font-family:var(--font-mono);font-size:13px;
-                         color:{% if lex.score >= 0 %}#22c55e{% else %}var(--negative){% endif %};">
+            <span class="mono color-{% if lex.score >= 0 %}pos{% else %}neg{% endif %}"
+                  style="font-size:13px;">
               {{ "%+.1f"|format(lex.score) }}
             </span>
           </td>
           <td>
             <div style="display:flex;gap:6px;">
-              <!-- Edit -->
+              <!-- Edit: data-* avoids Jinja2 expressions inside onclick JS -->
               <button class="icon-btn"
                       style="width:28px;height:28px;border-radius:6px;"
-                      onclick='openEditModal({{ lex.id }}, {{ lex.word|tojson }}, {{ lex.score }}, {{ lex.category|tojson }})'
+                      data-id="{{ lex.id }}"
+                      data-word="{{ lex.word|e }}"
+                      data-score="{{ lex.score }}"
+                      data-category="{{ lex.category }}"
+                      onclick="openEditModal(this)"
                       title="Edit">
                 <i class="bi bi-pencil" style="font-size:12px;color:var(--accent);"></i>
               </button>
@@ -140,7 +144,9 @@
   </table>
 </div>
 
-<!-- MODAL — ADD WORD -->
+<!-- ══════════════════════════════════════════
+     MODAL — ADD WORD
+══════════════════════════════════════════ -->
 <div class="mm-modal-backdrop" id="addModal" style="display:none;">
   <div class="mm-modal">
     <h5><i class="bi bi-plus-circle text-accent me-2"></i> Tambah Kata Lexicon</h5>
@@ -155,14 +161,14 @@
       <div class="grid-2">
         <div class="mm-input-group">
           <label class="mm-label">Kategori</label>
-          <select name="category" class="mm-input">
+          <select name="category" id="addCategory" class="mm-input">
             <option value="positif">Positif</option>
             <option value="negatif">Negatif</option>
           </select>
         </div>
         <div class="mm-input-group">
           <label class="mm-label">Score (−5 s/d +5)</label>
-          <input type="number" name="score" class="mm-input"
+          <input type="number" name="score" id="addScore" class="mm-input"
                  step="0.1" min="-5" max="5" value="1.0" required>
         </div>
       </div>
@@ -178,7 +184,9 @@
   </div>
 </div>
 
-<!-- MODAL — EDIT WORD -->
+<!-- ══════════════════════════════════════════
+     MODAL — EDIT WORD
+══════════════════════════════════════════ -->
 <div class="mm-modal-backdrop" id="editModal" style="display:none;">
   <div class="mm-modal">
     <h5><i class="bi bi-pencil text-accent me-2"></i> Edit Kata Lexicon</h5>

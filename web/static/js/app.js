@@ -1,46 +1,32 @@
-/* MotorMind — app.js
-   Global JavaScript for the main dashboard application. */
+/* app.js — Fungsi global MotorMind yang dipakai di semua halaman. */
 
 'use strict';
 
-/* TOAST */
 /**
- * Displays a toast notification on the screen.
- * @param {string} msg - The message to display.
- * @param {string} [type='info'] - The type of toast ('success', 'danger', 'warning', 'info').
+ * Tampilkan notifikasi toast di sudut layar.
+ * @param {string} msg  - Pesan yang ditampilkan.
+ * @param {string} type - Tipe toast: 'success' | 'danger' | 'warning' | 'info'.
  */
 function showToast(msg, type) {
-  // Default to 'info' type if no specific type is provided
   type = type || 'info';
-  
-  // Map toast types to Bootstrap icons and specific colors
   const icons = {
     success: '<i class="bi bi-check-circle-fill" style="color:#22c55e"></i>',
     danger:  '<i class="bi bi-exclamation-circle-fill" style="color:#ef4444"></i>',
     warning: '<i class="bi bi-exclamation-triangle-fill" style="color:#fbbf24"></i>',
     info:    '<i class="bi bi-info-circle-fill" style="color:#818cf8"></i>',
   };
-  
-  // Find the designated toast container on the page
   const c = document.getElementById('toastContainer');
-  if (!c) return; // Exit silently if there's no container (e.g., on a page without toasts)
-  
-  // Construct the toast DOM element
+  if (!c) return;
   const t = document.createElement('div');
   t.className = 'mm-toast';
   t.innerHTML = (icons[type] || icons.info) + '<span>' + msg + '</span>';
-  
-  // Inject the toast into the container
   c.appendChild(t);
-  
-  // Automatically remove the toast element from the DOM after 4 seconds (4000ms)
   setTimeout(function () { t.remove(); }, 4000);
 }
 
-/* CONFIRM DELETE */
 /**
- * Prompts the user with a confirmation dialog before submitting a delete form.
- * @param {string} formId - The ID of the HTML form element to submit.
+ * Tampilkan konfirmasi sebelum submit form hapus.
+ * @param {string} formId - ID elemen <form> yang akan di-submit.
  */
 function confirmDelete(formId) {
   if (confirm('Yakin ingin menghapus data ini?')) {
@@ -48,41 +34,58 @@ function confirmDelete(formId) {
   }
 }
 
-/* REPORT POPUP OPENER */
 /**
- * Opens a centered popup window for displaying printable reports.
- * @param {string} url - The URL of the report to open.
+ * Buka URL laporan di popup window terpusat.
+ * @param {string} url - URL halaman laporan.
  */
 function openReport(url) {
-  // Calculate window size: cap the max width at 960px and max height at 800px, but don't exceed screen size
-  var w = Math.min(window.screen.width, 960);
-  var h = Math.min(window.screen.height, 800);
-  
-  // Calculate center coordinates for the popup window
+  var w    = Math.min(window.screen.width, 960);
+  var h    = Math.min(window.screen.height, 800);
   var left = Math.round((window.screen.width  - w) / 2);
   var top  = Math.round((window.screen.height - h) / 2);
-  
-  // Open the report URL in a new popup window with specific dimensions and positions
   window.open(
-    url,
-    '_blank',
+    url, '_blank',
     'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top +
     ',scrollbars=yes,resizable=yes'
   );
 }
-
-/* SIDEBAR ACTIVE LINK */
 /**
- * Automatically highlights the active sidebar link based on the current window URL path.
- * Executes immediately on load.
+ * Terapkan atribut data-pct (lebar %), data-opacity, data-fsize, dan data-alpha
+ * ke elemen yang sesuai sebagai style inline.
+ * Memungkinkan Jinja2 menulis nilai dinamis ke data-*, bukan ke style="",
+ * sehingga linter CSS tidak melihat ekspresi template di dalam atribut style.
  */
+function applyDataWidths() {
+  /* Bar / fill dengan lebar dan opasitas dinamis */
+  document.querySelectorAll('[data-pct]').forEach(function(el) {
+    el.style.width = el.getAttribute('data-pct') + '%';
+    var op = el.getAttribute('data-opacity');
+    if (op !== null) el.style.opacity = op;
+  });
+
+  /* Word-cloud span: ukuran font dan warna alpha dinamis */
+  document.querySelectorAll('[data-fsize]').forEach(function(el) {
+    el.style.fontFamily = "'Space Mono', monospace";
+    el.style.fontSize   = el.getAttribute('data-fsize') + 'px';
+    var alpha = el.getAttribute('data-alpha');
+    if (alpha !== null) {
+      el.style.color = 'rgba(249,115,22,' + alpha + ')';
+    }
+    el.style.cursor = 'default';
+  });
+
+  /* Elemen dengan background warna dari data-bg */
+  document.querySelectorAll('[data-bg]').forEach(function(el) {
+    el.style.background = el.getAttribute('data-bg');
+  });
+}
+
+document.addEventListener('DOMContentLoaded', applyDataWidths);
+
+/* Tandai nav-item aktif di sidebar sesuai URL halaman saat ini. */
 (function highlightActive() {
-  // Get the current URL path from the browser
   var path = window.location.pathname;
-  
-  // Iterate over all sidebar navigation items
   document.querySelectorAll('.mm-sidebar .nav-item').forEach(function (link) {
-    // If the link's href matches the current path, add the 'active' class to highlight it
     if (link.getAttribute('href') === path) {
       link.classList.add('active');
     }
