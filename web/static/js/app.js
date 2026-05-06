@@ -49,6 +49,38 @@ function openReport(url) {
     ',scrollbars=yes,resizable=yes'
   );
 }
+/**
+ * Terapkan atribut data-pct (lebar %), data-opacity, data-fsize, dan data-alpha
+ * ke elemen yang sesuai sebagai style inline.
+ * Memungkinkan Jinja2 menulis nilai dinamis ke data-*, bukan ke style="",
+ * sehingga linter CSS tidak melihat ekspresi template di dalam atribut style.
+ */
+function applyDataWidths() {
+  /* Bar / fill dengan lebar dan opasitas dinamis */
+  document.querySelectorAll('[data-pct]').forEach(function(el) {
+    el.style.width = el.getAttribute('data-pct') + '%';
+    var op = el.getAttribute('data-opacity');
+    if (op !== null) el.style.opacity = op;
+  });
+
+  /* Word-cloud span: ukuran font dan warna alpha dinamis */
+  document.querySelectorAll('[data-fsize]').forEach(function(el) {
+    el.style.fontFamily = "'Space Mono', monospace";
+    el.style.fontSize   = el.getAttribute('data-fsize') + 'px';
+    var alpha = el.getAttribute('data-alpha');
+    if (alpha !== null) {
+      el.style.color = 'rgba(249,115,22,' + alpha + ')';
+    }
+    el.style.cursor = 'default';
+  });
+
+  /* Elemen dengan background warna dari data-bg */
+  document.querySelectorAll('[data-bg]').forEach(function(el) {
+    el.style.background = el.getAttribute('data-bg');
+  });
+}
+
+document.addEventListener('DOMContentLoaded', applyDataWidths);
 
 /* Tandai nav-item aktif di sidebar sesuai URL halaman saat ini. */
 (function highlightActive() {

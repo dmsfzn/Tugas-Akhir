@@ -329,6 +329,12 @@ body {
   color: var(--text-3); width: 70px; text-align: right; flex-shrink: 0;
 }
 
+/* ── UTILITY CLASSES ────────────────── */
+.mono      { font-family: var(--font-mono); }
+.bold      { font-weight: 700; }
+.color-pos { color: var(--accent); }
+.color-neg { color: var(--negative); }
+
 /* ── TWO-COL LAYOUT ─────────────────── */
 .two-col {
   display: grid;

@@ -80,7 +80,7 @@
               <div style="flex:1;">
                 <div class="confidence-bar">
                   <div class="confidence-fill {% if row.sentiment=='negatif' %}neg{% endif %}"
-                       style="width:{{ (row.confidence*100)|round if row.confidence else 0 }}%"></div>
+                       data-pct="{{ (row.confidence*100)|round if row.confidence else 0 }}"></div>
                 </div>
               </div>
               <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-2);width:36px;text-align:right;">

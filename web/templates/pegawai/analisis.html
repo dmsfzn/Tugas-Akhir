@@ -112,9 +112,10 @@
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div>
           <div class="card-label">Current Classification</div>
-          <div style="font-size:36px;font-weight:700;
-                      color:{% if result.sentiment=='positif' %}var(--accent){% elif result.sentiment=='negatif' %}var(--negative){% else %}var(--neutral){% endif %};
-                      text-transform:capitalize;margin-bottom:8px;">
+          <!-- Sentiment label: color set via class -->
+          <div class="color-{% if result.sentiment=='positif' %}pos{% elif result.sentiment=='negatif' %}neg{% else %}neutral{% endif %}"
+               style="font-size:36px;font-weight:700;
+                       text-transform:capitalize;margin-bottom:8px;">
             {{ result.sentiment }}
           </div>
         </div>
@@ -129,7 +130,7 @@
       <!-- Confidence bar -->
       <div class="confidence-bar" style="height:5px;margin-bottom:16px;">
         <div class="confidence-fill {% if result.sentiment=='negatif' %}neg{% endif %}"
-             style="width:{{ (result.confidence*100)|round }}%"></div>
+             data-pct="{{ (result.confidence*100)|round }}"></div>
       </div>
 
       <!-- Meta -->
@@ -144,8 +145,9 @@
         </div>
         <div>
           <div class="card-label">Lexicon Score</div>
-          <div style="font-family:var(--font-mono);font-size:13px;
-                      color:{% if result.lexicon_score >= 0 %}#6b87f5{% else %}var(--negative){% endif %};">
+          <!-- Lexicon score: color set via class -->  
+          <div class="mono color-{% if result.lexicon_score >= 0 %}pos{% else %}neg{% endif %}"
+               style="font-size:13px;">
             {{ "%+.2f"|format(result.lexicon_score) }}
           </div>
         </div>

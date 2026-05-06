@@ -32,8 +32,8 @@
     </div>
   </div>
   <div class="kop-address-bar">
-    <span>📍 Jl. Raya Magelang KM 5, Beran, Tegalrejo, Yogyakarta 55244</span>
-    <span>📞 (0274) 555-1234</span>
+    <span>📍 Jl. Kemang Raya No. 45, Kemang, Pesanggrahan, Jakarta Selatan 12730</span>
+    <span>📞 (021) 719-4567</span>
     <span>📱 0812-3456-7890</span>
     <span>✉ info@steamsentosa.id</span>
   </div>
@@ -72,7 +72,8 @@
       <div class="word-name orange">{{ word }}</div>
       <div class="bar-track">
         <div class="bar-fill orange"
-             style="width:{{ (count/max_c*100)|round }}%;opacity:{% if loop.index <= 3 %}1{% else %}0.55{% endif %};"></div>
+             data-pct="{{ (count/max_c*100)|round }}"
+             data-opacity="{% if loop.index <= 3 %}1{% else %}0.55{% endif %}"></div>
       </div>
       <div class="bar-count">{{ count }}</div>
     </div>
@@ -87,8 +88,8 @@
     {% if top_words %}
       {% for word, count in top_words %}
         {% set size = [11 + (count / top_words[0][1] * 12)|int, 24]|min %}
-        <span style="font-family:'Space Mono',monospace;font-size:{{ size }}px;
-                     color:rgba(249,115,22,{{ 0.4 + (count/top_words[0][1]*0.6)|round(2) }});"
+        <span data-fsize="{{ size }}"
+              data-alpha="{{ (0.4 + (count/top_words[0][1]*0.6))|round(2) }}"
               title="{{ count }} kemunculan">{{ word }}</span>
       {% endfor %}
     {% else %}
@@ -112,7 +113,7 @@
           <td style="font-family:'Space Mono',monospace;font-weight:700;">{{ count }}</td>
           <td>
             <span class="conf-bar">
-              <span class="conf-fill negatif" style="width:{{ (count/top_words[0][1]*100)|round }}%;"></span>
+              <span class="conf-fill negatif" data-pct="{{ (count/top_words[0][1]*100)|round }}"></span>
             </span>
             {{ "%.1f"|format(count/total_occ*100 if total_occ else 0) }}%
           </td>
@@ -150,12 +151,12 @@
   <div class="report-footer-section">
     <div class="footer-left">
       MotorMind Sentiment Analysis System — Tugas Akhir<br>
-      <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Raya Magelang KM 5, Yogyakarta<br>
+      <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Kemang Raya No. 45, Jakarta Selatan<br>
       Model: Neural X2.4 TF-IDF + Naive Bayes + Lexicon Hybrid
     </div>
 
     <div class="signature-block">
-      <div class="signature-place-date">Yogyakarta, {{ now().strftime('%d %B %Y') }}</div>
+      <div class="signature-place-date">Jakarta, {{ now().strftime('%d %B %Y') }}</div>
       <div class="signature-name">{{ session.get('username', '—') }}</div>
       <div class="signature-role">{{ session.get('role', '')|capitalize }}</div>
       <div class="signature-space"></div>

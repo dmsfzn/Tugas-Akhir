@@ -2,6 +2,11 @@
 
 document.addEventListener('DOMContentLoaded', function() {
 
+  /* Terapkan lebar bar dari atribut data-pct (menghindari Jinja2 di style=). */
+  document.querySelectorAll('[data-pct]').forEach(function(el) {
+    el.style.width = el.getAttribute('data-pct') + '%';
+  });
+
   /* Ubah tombol submit menjadi loading state saat form dikirim. */
   var form = document.getElementById('analysisForm');
   if (form) {

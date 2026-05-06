@@ -35,8 +35,8 @@
 
   <!-- Alamat -->
   <div class="kop-address-bar">
-    <span>📍 Jl. Raya Magelang KM 5, Beran, Tegalrejo, Yogyakarta 55244</span>
-    <span>📞 (0274) 555-1234</span>
+    <span>📍 Jl. Kemang Raya No. 45, Kemang, Pesanggrahan, Jakarta Selatan 12730</span>
+    <span>📞 (021) 719-4567</span>
     <span>📱 0812-3456-7890</span>
     <span>✉ info@steamsentosa.id</span>
   </div>
@@ -59,7 +59,7 @@
       <div class="stat-val accent">{{ "%.1f"|format(row.confidence*100 if row.confidence else 0) }}%</div>
       <div class="conf-bar" style="display:block;width:100%;margin-top:8px;">
         <span class="conf-fill {{ row.sentiment }}"
-              style="width:{{ (row.confidence*100)|round if row.confidence else 0 }}%;"></span>
+              data-pct="{{ (row.confidence*100)|round if row.confidence else 0 }}"></span>
       </div>
     </div>
     <div class="stat-box gray">
@@ -100,12 +100,12 @@
     <div class="footer-left">
       MotorMind Sentiment Analysis System — Tugas Akhir<br>
       <strong>Bengkel Steam Motor Sentosa</strong><br>
-      Jl. Raya Magelang KM 5, Yogyakarta
+      Jl. Kemang Raya No. 45, Jakarta Selatan
     </div>
 
     <div class="signature-block">
       <div class="signature-place-date">
-        Yogyakarta, {{ now().strftime('%d %B %Y') }}
+        Jakarta, {{ now().strftime('%d %B %Y') }}
       </div>
       <div class="signature-name">{{ session.get('username', '—') }}</div>
       <div class="signature-role">{{ session.get('role', '')|capitalize }}</div>

@@ -714,6 +714,11 @@ a:hover { color: #6b87f5; }
 }
 
 /* ── MISC ────────────────────────────────── */
+/* Utility aliases used by Jinja2 class-based conditional coloring */
+.mono      { font-family: var(--font-mono); }
+.color-pos     { color: var(--accent); }    /* Positif / skor ≥ 0 */
+.color-neg     { color: var(--negative); } /* Negatif / skor < 0  */
+.color-neutral { color: var(--neutral); }  /* Netral              */
 .text-mono { font-family: var(--font-mono); }
 .text-dim  { color: var(--text-2); }
 .text-dimmer { color: var(--text-3); }
