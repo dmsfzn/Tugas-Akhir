@@ -39,9 +39,3 @@ function clearInput() {
   if (el) el.value = '';
 }
 
-/** Tampilkan notifikasi saat file bulk dipilih. */
-function handleBulkFile(inp) {
-  if (inp.files && inp.files.length > 0) {
-    showToast('File "' + inp.files[0].name + '" siap untuk diproses.', 'info');
-  }
-}

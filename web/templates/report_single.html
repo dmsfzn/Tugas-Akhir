@@ -54,9 +54,9 @@
         {{ row.sentiment|upper }}
       </div>
     </div>
-    <div class="stat-box blue">
+    <div class="stat-box {% if row.sentiment=='negatif' %}orange{% else %}blue{% endif %}">
       <div class="stat-label">Confidence Score</div>
-      <div class="stat-val accent">{{ "%.1f"|format(row.confidence*100 if row.confidence else 0) }}%</div>
+      <div class="stat-val {% if row.sentiment=='negatif' %}orange{% else %}accent{% endif %}">{{ "%.1f"|format(row.confidence*100 if row.confidence else 0) }}%</div>
       <div class="conf-bar" style="display:block;width:100%;margin-top:8px;">
         <span class="conf-fill {{ row.sentiment }}"
               data-pct="{{ (row.confidence*100)|round if row.confidence else 0 }}"></span>

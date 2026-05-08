@@ -109,7 +109,8 @@
               <span class="conf-fill {{ row.sentiment }}"
                     data-pct="{{ (row.confidence*100)|round if row.confidence else 0 }}"></span>
             </span>
-            <span style="font-family:'Space Mono',monospace;font-size:11px;">
+            <span style="font-family:'Space Mono',monospace;font-size:11px;
+                         color:{% if row.sentiment=='negatif' %}#f97316{% else %}#4361EE{% endif %};">
               {{ "%.1f"|format(row.confidence*100) if row.confidence else '—' }}%
             </span>
           </td>
