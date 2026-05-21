@@ -22,11 +22,22 @@
 <!-- ── FLASH MESSAGES → auto toast ──────────── -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
+    <script type="application/json" id="flash-messages-data">
+      {{ messages | tojson }}
+    </script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        {% for cat, msg in messages %}
-          showToast({{ msg|tojson }}, '{{ cat }}');
-        {% endfor %}
+        const dataEl = document.getElementById('flash-messages-data');
+        if (dataEl) {
+          try {
+            const messages = JSON.parse(dataEl.textContent);
+            messages.forEach(([cat, msg]) => {
+              showToast(msg, cat);
+            });
+          } catch (e) {
+            console.error('Error parsing flash messages:', e);
+          }
+        }
       });
     </script>
   {% endif %}
@@ -74,14 +85,7 @@
           </a>
         </div>
 
-        <div class="nav-section">
-          <div class="nav-label">Export</div>
-          <a href="{{ url_for('report_export_csv') }}"
-             class="nav-item" target="_blank">
-            <i class="bi bi-file-earmark-arrow-down"></i>
-            <span>Export CSV</span>
-          </a>
-        </div>
+
 
       {% elif session.get('role') == 'owner' %}
         <!-- ── OWNER NAV ── -->
@@ -101,14 +105,7 @@
           </a>
         </div>
 
-        <div class="nav-section">
-          <div class="nav-label">Laporan</div>
-          <a href="{{ url_for('report_export_csv') }}"
-             class="nav-item" target="_blank">
-            <i class="bi bi-file-earmark-spreadsheet"></i>
-            <span>Export CSV</span>
-          </a>
-        </div>
+
       {% endif %}
     </nav>
 

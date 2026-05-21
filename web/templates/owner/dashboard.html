@@ -22,11 +22,10 @@
   </div>
 </div>
 
-<div class="grid-4 mb-4">
+<div class="grid-3 mb-4">
   <div class="mm-card" style="grid-column: span 2;">
-    <div class="card-label">Total Reviews (Monthly)</div>
+    <div class="card-label">Total Reviews</div>
     <div class="stat-value" style="font-size:42px;letter-spacing:-.03em;">{{ "{:,}".format(total) }}</div>
-    <div class="stat-delta positive"><i class="bi bi-arrow-up-short"></i> +12.4%</div>
   </div>
   <div class="mm-card">
     <div class="stat-icon-card">
@@ -34,15 +33,6 @@
       <div>
         <div class="card-label">Negative Pulse</div>
         <div class="stat-value" style="font-size:20px;">{{ "{:,}".format(negatif) }} Hits</div>
-      </div>
-    </div>
-  </div>
-  <div class="mm-card">
-    <div class="stat-icon-card">
-      <div class="stat-icon blue"><i class="bi bi-lightning-charge-fill"></i></div>
-      <div>
-        <div class="card-label">Neural Latency</div>
-        <div class="stat-value" style="font-size:20px;">24ms avg</div>
       </div>
     </div>
   </div>
@@ -85,44 +75,30 @@
   </div>
 </div>
 
-<div class="grid-2-3" style="gap:16px;">
-  <div class="mm-card">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <div class="card-label mb-0">Latest Findings</div>
-      <span class="text-dimmer" style="font-size:10px;">— — —</span>
-    </div>
-    {% for row in latest %}
-    <div class="d-flex align-items-start gap-3 mb-3 pb-3" style="border-bottom:1px solid var(--border);">
-      <span data-bg="{% if row.sentiment=='positif' %}var(--accent){% else %}var(--negative){% endif %}"
-            style="width:6px;height:6px;border-radius:50%;margin-top:6px;flex-shrink:0;display:inline-block;"></span>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:2px;">{{ row.analyst }} Feedback</div>
-        <div style="font-size:12px;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"{{ row.snippet }}…"</div>
-      </div>
-      <span class="badge-{{ row.sentiment }}">{{ row.sentiment|upper }}</span>
-    </div>
-    {% endfor %}
-    {% if not latest %}<div class="text-center py-4 text-dimmer">Belum ada data</div>{% endif %}
+<div class="mm-card">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="card-label mb-0">Latest Findings</div>
+    <span class="text-dimmer" style="font-size:10px;">— — —</span>
   </div>
-
-  <div class="mm-card accent-border" style="display:flex;flex-direction:column;justify-content:flex-end;">
-    <div style="text-align:right;margin-bottom:auto;">
-      <svg width="120" height="80" viewBox="0 0 120 80">
-        <circle cx="100" cy="80" r="70" fill="none" stroke="rgba(67,97,238,.2)" stroke-width="1"/>
-        <circle cx="100" cy="80" r="50" fill="none" stroke="rgba(67,97,238,.12)" stroke-width="1"/>
-        <circle cx="100" cy="80" r="30" fill="none" stroke="rgba(67,97,238,.08)" stroke-width="1"/>
-      </svg>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+  {% for row in latest %}
+  <div class="d-flex align-items-start gap-3" style="border-bottom:1px solid var(--border);padding:10px 8px 10px 0;">
+    <span data-bg="{% if row.sentiment=='positif' %}var(--accent){% else %}var(--negative){% endif %}"
+          style="width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0;display:inline-block;"></span>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:2px;">{{ row.analyst }} Feedback</div>
+      <div style="font-size:11px;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"{{ row.snippet }}…"</div>
+      <span class="badge-{{ row.sentiment }}" style="margin-top:4px;display:inline-block;">{{ row.sentiment|upper }}</span>
     </div>
-    <div>
-      <div style="font-size:10px;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;font-weight:700;margin-bottom:8px;">● Systems Ready</div>
-      <h3 style="font-size:22px;font-weight:700;color:var(--text-1);margin-bottom:10px;">Deep Learning Lab</h3>
-      <p style="font-size:12px;color:var(--text-2);margin-bottom:20px;line-height:1.6;">Initialize a new high-precision sentiment analysis session. Our neural engine is recalibrated for Q4 manufacturing linguistics.</p>
-      <a href="{{ url_for('report_export_csv') }}" class="btn-mm btn-mm-ghost w-100" style="justify-content:center;" target="_blank">
-        <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV Data
-      </a>
-    </div>
+  </div>
+  {% endfor %}
+  {% if not latest %}<div class="text-center py-4 text-dimmer" style="grid-column:span 2;">Belum ada data</div>{% endif %}
   </div>
 </div>
+
+
+
+
 
 {% endblock %}
 

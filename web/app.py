@@ -18,7 +18,7 @@ import mysql.connector
 from functools import wraps
 import csv
 import io
-from datetime import datetime, date
+from datetime import datetime
 import hashlib
 import re
 from collections import Counter
@@ -452,29 +452,7 @@ def owner_insight():
 # ─────────────────────────────────────────────
 # REPORT / EXPORT
 # ─────────────────────────────────────────────
-@app.route('/report/export-csv')
-@login_required
-def report_export_csv():
-    """Ekspor data analisis ke file CSV. Pegawai hanya mengekspor datanya sendiri."""
-    db  = get_db()
-    cur = db.cursor(dictionary=True)
-    if session['role'] == 'pegawai':
-        cur.execute("SELECT * FROM analyses WHERE user_id=%s ORDER BY created_at DESC", (session['user_id'],))
-    else:
-        cur.execute("SELECT * FROM analyses ORDER BY created_at DESC")
-    rows = cur.fetchall()
-    cur.close(); db.close()
 
-    output = io.StringIO()
-    if rows:
-        writer = csv.DictWriter(output, fieldnames=rows[0].keys())
-        writer.writeheader()
-        writer.writerows(rows)
-
-    resp = make_response(output.getvalue())
-    resp.headers['Content-Disposition'] = f'attachment; filename=motormind_export_{date.today()}.csv'
-    resp.headers['Content-Type'] = 'text/csv; charset=utf-8'
-    return resp
 
 
 @app.route('/report/single/<int:analysis_id>')
@@ -612,29 +590,7 @@ def report_insight():
                            top_words=top_words, total=total, negatif=negatif)
 
 
-@app.route('/report/lexicon-list')
-@login_required
-def report_lexicon_list():
-    """Popup daftar seluruh kata lexicon beserta statistik ringkas."""
-    db  = get_db()
-    cur = db.cursor(dictionary=True)
-    cur.execute("SELECT * FROM lexicon ORDER BY category, score ASC")
-    lexicons = cur.fetchall()
-    cur.close(); db.close()
 
-    total = len(lexicons)
-    pos   = sum(1 for r in lexicons if r['category'] == 'positif')
-    neg   = sum(1 for r in lexicons if r['category'] == 'negatif')
-    stats = {'total': total, 'pos': pos, 'neg': neg}
-    return render_template('report_lexicon_list.html', lexicons=lexicons, stats=stats)
-
-
-@app.route('/report/statistik')
-@login_required
-@role_required('owner')
-def report_statistik():
-    """Alias redirect ke laporan statistik owner."""
-    return redirect(url_for('report_owner_statistik'))
 
 
 # ─────────────────────────────────────────────

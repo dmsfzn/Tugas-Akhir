@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Analysis Engine{% endblock %}
-{% block page_label %}ANALYSIS ENGINE · MODULE MT-100{% endblock %}
+{% block page_label %}ANALYSIS ENGINE{% endblock %}
 
 {% block content %}
 
@@ -19,7 +19,6 @@
         <div>
           <div class="card-label mb-0">⚙ Single Text Entry</div>
         </div>
-        <span style="font-size:10px;color:var(--text-3);font-family:var(--font-mono);">MODULE MT-100</span>
       </div>
 
       <form method="POST" action="{{ url_for('pegawai_analisis') }}" id="analysisForm">
@@ -86,6 +85,25 @@
     </div>
     {% endif %}
 
+
+    <!-- Pre-Processing Log -->
+    <div class="mm-card">
+      <div class="card-label">● Pre-Processing Log</div>
+      <div class="proc-log" id="procLog">
+        {% if result %}
+          <div class="log-line log-ok">✓ Cleaning</div>
+          <div class="log-line log-ok">✓ Tokenization</div>
+          <div class="log-line log-spin">⟳ Stemming … PROCESSING</div>
+          <div class="log-line" style="margin-top:8px;color:var(--text-3);">
+            [{{ result.id }}] INIT TOKENIZATION PIPELINE ...<br>
+            [MEM:2GB] BUFFER ALLOCATED (24MB)<br>
+            [OK:3.1] VALIDATION TEST PASSED...
+          </div>
+        {% else %}
+          <div class="log-line text-dimmer">Menunggu input analisis...</div>
+        {% endif %}
+      </div>
+    </div>
 
   </div><!-- /left -->
 
@@ -165,25 +183,6 @@
     </div>
     {% endif %}
 
-    <!-- Pre-Processing Log -->
-    <div class="mm-card">
-      <div class="card-label">● Pre-Processing Log</div>
-      <div class="proc-log" id="procLog">
-        {% if result %}
-          <div class="log-line log-ok">✓ Cleaning</div>
-          <div class="log-line log-ok">✓ Tokenization</div>
-          <div class="log-line log-spin">⟳ Stemming … PROCESSING</div>
-          <div class="log-line" style="margin-top:8px;color:var(--text-3);">
-            [{{ result.id }}] INIT TOKENIZATION PIPELINE ...<br>
-            [MEM:2GB] BUFFER ALLOCATED (24MB)<br>
-            [OK:3.1] VALIDATION TEST PASSED...
-          </div>
-        {% else %}
-          <div class="log-line text-dimmer">Menunggu input analisis...</div>
-        {% endif %}
-      </div>
-    </div>
-
     <!-- Mini Bar Chart -->
     <div class="mm-card">
       <div class="card-label">Distribusi Confidence (7 Hari)</div>
@@ -191,6 +190,7 @@
     </div>
 
   </div><!-- /right -->
+
 </div>
 
 {% endblock %}
