@@ -8,8 +8,7 @@
   <h1>Insight Sentimen</h1>
   <div style="display:flex;gap:10px;">
     <!-- Laporan Insight → buka popup laporan printable (bukan download CSV) -->
-    <button class="btn-mm btn-mm-ghost"
-            onclick="openReport('/report/insight')">
+    <button class="btn-mm btn-mm-ghost" onclick="openReport('/report/insight')">
       <i class="bi bi-file-earmark-bar-graph"></i> Laporan Insight
     </button>
   </div>
@@ -23,12 +22,14 @@
   </div>
   <div class="mm-card">
     <div class="card-label">Top Kata Negatif</div>
-    <div class="stat-value text-mono" style="color:var(--negative);">{% if top_words %}{{ top_words[0][0] }}{% else %}—{% endif %}</div>
+    <div class="stat-value text-mono" style="color:var(--negative);">{% if top_words %}{{ top_words[0][0] }}{% else
+      %}—{% endif %}</div>
     <div class="stat-sub">{% if top_words %}{{ top_words[0][1] }} kemunculan{% endif %}</div>
   </div>
   <div class="mm-card">
     <div class="card-label">Kata Paling Sering</div>
-    <div class="stat-value text-mono" style="color:var(--negative);font-size:22px;">{% if top_words %}{{ top_words[0][1] }} hits{% else %}0{% endif %}</div>
+    <div class="stat-value text-mono" style="color:var(--negative);font-size:22px;">{% if top_words %}{{ top_words[0][1]
+      }} hits{% else %}0{% endif %}</div>
     <div class="stat-sub">Kemunculan tertinggi</div>
   </div>
 </div>
@@ -38,20 +39,21 @@
     <div class="card-label">Top Kata Negatif</div>
     <div style="font-size:16px;font-weight:700;color:var(--text-1);margin-bottom:16px;">Frequently Detected Issues</div>
     {% if top_words %}
-      {% set max_count = top_words[0][1] %}
-      {% for word, count in top_words[:12] %}
-      <div class="word-bar-item">
-        <div class="word-bar-label"><span style="color:var(--negative);font-family:var(--font-mono);font-size:12px;">{{ word }}</span></div>
-        <div class="word-bar-track">
-          <div class="word-bar-fill"
-               data-pct="{{ (count/max_count*100)|round }}"
-               data-bg="{% if loop.index <= 3 %}var(--negative){% else %}rgba(249,115,22,.5){% endif %}"></div>
-        </div>
-        <div class="word-bar-count">{{ count }}</div>
+    {% set max_count = top_words[0][1] %}
+    {% for word, count in top_words[:12] %}
+    <div class="word-bar-item">
+      <div class="word-bar-label"><span style="color:var(--negative);font-family:var(--font-mono);font-size:12px;">{{
+          word }}</span></div>
+      <div class="word-bar-track">
+        <div class="word-bar-fill" data-pct="{{ (count/max_count*100)|round }}"
+          data-bg="{% if loop.index <= 3 %}var(--negative){% else %}rgba(249,115,22,.5){% endif %}"></div>
       </div>
-      {% endfor %}
+      <div class="word-bar-count">{{ count }}</div>
+    </div>
+    {% endfor %}
     {% else %}
-      <div class="text-center py-4 text-dimmer"><i class="bi bi-bar-chart" style="font-size:28px;display:block;margin-bottom:8px;"></i>Tidak ada data negatif</div>
+    <div class="text-center py-4 text-dimmer"><i class="bi bi-bar-chart"
+        style="font-size:28px;display:block;margin-bottom:8px;"></i>Tidak ada data negatif</div>
     {% endif %}
   </div>
 
@@ -59,7 +61,8 @@
     <div class="mm-card">
       <div class="card-label">Tren Sentimen Negatif (8 Minggu)</div>
       <div class="bar-chart" id="negTrend" style="height:80px;"></div>
-      {% if neg_trend %}<div style="font-size:10px;color:var(--text-3);margin-top:8px;text-align:right;">REF: 8-WEEK DYNAMIC CYCLE</div>{% endif %}
+      {% if neg_trend %}<div style="font-size:10px;color:var(--text-3);margin-top:8px;text-align:right;">REF: 8-WEEK
+        DYNAMIC CYCLE</div>{% endif %}
       <!-- Data untuk insight.js -->
       <script type="application/json" id="negTrendData">{{ neg_trend|tojson }}</script>
     </div>
@@ -68,27 +71,29 @@
       <div class="card-label">Kata Cloud — Negatif</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:4px;">
         {% if top_words %}
-          {% for word, count in top_words %}
-            {% set size = [11 + (count / top_words[0][1] * 10)|int, 22]|min %}
-            <span data-fsize="{{ size }}"
-                  data-alpha="{{ (0.4 + (count/top_words[0][1]*0.6))|round(2) }}"
-                  title="{{ count }} kemunculan">{{ word }}</span>
-          {% endfor %}
+        {% for word, count in top_words %}
+        {% set size = [11 + (count / top_words[0][1] * 10)|int, 22]|min %}
+        <span data-fsize="{{ size }}" data-alpha="{{ (0.4 + (count/top_words[0][1]*0.6))|round(2) }}"
+          title="{{ count }} kemunculan">{{ word }}</span>
+        {% endfor %}
         {% else %}
-          <span class="text-dimmer">Tidak ada data</span>
+        <span class="text-dimmer">Tidak ada data</span>
         {% endif %}
       </div>
     </div>
 
     <div class="mm-card accent-border">
-      <div style="font-size:10px;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;font-weight:700;margin-bottom:8px;">● Recommendation Engine</div>
+      <div
+        style="font-size:10px;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;font-weight:700;margin-bottom:8px;">
+        ● Recommendation Engine</div>
       <div style="font-size:16px;font-weight:700;color:var(--text-1);margin-bottom:8px;">Action Required</div>
       <p style="font-size:12px;color:var(--text-2);margin-bottom:16px;line-height:1.6;">
-        {% if top_words %}Kata "{{ top_words[0][0] }}" terdeteksi sebagai isu dominan. Rekomendasikan review operasional terkait area ini.
+        {% if top_words %}Kata "{{ top_words[0][0] }}" terdeteksi sebagai isu dominan. Rekomendasikan review operasional
+        terkait area ini.
         {% else %}Tidak ada isu kritis yang terdeteksi saat ini.{% endif %}
       </p>
       <button class="btn-mm btn-mm-danger w-100" style="justify-content:center;"
-              onclick="openReport('/report/insight')">
+        onclick="openReport('/report/insight')">
         <i class="bi bi-file-earmark-text"></i> Lihat Laporan Insight
       </button>
     </div>
@@ -103,35 +108,45 @@
   <div class="mm-table-wrap" style="border:none;">
     <table class="mm-table">
       <thead>
-        <tr><th>#</th><th>Kata</th><th>Frekuensi</th><th>Proporsi</th><th>Level</th></tr>
+        <tr>
+          <th>#</th>
+          <th>Kata</th>
+          <th>Frekuensi</th>
+          <th>Proporsi</th>
+          <th>Level</th>
+        </tr>
       </thead>
       <tbody>
         {% if top_words %}
-          {% set total_occ = top_words|map(attribute=1)|sum %}
-          {% for word, count in top_words %}
-          <tr>
-            <td class="ts">{{ loop.index }}</td>
-            <td><span style="font-family:var(--font-mono);color:var(--negative);">{{ word }}</span></td>
-            <td><span style="font-family:var(--font-mono);">{{ count }}</span></td>
-            <td>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <div style="flex:1;height:4px;background:var(--bg-root);border-radius:2px;min-width:60px;">
-                  <div class="proportion-fill"
-                       data-pct="{{ (count/top_words[0][1]*100)|round }}"
-                       style="height:100%;background:var(--negative);border-radius:2px;"></div>
-                </div>
-                <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);">{{ "%.1f"|format(count/total_occ*100 if total_occ else 0) }}%</span>
+        {% set total_occ = top_words|map(attribute=1)|sum %}
+        {% for word, count in top_words %}
+        <tr>
+          <td class="ts">{{ loop.index }}</td>
+          <td><span style="font-family:var(--font-mono);color:var(--negative);">{{ word }}</span></td>
+          <td><span style="font-family:var(--font-mono);">{{ count }}</span></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="flex:1;height:4px;background:var(--bg-root);border-radius:2px;min-width:60px;">
+                <div class="proportion-fill" data-pct="{{ (count/top_words[0][1]*100)|round }}"
+                  style="height:100%;background:var(--negative);border-radius:2px;"></div>
               </div>
-            </td>
-            <td>
-              {% if loop.index <= 3 %}<span class="badge-negatif">CRITICAL</span>
-              {% elif loop.index <= 7 %}<span style="background:rgba(250,204,21,.1);color:#fbbf24;border:1px solid rgba(250,204,21,.2);font-family:var(--font-mono);font-size:10px;padding:3px 10px;border-radius:20px;">WARNING</span>
-              {% else %}<span class="badge-netral">MONITOR</span>{% endif %}
-            </td>
-          </tr>
-          {% endfor %}
+              <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-3);">{{
+                "%.1f"|format(count/total_occ*100 if total_occ else 0) }}%</span>
+            </div>
+          </td>
+          <td>
+            {% if loop.index <= 3 %}<span class="badge-negatif">CRITICAL</span>
+              {% elif loop.index <= 7 %}<span
+                style="background:rgba(250,204,21,.1);color:#fbbf24;border:1px solid rgba(250,204,21,.2);font-family:var(--font-mono);font-size:10px;padding:3px 10px;border-radius:20px;">
+                WARNING</span>
+                {% else %}<span class="badge-netral">MONITOR</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
         {% else %}
-          <tr><td colspan="5" class="text-center py-4 text-dimmer">Tidak ada data negatif tersedia</td></tr>
+        <tr>
+          <td colspan="5" class="text-center py-4 text-dimmer">Tidak ada data negatif tersedia</td>
+        </tr>
         {% endif %}
       </tbody>
     </table>

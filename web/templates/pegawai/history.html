@@ -8,8 +8,7 @@
   <h1>Laboratory Records</h1>
   <div style="display:flex;gap:10px;">
     <!-- Export CSV → buka popup laporan semua analisis (range sesuai filter) -->
-    <button class="btn-mm btn-mm-primary"
-            onclick="openAllReport()">
+    <button class="btn-mm btn-mm-primary" onclick="openAllReport()">
       <i class="bi bi-file-earmark-arrow-down"></i> Export CSV / Laporan
     </button>
   </div>
@@ -30,7 +29,7 @@
       <div>
         <label class="mm-label">Sentiment Filter</label>
         <select name="sentiment" class="mm-input" style="width:160px;">
-          <option value="all"     {% if sentiment=='all'     %}selected{% endif %}>All Sentiments</option>
+          <option value="all" {% if sentiment=='all' %}selected{% endif %}>All Sentiments</option>
           <option value="positif" {% if sentiment=='positif' %}selected{% endif %}>POSITIF</option>
           <option value="negatif" {% if sentiment=='negatif' %}selected{% endif %}>NEGATIF</option>
         </select>
@@ -49,9 +48,11 @@
 
 <!-- ── TABLE ─────────────────────────────── -->
 <div class="mm-table-wrap mb-3">
-  <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+  <div
+    style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
     <span style="font-size:11px;color:var(--text-3);">
-      Viewing {{ analyses|length }} of <span style="color:var(--text-1);font-family:var(--font-mono);">{{ total_rows|default('—') }}</span> analysed
+      Viewing {{ analyses|length }} of <span style="color:var(--text-1);font-family:var(--font-mono);">{{
+        total_rows|default('—') }}</span> analysed
     </span>
     <span style="font-size:11px;color:var(--text-3);font-family:var(--font-mono);">{{ page }} / {{ total_pages }}</span>
   </div>
@@ -68,42 +69,42 @@
     </thead>
     <tbody>
       {% if analyses %}
-        {% for row in analyses %}
-        <tr>
-          <td class="ts" style="white-space:nowrap;">
-            {{ row.created_at.strftime('%Y.%m.%d | %H:%M:%S') if row.created_at else '—' }}
-          </td>
-          <td class="snippet">"{{ row.snippet }}…"</td>
-          <td><span class="badge-{{ row.sentiment }}">{{ row.sentiment|upper }}</span></td>
-          <td>
-            <div style="display:flex;align-items:center;gap:10px;min-width:120px;">
-              <div style="flex:1;">
-                <div class="confidence-bar">
-                  <div class="confidence-fill {% if row.sentiment=='negatif' %}neg{% endif %}"
-                       data-pct="{{ (row.confidence*100)|round if row.confidence else 0 }}"></div>
-                </div>
+      {% for row in analyses %}
+      <tr>
+        <td class="ts" style="white-space:nowrap;">
+          {{ row.created_at.strftime('%Y.%m.%d | %H:%M:%S') if row.created_at else '—' }}
+        </td>
+        <td class="snippet">"{{ row.snippet }}…"</td>
+        <td><span class="badge-{{ row.sentiment }}">{{ row.sentiment|upper }}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;min-width:120px;">
+            <div style="flex:1;">
+              <div class="confidence-bar">
+                <div class="confidence-fill {% if row.sentiment=='negatif' %}neg{% endif %}"
+                  data-pct="{{ (row.confidence*100)|round if row.confidence else 0 }}"></div>
               </div>
-              <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-2);width:36px;text-align:right;">
-                {{ "%.1f"|format(row.confidence*100) if row.confidence else '—' }}%
-              </span>
             </div>
-          </td>
-          <td>
-            <!-- Hanya tombol laporan tunggal, tombol mata (detail) dihapus -->
-            <button class="icon-btn" style="width:28px;height:28px;border-radius:6px;"
-                    onclick="openReport('/report/single/{{ row.id }}')" title="Laporan">
-              <i class="bi bi-file-earmark-text" style="font-size:12px;"></i>
-            </button>
-          </td>
-        </tr>
-        {% endfor %}
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-2);width:36px;text-align:right;">
+              {{ "%.1f"|format(row.confidence*100) if row.confidence else '—' }}%
+            </span>
+          </div>
+        </td>
+        <td>
+          <!-- Hanya tombol laporan tunggal, tombol mata (detail) dihapus -->
+          <button class="icon-btn" style="width:28px;height:28px;border-radius:6px;"
+            onclick="openReport('/report/single/{{ row.id }}')" title="Laporan">
+            <i class="bi bi-file-earmark-text" style="font-size:12px;"></i>
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
       {% else %}
-        <tr>
-          <td colspan="5" class="text-center py-5 text-dimmer">
-            <i class="bi bi-inbox" style="font-size:28px;display:block;margin-bottom:8px;"></i>
-            Tidak ada data sesuai filter
-          </td>
-        </tr>
+      <tr>
+        <td colspan="5" class="text-center py-5 text-dimmer">
+          <i class="bi bi-inbox" style="font-size:28px;display:block;margin-bottom:8px;"></i>
+          Tidak ada data sesuai filter
+        </td>
+      </tr>
       {% endif %}
     </tbody>
   </table>
@@ -115,13 +116,13 @@
   <span style="font-size:12px;color:var(--text-3);">Halaman {{ page }} dari {{ total_pages }}</span>
   <div class="mm-pagination">
     <a href="{{ url_for('pegawai_history', page=page-1, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}"
-       class="page-btn {% if page <= 1 %}disabled{% endif %}"><i class="bi bi-chevron-left"></i></a>
+      class="page-btn {% if page <= 1 %}disabled{% endif %}"><i class="bi bi-chevron-left"></i></a>
     {% for p in range([1, page-2]|max, [total_pages+1, page+3]|min) %}
-      <a href="{{ url_for('pegawai_history', page=p, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}"
-         class="page-btn {% if p == page %}active{% endif %}">{{ p }}</a>
+    <a href="{{ url_for('pegawai_history', page=p, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}"
+      class="page-btn {% if p == page %}active{% endif %}">{{ p }}</a>
     {% endfor %}
     <a href="{{ url_for('pegawai_history', page=page+1, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}"
-       class="page-btn {% if page >= total_pages %}disabled{% endif %}"><i class="bi bi-chevron-right"></i></a>
+      class="page-btn {% if page >= total_pages %}disabled{% endif %}"><i class="bi bi-chevron-right"></i></a>
   </div>
 </div>
 {% endif %}
@@ -131,41 +132,51 @@
   <div class="mm-card">
     <div class="card-label">Sentiment Distribution</div>
     {% if total_rows and total_rows > 0 %}
-      {% set pos_count = analyses|selectattr('sentiment','equalto','positif')|list|length %}
-      {% set neg_count = analyses|selectattr('sentiment','equalto','negatif')|list|length %}
-      <div class="donut-wrap">
-        <svg width="80" height="80" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r="30" fill="none" stroke="var(--bg-root)" stroke-width="12"/>
-          {% set pos_pct = (pos_count / (pos_count + neg_count) * 100)|round if (pos_count + neg_count) > 0 else 50 %}
-          {% set circ = 188 %}
-          <circle cx="40" cy="40" r="30" fill="none" stroke="var(--accent)" stroke-width="12"
-                  stroke-dasharray="{{ (pos_pct/100*circ)|round }} {{ circ }}"
-                  stroke-dashoffset="{{ circ // 4 }}" transform="rotate(-90 40 40)"/>
-          <circle cx="40" cy="40" r="30" fill="none" stroke="var(--negative)" stroke-width="12"
-                  stroke-dasharray="{{ ((100-pos_pct)/100*circ)|round }} {{ circ }}"
-                  stroke-dashoffset="{{ -(pos_pct/100*circ - circ//4)|round }}" transform="rotate(-90 40 40)"/>
-        </svg>
-        <div class="donut-labels">
-          <div class="donut-label-item">
-            <span class="donut-dot" style="background:var(--accent);"></span>
-            <div><div class="val">{{ pos_count }}</div><div class="pct text-dim">POSITIF · {{ pos_pct }}%</div></div>
+    {% set pos_count = analyses|selectattr('sentiment','equalto','positif')|list|length %}
+    {% set neg_count = analyses|selectattr('sentiment','equalto','negatif')|list|length %}
+    <div class="donut-wrap">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="30" fill="none" stroke="var(--bg-root)" stroke-width="12" />
+        {% set pos_pct = (pos_count / (pos_count + neg_count) * 100)|round if (pos_count + neg_count) > 0 else 50 %}
+        {% set circ = 188 %}
+        <circle cx="40" cy="40" r="30" fill="none" stroke="var(--accent)" stroke-width="12"
+          stroke-dasharray="{{ (pos_pct/100*circ)|round }} {{ circ }}" stroke-dashoffset="{{ circ // 4 }}"
+          transform="rotate(-90 40 40)" />
+        <circle cx="40" cy="40" r="30" fill="none" stroke="var(--negative)" stroke-width="12"
+          stroke-dasharray="{{ ((100-pos_pct)/100*circ)|round }} {{ circ }}"
+          stroke-dashoffset="{{ -(pos_pct/100*circ - circ//4)|round }}" transform="rotate(-90 40 40)" />
+      </svg>
+      <div class="donut-labels">
+        <div class="donut-label-item">
+          <span class="donut-dot" style="background:var(--accent);"></span>
+          <div>
+            <div class="val">{{ pos_count }}</div>
+            <div class="pct text-dim">POSITIF · {{ pos_pct }}%</div>
           </div>
-          <div class="donut-label-item">
-            <span class="donut-dot" style="background:var(--negative);"></span>
-            <div><div class="val">{{ neg_count }}</div><div class="pct text-dim">NEGATIF · {{ (100-pos_pct) }}%</div></div>
+        </div>
+        <div class="donut-label-item">
+          <span class="donut-dot" style="background:var(--negative);"></span>
+          <div>
+            <div class="val">{{ neg_count }}</div>
+            <div class="pct text-dim">NEGATIF · {{ (100-pos_pct) }}%</div>
           </div>
         </div>
       </div>
+    </div>
     {% else %}
-      <div class="text-dimmer text-center py-3">Tidak ada data</div>
+    <div class="text-dimmer text-center py-3">Tidak ada data</div>
     {% endif %}
   </div>
   <div class="mm-card">
     <div class="card-label">Laboratory Activity</div>
     <div class="bar-chart" id="actChart" style="height:80px;"></div>
     <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;">
-      <span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;background:var(--accent);border-radius:50%;"></span><span class="text-dim">Analyses Peak</span></span>
-      <span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;background:var(--text-3);border-radius:50%;"></span><span class="text-dim">Baseline</span></span>
+      <span style="display:flex;align-items:center;gap:5px;"><span
+          style="width:8px;height:8px;background:var(--accent);border-radius:50%;"></span><span
+          class="text-dim">Analyses Peak</span></span>
+      <span style="display:flex;align-items:center;gap:5px;"><span
+          style="width:8px;height:8px;background:var(--text-3);border-radius:50%;"></span><span
+          class="text-dim">Baseline</span></span>
       <span class="text-dimmer ms-auto" style="font-size:10px;">REF: 7-DAY DYNAMIC CYCLE</span>
     </div>
   </div>
