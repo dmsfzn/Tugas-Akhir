@@ -8,8 +8,7 @@
   <h1>Lexicon Database</h1>
   <div style="display:flex;gap:10px;">
     <!-- Buka popup daftar lexicon lengkap (printable) -->
-    <button class="btn-mm btn-mm-ghost"
-            onclick="openReport('/report/lexicon-list')">
+    <button class="btn-mm btn-mm-ghost" onclick="openReport('/report/lexicon-list')">
       <i class="bi bi-list-ul"></i> Lihat Daftar Lexicon
     </button>
     <button class="btn-mm btn-mm-primary" onclick="openAddModal()">
@@ -56,10 +55,9 @@
 <!-- ── FILTER + SEARCH ────────────────────── -->
 <form method="GET" action="{{ url_for('pegawai_lexicon') }}">
   <div class="filter-bar mb-3">
-    <input type="text" name="q" class="mm-input"
-           placeholder="Cari kata..." value="{{ q }}" style="min-width:200px;">
+    <input type="text" name="q" class="mm-input" placeholder="Cari kata..." value="{{ q }}" style="min-width:200px;">
     <select name="cat" class="mm-input">
-      <option value="all"     {% if cat=='all'     %}selected{% endif %}>Semua Kategori</option>
+      <option value="all" {% if cat=='all' %}selected{% endif %}>Semua Kategori</option>
       <option value="positif" {% if cat=='positif' %}selected{% endif %}>Positif</option>
       <option value="negatif" {% if cat=='negatif' %}selected{% endif %}>Negatif</option>
     </select>
@@ -86,59 +84,50 @@
     </thead>
     <tbody>
       {% if lexicons %}
-        {% for lex in lexicons %}
-        <tr>
-          <td class="ts">{{ loop.index }}</td>
-          <td>
-          <span class="mono color-{% if lex.category=='positif' %}pos{% else %}neg{% endif %}"
-                style="font-size:13px;">
-              {{ lex.word }}
-            </span>
-          </td>
-          <td>
-            <span class="badge-{{ lex.category }}">{{ lex.category|upper }}</span>
-          </td>
-          <td>
-            <span class="mono color-{% if lex.score >= 0 %}pos{% else %}neg{% endif %}"
-                  style="font-size:13px;">
-              {{ "%+.1f"|format(lex.score) }}
-            </span>
-          </td>
-          <td>
-            <div style="display:flex;gap:6px;">
-              <!-- Edit: data-* avoids Jinja2 expressions inside onclick JS -->
-              <button class="icon-btn"
-                      style="width:28px;height:28px;border-radius:6px;"
-                      data-id="{{ lex.id }}"
-                      data-word="{{ lex.word|e }}"
-                      data-score="{{ lex.score }}"
-                      data-category="{{ lex.category }}"
-                      onclick="openEditModal(this)"
-                      title="Edit">
-                <i class="bi bi-pencil" style="font-size:12px;color:var(--accent);"></i>
+      {% for lex in lexicons %}
+      <tr>
+        <td class="ts">{{ loop.index }}</td>
+        <td>
+          <span class="mono color-{% if lex.category=='positif' %}pos{% else %}neg{% endif %}" style="font-size:13px;">
+            {{ lex.word }}
+          </span>
+        </td>
+        <td>
+          <span class="badge-{{ lex.category }}">{{ lex.category|upper }}</span>
+        </td>
+        <td>
+          <span class="mono color-{% if lex.score >= 0 %}pos{% else %}neg{% endif %}" style="font-size:13px;">
+            {{ "%+.1f"|format(lex.score) }}
+          </span>
+        </td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <!-- Edit: data-* avoids Jinja2 expressions inside onclick JS -->
+            <button class="icon-btn" style="width:28px;height:28px;border-radius:6px;" data-id="{{ lex.id }}"
+              data-word="{{ lex.word|e }}" data-score="{{ lex.score }}" data-category="{{ lex.category }}"
+              onclick="openEditModal(this)" title="Edit">
+              <i class="bi bi-pencil" style="font-size:12px;color:var(--accent);"></i>
+            </button>
+            <!-- Delete -->
+            <form method="POST" action="{{ url_for('pegawai_lexicon') }}" id="del-{{ lex.id }}" style="display:inline;">
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="id" value="{{ lex.id }}">
+              <button type="button" class="icon-btn" style="width:28px;height:28px;border-radius:6px;"
+                onclick="confirmDelete('del-{{ lex.id }}')" title="Hapus">
+                <i class="bi bi-trash" style="font-size:12px;color:#ef4444;"></i>
               </button>
-              <!-- Delete -->
-              <form method="POST" action="{{ url_for('pegawai_lexicon') }}"
-                    id="del-{{ lex.id }}" style="display:inline;">
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="id" value="{{ lex.id }}">
-                <button type="button" class="icon-btn"
-                        style="width:28px;height:28px;border-radius:6px;"
-                        onclick="confirmDelete('del-{{ lex.id }}')" title="Hapus">
-                  <i class="bi bi-trash" style="font-size:12px;color:#ef4444;"></i>
-                </button>
-              </form>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
       {% else %}
-        <tr>
-          <td colspan="5" class="text-center py-5 text-dimmer">
-            <i class="bi bi-database-x" style="font-size:28px;display:block;margin-bottom:8px;"></i>
-            Lexicon kosong — tambahkan kata pertama Anda
-          </td>
-        </tr>
+      <tr>
+        <td colspan="5" class="text-center py-5 text-dimmer">
+          <i class="bi bi-database-x" style="font-size:28px;display:block;margin-bottom:8px;"></i>
+          Lexicon kosong — tambahkan kata pertama Anda
+        </td>
+      </tr>
       {% endif %}
     </tbody>
   </table>
@@ -155,8 +144,7 @@
 
       <div class="mm-input-group">
         <label class="mm-label">Kata</label>
-        <input type="text" name="word" class="mm-input"
-               placeholder="Masukkan kata..." required>
+        <input type="text" name="word" class="mm-input" placeholder="Masukkan kata..." required>
       </div>
       <div class="grid-2">
         <div class="mm-input-group">
@@ -168,8 +156,8 @@
         </div>
         <div class="mm-input-group">
           <label class="mm-label">Score (−5 s/d +5)</label>
-          <input type="number" name="score" id="addScore" class="mm-input"
-                 step="0.1" min="-5" max="5" value="1.0" required>
+          <input type="number" name="score" id="addScore" class="mm-input" step="0.1" min="-5" max="5" value="1.0"
+            required>
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:4px;">
@@ -196,8 +184,7 @@
 
       <div class="mm-input-group">
         <label class="mm-label">Kata</label>
-        <input type="text" id="editWord" class="mm-input" disabled
-               style="color:var(--text-3);">
+        <input type="text" id="editWord" class="mm-input" disabled style="color:var(--text-3);">
       </div>
       <div class="grid-2">
         <div class="mm-input-group">
@@ -209,8 +196,7 @@
         </div>
         <div class="mm-input-group">
           <label class="mm-label">Score</label>
-          <input type="number" name="score" id="editScore" class="mm-input"
-                 step="0.1" min="-5" max="5" required>
+          <input type="number" name="score" id="editScore" class="mm-input" step="0.1" min="-5" max="5" required>
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:4px;">

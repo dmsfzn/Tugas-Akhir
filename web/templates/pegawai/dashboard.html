@@ -41,7 +41,7 @@
         <div class="stat-value text-mono" style="color:#6b87f5">{{ positif }}</div>
         <div class="stat-sub">
           {% if total > 0 %}
-            {{ "%.1f"|format(positif/total*100) }}% dari total
+          {{ "%.1f"|format(positif/total*100) }}% dari total
           {% else %}—{% endif %}
         </div>
       </div>
@@ -57,7 +57,7 @@
         <div class="stat-value text-mono" style="color:var(--negative)">{{ negatif }}</div>
         <div class="stat-sub">
           {% if total > 0 %}
-            {{ "%.1f"|format(negatif/total*100) }}% dari total
+          {{ "%.1f"|format(negatif/total*100) }}% dari total
           {% else %}—{% endif %}
         </div>
       </div>
@@ -95,29 +95,28 @@
     </div>
 
     {% if recent %}
-      {% for row in recent %}
-      <div class="d-flex align-items-start gap-3 mb-0 pb-0"
-           style="border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:10px;">
-        <span style="width:6px;height:6px;border-radius:50%;margin-top:6px;flex-shrink:0;
-                     background:{% if row.sentiment=='positif' %}var(--accent){% else %}var(--negative){% endif %};">
-        </span>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;color:var(--text-1);
+    {% for row in recent %}
+    <div class="d-flex align-items-start gap-3 mb-0 pb-0"
+      style="border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:10px;">
+      <span style="width:6px;height:6px;border-radius:50%;margin-top:6px;flex-shrink:0;display:inline-block;
+                     background:{{ 'var(--accent)' if row.sentiment=='positif' else 'var(--negative)' }};"></span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;color:var(--text-1);
                       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-            {{ row.snippet }}…
-          </div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:3px;">
-            {{ row.created_at.strftime('%d %b %Y · %H:%M') if row.created_at else '—' }}
-          </div>
+          {{ row.snippet }}…
         </div>
-        <span class="badge-{{ row.sentiment }}">{{ row.sentiment|upper }}</span>
+        <div style="font-size:11px;color:var(--text-3);margin-top:3px;">
+          {{ row.created_at.strftime('%d %b %Y · %H:%M') if row.created_at else '—' }}
+        </div>
       </div>
-      {% endfor %}
+      <span class="badge-{{ row.sentiment }}">{{ row.sentiment|upper }}</span>
+    </div>
+    {% endfor %}
     {% else %}
-      <div class="text-center py-4 text-dimmer">
-        <i class="bi bi-inbox" style="font-size:28px;display:block;margin-bottom:8px;"></i>
-        Belum ada analisis
-      </div>
+    <div class="text-center py-4 text-dimmer">
+      <i class="bi bi-inbox" style="font-size:28px;display:block;margin-bottom:8px;"></i>
+      Belum ada analisis
+    </div>
     {% endif %}
   </div>
 

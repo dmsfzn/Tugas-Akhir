@@ -12,11 +12,7 @@
     <h1>Operations Overview</h1>
   </div>
   <div style="display:flex;gap:10px;">
-    <a href="{{ url_for('owner_insight') }}" class="btn-mm btn-mm-ghost">
-      <i class="bi bi-graph-up-arrow"></i> Insight
-    </a>
-    <button class="btn-mm btn-mm-primary"
-            onclick="openReport('/report/owner-statistik')">
+    <button class="btn-mm btn-mm-primary" onclick="openReport('/report/owner-statistik')">
       <i class="bi bi-file-earmark-bar-graph"></i> Laporan Statistik
     </button>
   </div>
@@ -43,32 +39,47 @@
     <div class="card-label">Sentiment Velocity Trend</div>
     <div style="font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:16px;">Engine Response Dynamics</div>
     <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:10px;">
-      <button class="page-btn" id="btn7d" onclick="switchRange(7)" style="width:auto;padding:0 10px;font-size:11px;">7D</button>
-      <button class="page-btn active" id="btn30d" onclick="switchRange(30)" style="width:auto;padding:0 10px;font-size:11px;">30D</button>
+      <button class="page-btn" id="btn7d" onclick="switchRange(7)"
+        style="width:auto;padding:0 10px;font-size:11px;">7D</button>
+      <button class="page-btn active" id="btn30d" onclick="switchRange(30)"
+        style="width:auto;padding:0 10px;font-size:11px;">30D</button>
     </div>
     <div class="bar-chart" id="mainChart" style="height:100px;"></div>
     <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;">
-      <span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;background:var(--accent);border-radius:50%;"></span><span class="text-dim">Analyses Peak</span></span>
-      <span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;background:var(--text-3);border-radius:50%;"></span><span class="text-dim">Baseline</span></span>
+      <span style="display:flex;align-items:center;gap:5px;"><span
+          style="width:8px;height:8px;background:var(--accent);border-radius:50%;"></span><span
+          class="text-dim">Analyses Peak</span></span>
+      <span style="display:flex;align-items:center;gap:5px;"><span
+          style="width:8px;height:8px;background:var(--text-3);border-radius:50%;"></span><span
+          class="text-dim">Baseline</span></span>
     </div>
   </div>
   <div class="mm-card">
     <div class="card-label">Sentiment Distribution</div>
     <div class="donut-wrap" style="flex-direction:column;align-items:flex-start;gap:16px;">
       <svg width="100" height="100" viewBox="0 0 100 100" style="display:block;margin:0 auto;">
-        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--bg-root)" stroke-width="14"/>
+        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--bg-root)" stroke-width="14" />
         {% set circ = 239 %}{% set pos_arc = (pos_pct / 100 * circ)|round %}{% set neg_arc = circ - pos_arc %}
-        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--accent)" stroke-width="14" stroke-dasharray="{{ pos_arc }} {{ circ }}" transform="rotate(-90 50 50)"/>
-        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--negative)" stroke-width="14" stroke-dasharray="{{ neg_arc }} {{ circ }}" stroke-dashoffset="{{ -pos_arc }}" transform="rotate(-90 50 50)"/>
+        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--accent)" stroke-width="14"
+          stroke-dasharray="{{ pos_arc }} {{ circ }}" transform="rotate(-90 50 50)" />
+        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--negative)" stroke-width="14"
+          stroke-dasharray="{{ neg_arc }} {{ circ }}" stroke-dashoffset="{{ -pos_arc }}"
+          transform="rotate(-90 50 50)" />
       </svg>
       <div style="width:100%;">
         <div class="donut-label-item mb-2">
           <span class="donut-dot" style="background:var(--accent);"></span>
-          <div><div class="val" style="font-size:18px;">{{ positif }}</div><div class="pct text-dim">POSITIF · {{ pos_pct }}%</div></div>
+          <div>
+            <div class="val" style="font-size:18px;">{{ positif }}</div>
+            <div class="pct text-dim">POSITIF · {{ pos_pct }}%</div>
+          </div>
         </div>
         <div class="donut-label-item">
           <span class="donut-dot" style="background:var(--negative);"></span>
-          <div><div class="val" style="font-size:18px;">{{ negatif }}</div><div class="pct text-dim">NEGATIF · {{ neg_pct }}%</div></div>
+          <div>
+            <div class="val" style="font-size:18px;">{{ negatif }}</div>
+            <div class="pct text-dim">NEGATIF · {{ neg_pct }}%</div>
+          </div>
         </div>
       </div>
     </div>
@@ -81,18 +92,22 @@
     <span class="text-dimmer" style="font-size:10px;">— — —</span>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
-  {% for row in latest %}
-  <div class="d-flex align-items-start gap-3" style="border-bottom:1px solid var(--border);padding:10px 8px 10px 0;">
-    <span data-bg="{% if row.sentiment=='positif' %}var(--accent){% else %}var(--negative){% endif %}"
-          style="width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0;display:inline-block;"></span>
-    <div style="flex:1;min-width:0;">
-      <div style="font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:2px;">{{ row.analyst }} Feedback</div>
-      <div style="font-size:11px;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"{{ row.snippet }}…"</div>
-      <span class="badge-{{ row.sentiment }}" style="margin-top:4px;display:inline-block;">{{ row.sentiment|upper }}</span>
+    {% for row in latest %}
+    <div class="d-flex align-items-start gap-3" style="border-bottom:1px solid var(--border);padding:10px 8px 10px 0;">
+      <span data-bg="{% if row.sentiment=='positif' %}var(--accent){% else %}var(--negative){% endif %}"
+        style="width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0;display:inline-block;"></span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:11px;font-weight:600;color:var(--text-2);margin-bottom:2px;">{{ row.analyst }} Feedback
+        </div>
+        <div style="font-size:11px;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"{{
+          row.snippet }}…"</div>
+        <span class="badge-{{ row.sentiment }}" style="margin-top:4px;display:inline-block;">{{ row.sentiment|upper
+          }}</span>
+      </div>
     </div>
-  </div>
-  {% endfor %}
-  {% if not latest %}<div class="text-center py-4 text-dimmer" style="grid-column:span 2;">Belum ada data</div>{% endif %}
+    {% endfor %}
+    {% if not latest %}<div class="text-center py-4 text-dimmer" style="grid-column:span 2;">Belum ada data</div>{%
+    endif %}
   </div>
 </div>
 

@@ -23,11 +23,8 @@
 
       <form method="POST" action="{{ url_for('pegawai_analisis') }}" id="analysisForm">
         <div class="mm-input-group">
-          <textarea name="text"
-                    class="mm-input mm-textarea"
-                    id="inputText"
-                    placeholder="Masukkan teks untuk dianalisis..."
-                    required>{{ input_text }}</textarea>
+          <textarea name="text" class="mm-input mm-textarea" id="inputText"
+            placeholder="Masukkan teks untuk dianalisis..." required>{{ input_text }}</textarea>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;">
           <button type="button" class="btn-mm btn-mm-ghost" onclick="clearInput()">
@@ -48,37 +45,39 @@
         <span style="font-size:10px;color:var(--text-3);font-family:var(--font-mono);">ATTRIBUTION MAP</span>
       </div>
 
-      <div id="wordHighlight"
-           style="line-height:2;font-size:14px;color:var(--text-1);
+      <div id="wordHighlight" style="line-height:2;font-size:14px;color:var(--text-1);
                   background:var(--bg-input);border:1px solid var(--border);
                   border-radius:8px;padding:14px;min-height:60px;">
         {% set highlight_words = result.highlights|map(attribute='word')|list if result.highlights else [] %}
         {% set highlight_map = {} %}
         {% for h in (result.highlights or []) %}
-          {% set _ = highlight_map.update({h.word: h.label}) %}
+        {% set _ = highlight_map.update({h.word: h.label}) %}
         {% endfor %}
         {% for word in result.text.split() %}
-          {% set clean = word|lower|replace('.','') %}
-          {% if clean in highlight_map %}
-            <span class="word-highlight {{ highlight_map[clean] }}">{{ word }}</span>
-          {% else %}
-            {{ word }}
-          {% endif %}
+        {% set clean = word|lower|replace('.','') %}
+        {% if clean in highlight_map %}
+        <span class="word-highlight {{ highlight_map[clean] }}">{{ word }}</span>
+        {% else %}
+        {{ word }}
+        {% endif %}
         {% endfor %}
       </div>
 
       <!-- Legend -->
       <div style="display:flex;gap:20px;margin-top:12px;font-size:11px;">
         <span style="display:flex;align-items:center;gap:6px;">
-          <span style="width:10px;height:10px;background:rgba(67,97,238,.18);border:1px solid var(--accent);border-radius:2px;"></span>
+          <span
+            style="width:10px;height:10px;background:rgba(67,97,238,.18);border:1px solid var(--accent);border-radius:2px;"></span>
           <span class="text-dim">Positive Influence</span>
         </span>
         <span style="display:flex;align-items:center;gap:6px;">
-          <span style="width:10px;height:10px;background:rgba(249,115,22,.12);border:1px solid var(--negative);border-radius:2px;"></span>
+          <span
+            style="width:10px;height:10px;background:rgba(249,115,22,.12);border:1px solid var(--negative);border-radius:2px;"></span>
           <span class="text-dim">Negative Influence</span>
         </span>
         <span style="display:flex;align-items:center;gap:6px;">
-          <span style="width:10px;height:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;"></span>
+          <span
+            style="width:10px;height:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;"></span>
           <span class="text-dim">Neutral Word</span>
         </span>
       </div>
@@ -91,16 +90,16 @@
       <div class="card-label">● Pre-Processing Log</div>
       <div class="proc-log" id="procLog">
         {% if result %}
-          <div class="log-line log-ok">✓ Cleaning</div>
-          <div class="log-line log-ok">✓ Tokenization</div>
-          <div class="log-line log-spin">⟳ Stemming … PROCESSING</div>
-          <div class="log-line" style="margin-top:8px;color:var(--text-3);">
-            [{{ result.id }}] INIT TOKENIZATION PIPELINE ...<br>
-            [MEM:2GB] BUFFER ALLOCATED (24MB)<br>
-            [OK:3.1] VALIDATION TEST PASSED...
-          </div>
+        <div class="log-line log-ok">✓ Cleaning</div>
+        <div class="log-line log-ok">✓ Tokenization</div>
+        <div class="log-line log-spin">⟳ Stemming … PROCESSING</div>
+        <div class="log-line" style="margin-top:8px;color:var(--text-3);">
+          [{{ result.id }}] INIT TOKENIZATION PIPELINE ...<br>
+          [MEM:2GB] BUFFER ALLOCATED (24MB)<br>
+          [OK:3.1] VALIDATION TEST PASSED...
+        </div>
         {% else %}
-          <div class="log-line text-dimmer">Menunggu input analisis...</div>
+        <div class="log-line text-dimmer">Menunggu input analisis...</div>
         {% endif %}
       </div>
     </div>
@@ -117,8 +116,9 @@
         <div>
           <div class="card-label">Current Classification</div>
           <!-- Sentiment label: color set via class -->
-          <div class="color-{% if result.sentiment=='positif' %}pos{% elif result.sentiment=='negatif' %}neg{% else %}neutral{% endif %}"
-               style="font-size:36px;font-weight:700;
+          <div
+            class="color-{% if result.sentiment=='positif' %}pos{% elif result.sentiment=='negatif' %}neg{% else %}neutral{% endif %}"
+            style="font-size:36px;font-weight:700;
                        text-transform:capitalize;margin-bottom:8px;">
             {{ result.sentiment }}
           </div>
@@ -134,7 +134,7 @@
       <!-- Confidence bar -->
       <div class="confidence-bar" style="height:5px;margin-bottom:16px;">
         <div class="confidence-fill {% if result.sentiment=='negatif' %}neg{% endif %}"
-             data-pct="{{ (result.confidence*100)|round }}"></div>
+          data-pct="{{ (result.confidence*100)|round }}"></div>
       </div>
 
       <!-- Meta -->
@@ -149,9 +149,8 @@
         </div>
         <div>
           <div class="card-label">Lexicon Score</div>
-          <!-- Lexicon score: color set via class -->  
-          <div class="mono color-{% if result.lexicon_score >= 0 %}pos{% else %}neg{% endif %}"
-               style="font-size:13px;">
+          <!-- Lexicon score: color set via class -->
+          <div class="mono color-{% if result.lexicon_score >= 0 %}pos{% else %}neg{% endif %}" style="font-size:13px;">
             {{ "%+.2f"|format(result.lexicon_score) }}
           </div>
         </div>
@@ -166,7 +165,7 @@
       <!-- Report Button -->
       <hr class="mm-hr">
       <button class="btn-mm btn-mm-ghost w-100" style="justify-content:center;"
-              onclick="openReport('/report/single/{{ result.id }}')">
+        onclick="openReport('/report/single/{{ result.id }}')">
         <i class="bi bi-file-earmark-text"></i> Generate Laporan Tunggal
       </button>
     </div>
