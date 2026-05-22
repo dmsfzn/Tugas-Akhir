@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,143 +12,127 @@
     /* Grid noise texture overlay */
     .login-bg::before {
       background-image:
-        radial-gradient(circle at 20% 20%, rgba(67,97,238,.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(249,115,22,.08) 0%, transparent 50%);
-      inset: 0; position: absolute; content: '';
+        radial-gradient(circle at 20% 20%, rgba(67, 97, 238, .15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(249, 115, 22, .08) 0%, transparent 50%);
+      inset: 0;
+      position: absolute;
+      content: '';
     }
+
     .login-grid {
-      position: absolute; inset: 0;
+      position: absolute;
+      inset: 0;
       background-image:
-        linear-gradient(rgba(67,97,238,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(67,97,238,.04) 1px, transparent 1px);
+        linear-gradient(rgba(67, 97, 238, .04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(67, 97, 238, .04) 1px, transparent 1px);
       background-size: 40px 40px;
       pointer-events: none;
     }
+
     .pw-toggle {
-      position: absolute; right: 12px; top: 50%;
+      position: absolute;
+      right: 12px;
+      top: 50%;
       transform: translateY(-50%);
-      background: none; border: none;
-      color: var(--text-3); cursor: pointer; padding: 0;
+      background: none;
+      border: none;
+      color: var(--text-3);
+      cursor: pointer;
+      padding: 0;
       font-size: 14px;
     }
-    .pw-wrap { position: relative; }
+
+    .pw-wrap {
+      position: relative;
+    }
   </style>
 </head>
+
 <body>
 
-<div class="login-bg">
-  <div class="login-grid"></div>
+  <div class="login-bg">
+    <div class="login-grid"></div>
 
-  <div class="login-card">
-    <!-- Brand -->
-    <div class="login-brand">
-      <div class="logo-icon">⚡</div>
-      <h2>MotorMind</h2>
-      <p>System Access</p>
-      <p class="text-dimmer" style="font-size:11px;margin-top:2px;">
-        Select your authorization channel
-      </p>
-    </div>
+    <div class="login-card">
+      <!-- Brand -->
+      <div class="login-brand">
+        <div class="logo-icon">⚡</div>
+        <h2>MotorMind</h2>
+        <p>System Access</p>
+        <p class="text-dimmer" style="font-size:11px;margin-top:2px;">
+          Enter your credentials
+        </p>
+      </div>
 
-    <!-- Flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
       {% for cat, msg in messages %}
-        <div class="mm-alert {{ 'danger' if cat=='danger' else ('success' if cat=='success' else 'info') }}">
-          <i class="bi bi-{{ 'exclamation-circle' if cat=='danger' else 'check-circle' }}"></i>
-          {{ msg }}
-        </div>
+      <div class="mm-alert {{ 'danger' if cat=='danger' else ('success' if cat=='success' else 'info') }}">
+        <i class="bi bi-{{ 'exclamation-circle' if cat=='danger' else 'check-circle' }}"></i>
+        {{ msg }}
+      </div>
       {% endfor %}
-    {% endwith %}
+      {% endwith %}
 
-    <!-- Role tabs -->
-    <div class="role-tabs mb-0" id="roleTabs">
-      <button class="role-tab active" data-role="pegawai" type="button">
-        ADMIN / EMPLOYEE
-      </button>
-      <button class="role-tab" data-role="owner" type="button">
-        OWNER
-      </button>
-    </div>
+      <form method="POST" action="{{ url_for('login') }}" id="loginForm" style="margin-top:20px;">
 
-    <form method="POST" action="{{ url_for('login') }}" id="loginForm" style="margin-top:20px;">
-      <input type="hidden" name="role" id="roleInput" value="pegawai">
-
-      <!-- Identification Token -->
-      <div class="mm-input-group">
-        <label class="mm-label">
-          <i class="bi bi-shield-lock" style="margin-right:4px;"></i>
-          Identification Token
-        </label>
-        <div style="position:relative;">
-          <i class="bi bi-person" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:14px;"></i>
-          <input type="text"
-                 name="identifier"
-                 id="identifier"
-                 class="mm-input"
-                 style="padding-left:36px;"
-                 placeholder="Employee ID or Email"
-                 required
-                 value="{{ request.form.get('identifier','') }}">
-        </div>
-      </div>
-
-      <!-- Security Key -->
-      <div class="mm-input-group">
-        <div class="d-flex justify-content-between align-items-center" style="margin-bottom:6px;">
-          <label class="mm-label mb-0">
-            <i class="bi bi-key" style="margin-right:4px;"></i>
-            Security Key
+        <!-- Identification Token -->
+        <div class="mm-input-group">
+          <label class="mm-label">
+            <i class="bi bi-shield-lock" style="margin-right:4px;"></i>
+            Identification Token
           </label>
+          <div style="position:relative;">
+            <i class="bi bi-person"
+              style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:14px;"></i>
+            <input type="text" name="identifier" id="identifier" class="mm-input" style="padding-left:36px;"
+              placeholder="ID or Email" required value="{{ request.form.get('identifier','') }}">
+          </div>
         </div>
-        <div class="pw-wrap">
-          <i class="bi bi-lock" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:14px;"></i>
-          <input type="password"
-                 name="password"
-                 id="pwInput"
-                 class="mm-input"
-                 style="padding-left:36px;padding-right:40px;"
-                 placeholder="••••••••"
-                 required>
-          <button type="button" class="pw-toggle" onclick="togglePw()">
-            <i class="bi bi-eye" id="pwEyeIcon"></i>
-          </button>
+
+        <!-- Security Key -->
+        <div class="mm-input-group">
+          <div class="d-flex justify-content-between align-items-center" style="margin-bottom:6px;">
+            <label class="mm-label mb-0">
+              <i class="bi bi-key" style="margin-right:4px;"></i>
+              Security Key
+            </label>
+          </div>
+          <div class="pw-wrap">
+            <i class="bi bi-lock"
+              style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:14px;"></i>
+            <input type="password" name="password" id="pwInput" class="mm-input"
+              style="padding-left:36px;padding-right:40px;" placeholder="••••••••" required>
+            <button type="button" class="pw-toggle" onclick="togglePw()">
+              <i class="bi bi-eye" id="pwEyeIcon"></i>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <!-- Submit -->
-      <button type="submit" class="btn-mm btn-mm-primary w-100" style="justify-content:center; margin-top:4px;">
-        Initialize Terminal
-        <i class="bi bi-arrow-right"></i>
-      </button>
-    </form>
+        <!-- Submit -->
+        <button type="submit" class="btn-mm btn-mm-primary w-100" style="justify-content:center; margin-top:4px;">
+          Initialize Terminal
+          <i class="bi bi-arrow-right"></i>
+        </button>
+      </form>
 
+    </div>
   </div>
-</div>
 
-<script>
-/* Role tabs */
-document.querySelectorAll('.role-tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.role-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('roleInput').value = btn.dataset.role;
-    document.getElementById('identifier').placeholder =
-      btn.dataset.role === 'owner' ? 'Owner ID or Email' : 'Employee ID or Email';
-  });
-});
-
-/* Password toggle */
-function togglePw() {
-  const inp  = document.getElementById('pwInput');
-  const icon = document.getElementById('pwEyeIcon');
-  if (inp.type === 'password') {
-    inp.type = 'text';
-    icon.className = 'bi bi-eye-slash';
-  } else {
-    inp.type = 'password';
-    icon.className = 'bi bi-eye';
-  }
-}
-</script>
+  <script>
+    /* Password toggle */
+    function togglePw() {
+      const inp = document.getElementById('pwInput');
+      const icon = document.getElementById('pwEyeIcon');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+      } else {
+        inp.type = 'password';
+        icon.className = 'bi bi-eye';
+      }
+    }
+  </script>
 </body>
+
 </html>
