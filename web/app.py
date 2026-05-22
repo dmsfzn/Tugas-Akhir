@@ -455,6 +455,24 @@ def owner_insight():
 
 
 
+@app.route('/report/lexicon-list')
+@login_required
+def report_lexicon_list():
+    """Popup laporan daftar lexicon lengkap."""
+    db  = get_db()
+    cur = db.cursor(dictionary=True)
+    cur.execute("SELECT * FROM lexicon ORDER BY word ASC")
+    lexicons = cur.fetchall()
+    cur.close(); db.close()
+
+    total = len(lexicons)
+    pos   = sum(1 for r in lexicons if r['category'] == 'positif')
+    neg   = sum(1 for r in lexicons if r['category'] == 'negatif')
+    stats = {'total': total, 'pos': pos, 'neg': neg}
+
+    return render_template('report_lexicon_list.html', lexicons=lexicons, stats=stats)
+
+
 @app.route('/report/single/<int:analysis_id>')
 @login_required
 def report_single(analysis_id):
