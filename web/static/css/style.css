@@ -73,6 +73,7 @@ a:hover { color: #6b87f5; }
   overflow: hidden;
 }
 .mm-sidebar:hover { width: var(--sidebar-exp); }
+.mm-sidebar:hover + .mm-main { margin-left: var(--sidebar-exp); }
 
 .mm-sidebar .brand {
   display: flex;
@@ -697,6 +698,7 @@ a:hover { color: #6b87f5; }
 @media (max-width: 768px) {
   .mm-sidebar { width: 56px; }
   .mm-sidebar:hover { width: 56px; }
+  .mm-sidebar:hover + .mm-main { margin-left: 56px; }
   .mm-sidebar .brand-text,
   .mm-sidebar .nav-item span,
   .mm-sidebar .nav-label,
