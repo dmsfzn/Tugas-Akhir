@@ -97,22 +97,21 @@ def role_required(*roles):
 # ─────────────────────────────────────────────
 @app.route('/', methods=['GET', 'POST'])
 def login():
-    """Halaman login: validasi identifier (email/NIP) + password + role ke DB."""
+    """Halaman login: validasi identifier (email/NIP) + password ke DB."""
     if 'user_id' in session:
         return redirect(url_for('dashboard_redirect'))
 
     if request.method == 'POST':
         identifier = request.form.get('identifier', '').strip()
         password   = request.form.get('password', '')
-        role       = request.form.get('role', 'pegawai')
 
         db = get_db()
         cur = db.cursor(dictionary=True)
         cur.execute(
             """SELECT * FROM users
                WHERE (email = %s OR employee_id = %s)
-                 AND password = %s AND role = %s AND is_active = 1""",
-            (identifier, identifier, hash_password(password), role)
+                 AND password = %s AND is_active = 1""",
+            (identifier, identifier, hash_password(password))
         )
         user = cur.fetchone()
         cur.close(); db.close()
