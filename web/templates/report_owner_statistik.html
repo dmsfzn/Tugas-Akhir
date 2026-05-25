@@ -142,7 +142,7 @@
     <div class="signature-block">
       <div class="signature-place-date">Jakarta, {{ now().strftime('%d %B %Y') }}</div>
       <div class="signature-name">{{ session.get('username', '—') }}</div>
-      <div class="signature-role">{{ session.get('role', '')|capitalize }}</div>
+      <div class="signature-role">{% if session.get('role') == 'owner' %}Pemilik{% else %}{{ session.get('role', '')|capitalize }}{% endif %}</div>
       <div class="signature-space"></div>
       <div class="signature-caption">Tanda Tangan</div>
     </div>
