@@ -540,6 +540,75 @@ def report_all_analyses():
                            sentiment=sentiment, q=q)
 
 
+@app.route('/report/export-csv')
+@login_required
+def report_export_csv():
+    """Download laporan analisis sebagai file CSV dengan filter identik."""
+    date_from = request.args.get('date_from', '')
+    date_to   = request.args.get('date_to', '')
+    sentiment = request.args.get('sentiment', 'all')
+    q         = request.args.get('q', '').strip()
+
+    db  = get_db()
+    cur = db.cursor(dictionary=True)
+
+    if session['role'] == 'pegawai':
+        cond   = ["user_id = %s"]
+        params = [session['user_id']]
+    else:
+        cond   = ["1=1"]
+        params = []
+    if q:
+        cond.append("text LIKE %s"); params.append(f'%{q}%')
+    if sentiment != 'all':
+        cond.append("sentiment = %s"); params.append(sentiment)
+    if date_from:
+        cond.append("DATE(created_at) >= %s"); params.append(date_from)
+    if date_to:
+        cond.append("DATE(created_at) <= %s"); params.append(date_to)
+
+    where = " AND ".join(cond)
+
+    # Subquery to avoid ambiguity on created_at column during JOIN with users
+    cur.execute(
+        f"""SELECT sub.id, sub.user_id, sub.text, sub.sentiment,
+                   sub.confidence, sub.lexicon_score, sub.word_count,
+                   sub.created_at, u.name AS analyst_name
+            FROM (SELECT * FROM analyses WHERE {where}) AS sub
+            LEFT JOIN users u ON sub.user_id = u.id
+            ORDER BY sub.created_at DESC""",
+        params
+    )
+    rows = cur.fetchall()
+    cur.close(); db.close()
+
+    # Generate CSV in memory
+    si = io.StringIO()
+    cw = csv.writer(si)
+
+    # Write header
+    cw.writerow(['No', 'Tanggal & Waktu', 'Analyst', 'Teks Analisis', 'Sentimen', 'Confidence (%)', 'Lexicon Score', 'Word Count'])
+
+    for idx, row in enumerate(rows, 1):
+        created_at_str = row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if row['created_at'] else '—'
+        confidence_pct = round(row['confidence'] * 100, 1) if row['confidence'] else '—'
+        cw.writerow([
+            idx,
+            created_at_str,
+            row['analyst_name'] or '—',
+            row['text'],
+            row['sentiment'].upper() if row['sentiment'] else '—',
+            confidence_pct,
+            f"{row['lexicon_score']:+.2f}" if row['lexicon_score'] is not None else '—',
+            row['word_count'] or 0
+        ])
+
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = f"attachment; filename=report_analyses_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    output.headers["Content-type"] = "text/csv; charset=utf-8"
+    return output
+
+
 @app.route('/report/owner-statistik')
 @login_required
 @role_required('owner')
