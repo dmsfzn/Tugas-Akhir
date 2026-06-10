@@ -146,8 +146,13 @@
 
     <!-- TOPBAR -->
     <header class="mm-topbar">
-      <div class="page-title">
-        {% block page_label %}MotorMind{% endblock %}
+      <div class="d-flex align-items-center">
+        <button id="sidebarToggle" class="icon-btn me-3" title="Toggle Sidebar">
+          <i class="bi bi-list"></i>
+        </button>
+        <div class="page-title">
+          {% block page_label %}MotorMind{% endblock %}
+        </div>
       </div>
       <div class="topbar-actions">
         <a href="{{ url_for('logout') }}" class="icon-btn" title="Logout">
