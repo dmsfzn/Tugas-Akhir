@@ -21,4 +21,6 @@ model/
 data/
 
 .vscode/
-listing_program_ta.md
+listing_program_ta.md
+
+*.mysql
