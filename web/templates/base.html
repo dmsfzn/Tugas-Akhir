@@ -66,12 +66,6 @@
             <span>Dashboard</span>
           </a>
 
-          <a href="{{ url_for('pegawai_analisis') }}"
-             class="nav-item {% if request.endpoint == 'pegawai_analisis' %}active{% endif %}">
-            <i class="bi bi-cpu"></i>
-            <span>Analisis</span>
-          </a>
-
           <a href="{{ url_for('pegawai_history') }}"
              class="nav-item {% if request.endpoint == 'pegawai_history' %}active{% endif %}">
             <i class="bi bi-clock-history"></i>
@@ -84,8 +78,6 @@
             <span>Lexicon</span>
           </a>
         </div>
-
-
 
       {% elif session.get('role') == 'owner' %}
         <!-- ── OWNER NAV ── -->
@@ -105,7 +97,27 @@
           </a>
         </div>
 
+        <div class="nav-section">
+          <div class="nav-label">Operasional</div>
 
+          <a href="{{ url_for('pegawai_history') }}"
+             class="nav-item {% if request.endpoint == 'pegawai_history' %}active{% endif %}">
+            <i class="bi bi-clock-history"></i>
+            <span>Riwayat</span>
+          </a>
+
+          <a href="{{ url_for('pegawai_lexicon') }}"
+             class="nav-item {% if request.endpoint == 'pegawai_lexicon' %}active{% endif %}">
+            <i class="bi bi-database"></i>
+            <span>Lexicon</span>
+          </a>
+
+          <a href="{{ url_for('owner_employees') }}"
+             class="nav-item {% if request.endpoint == 'owner_employees' %}active{% endif %}">
+            <i class="bi bi-people"></i>
+            <span>Kelola Pegawai</span>
+          </a>
+        </div>
       {% endif %}
     </nav>
 

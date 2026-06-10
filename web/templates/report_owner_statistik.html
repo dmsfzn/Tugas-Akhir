@@ -112,19 +112,19 @@
   {% endfor %}
   {% endif %}
 
-  <!-- Analyst Productivity -->
-  {% if analysts %}
-  <div class="section-title">Produktivitas Analyst</div>
+  <!-- Tipe Motor Terpopuler -->
+  {% if motor_types %}
+  <div class="section-title">Tipe Motor Terpopuler</div>
   <table class="report-table blue">
     <thead>
-      <tr><th>#</th><th>Nama Analyst</th><th>Total Analisis</th></tr>
+      <tr><th>#</th><th>Tipe Motor</th><th>Frekuensi Cuci</th></tr>
     </thead>
     <tbody>
-      {% for a in analysts %}
+      {% for m in motor_types %}
       <tr class="avoid-break">
         <td style="font-family:'Space Mono',monospace;font-size:10px;color:#9ca3af;">{{ loop.index }}</td>
-        <td>{{ a.name }}</td>
-        <td style="font-family:'Space Mono',monospace;font-weight:700;color:#4361EE;">{{ a.cnt }}</td>
+        <td style="font-weight:600;color:#1a1a2e;">{{ m.motor_type }}</td>
+        <td style="font-family:'Space Mono',monospace;font-weight:700;color:#4361EE;">{{ m.cnt }} kali</td>
       </tr>
       {% endfor %}
     </tbody>

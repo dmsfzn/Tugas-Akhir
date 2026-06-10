@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan Daftar Pegawai — MotorMind</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+</head>
+<body>
+
+<!-- ── TOOLBAR ── -->
+<div class="print-toolbar">
+  <div class="tb-info">Laporan Pegawai · {{ employees|length }} pegawai terdaftar</div>
+  <button class="btn-print primary" onclick="doPrint()">⎙ Cetak / Simpan PDF</button>
+  <button class="btn-print secondary" onclick="doClose()">✕ Tutup</button>
+</div>
+
+<div class="report-page">
+
+  <!-- ── KOP SURAT ── -->
+  <div class="kop-surat">
+    <div class="kop-left">
+      <div class="kop-logo">⚡</div>
+      <div class="kop-company">
+        <div class="kop-company-name">BENGKEL STEAM MOTOR SENTOSA</div>
+        <div class="kop-company-tagline">Perawatan & Analisis Sentimen Pelanggan Barista</div>
+      </div>
+    </div>
+    <div class="kop-right">
+      <div class="kop-doctype">Laporan Daftar Pegawai</div>
+      Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}<br>
+      Total Pegawai: {{ employees|length }}
+    </div>
+  </div>
+  <div class="kop-address-bar">
+    <span>📍 Jl. Kemang Raya No. 45, Kemang, Pesanggrahan, Jakarta Selatan 12730</span>
+    <span>📞 (021) 719-4567</span>
+    <span>📱 0812-3456-7890</span>
+    <span>✉ info@steamsentosa.id</span>
+  </div>
+
+  <!-- ── JUDUL ── -->
+  <div class="report-title-block">
+    <h2>Laporan Daftar Pegawai Terdaftar</h2>
+  </div>
+
+  <!-- ── TABEL PEGAWAI ── -->
+  <div class="section-title">Daftar Pegawai</div>
+  <table class="report-table dark big-table">
+    <thead>
+      <tr>
+        <th style="width: 50px;">#</th>
+        <th>ID Pegawai</th>
+        <th>Nama Lengkap</th>
+        <th>No. Telepon / WA</th>
+        <th>Tanggal Terdaftar</th>
+        <th>Status Akun</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if employees %}
+        {% for emp in employees %}
+        <tr class="avoid-break">
+          <td style="font-family:'Space Mono',monospace;font-size:10px;color:#9ca3af;">{{ loop.index }}</td>
+          <td style="font-family:'Space Mono',monospace;font-weight:700;color:#4361EE;font-size:12px;">{{ emp.employee_id }}</td>
+          <td style="color:#1a1a2e;font-size:12px;font-weight:600;">{{ emp.name }}</td>
+          <td style="font-size:12px;">{{ emp.phone }}</td>
+          <td style="font-family:'Space Mono',monospace;font-size:11px;color:#4a4a6a;">
+            {{ emp.created_at.strftime('%d %b %Y · %H:%M') if emp.created_at else '—' }}
+          </td>
+          <td>
+            <span class="badge {% if emp.is_active %}positif{% else %}negatif{% endif %}">
+              {% if emp.is_active %}AKTIF{% else %}NONAKTIF{% endif %}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="6" style="text-align:center;padding:24px;color:#9ca3af;">
+            Belum ada pegawai terdaftar.
+          </td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+  <!-- ── FOOTER & TANDA TANGAN ── -->
+  <div class="report-footer-section" style="margin-top: 50px;">
+    <div class="footer-left">
+      MotorMind Sentiment Analysis System — Tugas Akhir<br>
+      <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Kemang Raya No. 45, Jakarta Selatan<br>
+      Sistem Portal Feedback & Captive Wifi
+    </div>
+
+    <div class="signature-block">
+      <div class="signature-place-date">Jakarta, {{ now().strftime('%d %B %Y') }}</div>
+      <div class="signature-name">{{ session.get('username', '—') }}</div>
+      <div class="signature-role">{% if session.get('role') == 'owner' %}Pemilik{% else %}{{ session.get('role', '')|capitalize }}{% endif %}</div>
+      <div class="signature-space"></div>
+      <div class="signature-caption">Tanda Tangan</div>
+    </div>
+  </div>
+
+</div><!-- .report-page -->
+
+<script>
+  function doPrint() {
+    window.print();
+  }
+  function doClose() {
+    window.close();
+  }
+</script>
+</body>
+</html>

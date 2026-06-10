@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MotorMind — Free Wifi Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .login-bg::before {
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(67, 97, 238, .15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(249, 115, 22, .08) 0%, transparent 50%);
+      inset: 0;
+      position: absolute;
+      content: '';
+    }
+
+    .login-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(67, 97, 238, .04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(67, 97, 238, .04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    .feedback-card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+      position: relative;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-bg">
+    <div class="login-grid"></div>
+
+    <div class="feedback-card">
+      <!-- Brand & Wifi Banner -->
+      <div class="login-brand mb-4">
+        <div class="logo-icon"><i class="bi bi-wifi"></i></div>
+        <h2 style="font-size:24px;">FREE STEAM WIFI</h2>
+        <p>MotorMind Steam Wash Service</p>
+        <p class="text-dimmer" style="font-size:11.5px;margin-top:2px;">
+          Berikan feedback Anda tentang layanan kami untuk mengaktifkan akses internet gratis.
+        </p>
+      </div>
+
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+        <div class="mm-alert {{ 'danger' if cat=='danger' else ('success' if cat=='success' else 'info') }} mb-3">
+          <i class="bi bi-{{ 'exclamation-circle' if cat=='danger' else 'check-circle' }}"></i>
+          {{ msg }}
+        </div>
+        {% endfor %}
+      {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('index') }}" id="feedbackForm">
+        
+        <!-- Row: Nama & Tipe Motor -->
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <div class="mm-input-group mb-0">
+              <label class="mm-label">
+                <i class="bi bi-person" style="margin-right:4px;"></i>
+                Nama Pelanggan <span class="text-dimmer" style="font-size:10px;">(Opsional)</span>
+              </label>
+              <input type="text" name="name" class="mm-input" placeholder="Masukkan nama Anda">
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="mm-input-group mb-0">
+              <label class="mm-label">
+                <i class="bi bi-bicycle" style="margin-right:4px;"></i>
+                Tipe Motor <span class="text-danger">*</span>
+              </label>
+              <input type="text" name="motor_type" class="mm-input" placeholder="NMAX, Beat, Vespa..." required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback / Ulasan -->
+        <div class="mm-input-group mb-3">
+          <label class="mm-label">
+            <i class="bi bi-chat-right-text" style="margin-right:4px;"></i>
+            Ulasan Layanan <span class="text-danger">*</span>
+          </label>
+          <textarea name="feedback" class="mm-input mm-textarea" style="height:100px; min-height:80px;"
+            placeholder="Bagaimana hasil cucian motor dan pelayanan kami?" required></textarea>
+        </div>
+
+        <!-- Kritik & Saran -->
+        <div class="mm-input-group mb-4">
+          <label class="mm-label">
+            <i class="bi bi-pencil-square" style="margin-right:4px;"></i>
+            Kritik / Saran <span class="text-dimmer" style="font-size:10px;">(Opsional)</span>
+          </label>
+          <textarea name="criticism_suggestion" class="mm-input mm-textarea" style="height:80px; min-height:60px;"
+            placeholder="Masukkan kritik/saran demi kenyamanan Anda"></textarea>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-mm btn-mm-primary w-100" style="justify-content:center;">
+          Kirim & Hubungkan Wifi
+          <i class="bi bi-wifi-2"></i>
+        </button>
+      </form>
+
+      <!-- Member login link -->
+      <div class="text-center mt-3">
+        <a href="{{ url_for('login') }}" class="text-dimmer" style="font-size:12px;text-decoration:none;">
+          <i class="bi bi-shield-lock"></i> Login Staf MotorMind
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+
+</html>

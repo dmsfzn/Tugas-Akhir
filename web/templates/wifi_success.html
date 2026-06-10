@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MotorMind — Wifi Connected</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .login-bg::before {
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(67, 97, 238, .15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(249, 115, 22, .08) 0%, transparent 50%);
+      inset: 0;
+      position: absolute;
+      content: '';
+    }
+
+    .login-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(67, 97, 238, .04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(67, 97, 238, .04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    .success-card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+      position: relative;
+      text-align: center;
+    }
+
+    .pulse-icon {
+      width: 80px;
+      height: 80px;
+      line-height: 80px;
+      background: rgba(67, 97, 238, 0.15);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      border-radius: 50%;
+      font-size: 36px;
+      margin: 0 auto 20px;
+      animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-border {
+      0% {
+        box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 15px rgba(67, 97, 238, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(67, 97, 238, 0);
+      }
+    }
+
+    .spec-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 0;
+      font-size: 13px;
+    }
+
+    .spec-item:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-bg">
+    <div class="login-grid"></div>
+
+    <div class="success-card">
+      <!-- Success Icon -->
+      <div class="pulse-icon">
+        <i class="bi bi-shield-check"></i>
+      </div>
+
+      <!-- Heading -->
+      <h2 style="font-size:24px;font-weight:700;color:var(--text-1);">ACCESS GRANTED</h2>
+      <p class="text-dimmer" style="font-size:13px;margin-bottom:24px;">
+        Halo, <strong>{{ customer }}</strong>. Terima kasih atas ulasan Anda! Perangkat Anda kini telah terhubung ke internet.
+      </p>
+
+      <!-- Connection Details Card -->
+      <div class="mm-card text-start mb-4" style="background:var(--bg-root);border:1px solid var(--border);">
+        <div class="card-label mb-2"><i class="bi bi-info-circle"></i> Detail Koneksi</div>
+        <div class="spec-item">
+          <span class="text-dim">Nama Jaringan</span>
+          <span class="mono color-pos">MotorMind_Steam_FreeWifi</span>
+        </div>
+        <div class="spec-item">
+          <span class="text-dim">Status</span>
+          <span class="mono text-success">CONNECTED</span>
+        </div>
+        <div class="spec-item">
+          <span class="text-dim">Kecepatan Link</span>
+          <span class="mono">150 Mbps</span>
+        </div>
+        <div class="spec-item">
+          <span class="text-dim">Alokasi IP</span>
+          <span class="mono">192.168.10.154</span>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <a href="https://google.com" target="_blank" class="btn-mm btn-mm-primary w-100" style="justify-content:center;">
+        Lanjutkan Browsing
+        <i class="bi bi-globe"></i>
+      </a>
+
+      <!-- Home link -->
+      <div class="text-center mt-3">
+        <a href="{{ url_for('index') }}" class="text-dimmer" style="font-size:12px;text-decoration:none;">
+          <i class="bi bi-arrow-left"></i> Kembali ke Form Feedback
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+
+</html>

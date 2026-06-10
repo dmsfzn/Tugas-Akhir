@@ -82,7 +82,8 @@
       <tr>
         <th>#</th>
         <th>Tanggal &amp; Waktu</th>
-        <th class="hide-mobile">Analyst</th>
+        <th>Pelanggan</th>
+        <th>Tipe Motor</th>
         <th>Teks Analisis</th>
         <th>Sentimen</th>
         <th class="hide-mobile">Confidence</th>
@@ -97,7 +98,8 @@
           <td style="white-space:nowrap;font-family:'Space Mono',monospace;font-size:10px;color:#9ca3af;">
             {{ row.created_at.strftime('%d/%m/%Y %H:%M') if row.created_at else '—' }}
           </td>
-          <td class="hide-mobile" style="font-size:12px;color:#4a4a6a;">{{ row.analyst_name or '—' }}</td>
+          <td style="font-size:12px;color:#4a4a6a;font-weight:600;">{{ row.customer_name or 'Anonim' }}</td>
+          <td style="font-size:12px;color:#4a4a6a;">{{ row.motor_type or '—' }}</td>
           <td style="max-width:220px;color:#1a1a2e;font-size:12px;">
             {{ row.text[:90] }}{% if row.text|length > 90 %}…{% endif %}
           </td>
@@ -122,7 +124,7 @@
         {% endfor %}
       {% else %}
         <tr>
-          <td colspan="6" style="text-align:center;padding:24px;color:#9ca3af;">
+          <td colspan="8" style="text-align:center;padding:24px;color:#9ca3af;">
             Tidak ada data analisis
           </td>
         </tr>

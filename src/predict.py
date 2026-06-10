@@ -7,15 +7,7 @@ import joblib
 import numpy as np
 from stemmid import Stemmer
 from config import MODEL_FILE, VECTORIZER_FILE
-from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
-
-
-# =========================
-# STOPWORD (Sastrawi)
-# =========================
-factory = StopWordRemoverFactory()
-STOPWORDS = set(factory.get_stop_words())
-STOPWORDS -= {"tidak", "kurang", "belum"}
+from preprocess import normalisasi_teks
 
 
 # =========================
@@ -29,32 +21,6 @@ KAMUS_KUSTOM = {
     "lama":   -1,
     "nyaman":  1,
 }
-
-
-# =========================
-# PREPROCESSING (WAJIB SAMA DENGAN TRAINING)
-# =========================
-def preprocess_text(text, stemmer):
-    text = str(text).lower()
-
-    # cleaning
-    text = re.sub(r"http\S+|www\S+", "", text)
-    text = re.sub(r"[^a-zA-Z\s]", "", text)
-    text = re.sub(r"\s+", " ", text).strip()
-
-    # tokenizing
-    tokens = text.split()
-
-    # stopword removal
-    tokens = [t for t in tokens if t not in STOPWORDS]
-
-    # gabung kembali
-    text = " ".join(tokens)
-
-    # stemming
-    text = stemmer.loads(text)
-
-    return text
 
 
 # =========================
@@ -121,7 +87,7 @@ def lexicon_scoring(text: str, lexicon: dict):
 def hybrid_prediction(text: str, model, vectorizer, stemmer: Stemmer, custom_dict: dict):
 
     # a. Preprocessing
-    teks_bersih = preprocess_text(text, stemmer)
+    teks_bersih = normalisasi_teks(text, stemmer)
     vec = vectorizer.transform([teks_bersih])
 
     # b. Prediksi ML

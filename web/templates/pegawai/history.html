@@ -61,10 +61,11 @@
     <thead>
       <tr>
         <th>Timestamp</th>
+        <th>Pelanggan</th>
+        <th>Tipe Motor</th>
         <th>Review Snippet</th>
         <th>Sentiment</th>
         <th>Confidence</th>
-        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -74,6 +75,8 @@
         <td class="ts" style="white-space:nowrap;">
           {{ row.created_at.strftime('%Y.%m.%d | %H:%M:%S') if row.created_at else '—' }}
         </td>
+        <td class="customer" style="font-weight:600;color:var(--text-1);">{{ row.customer_name or 'Anonim' }}</td>
+        <td class="motor" style="color:var(--text-2);">{{ row.motor_type or '—' }}</td>
         <td class="snippet">"{{ row.snippet }}…"</td>
         <td><span class="badge-{{ row.sentiment }}">{{ row.sentiment|upper }}</span></td>
         <td>
@@ -89,18 +92,11 @@
             </span>
           </div>
         </td>
-        <td>
-          <!-- Hanya tombol laporan tunggal, tombol mata (detail) dihapus -->
-          <button class="icon-btn" style="width:28px;height:28px;border-radius:6px;"
-            onclick="openReport('/report/single/{{ row.id }}')" title="Laporan">
-            <i class="bi bi-file-earmark-text" style="font-size:12px;"></i>
-          </button>
-        </td>
       </tr>
       {% endfor %}
       {% else %}
       <tr>
-        <td colspan="5" class="text-center py-5 text-dimmer">
+        <td colspan="6" class="text-center py-5 text-dimmer">
           <i class="bi bi-inbox" style="font-size:28px;display:block;margin-bottom:8px;"></i>
           Tidak ada data sesuai filter
         </td>
