@@ -163,9 +163,9 @@ def login():
         cur = db.cursor(dictionary=True)
         cur.execute(
             """SELECT * FROM users
-               WHERE (email = %s OR employee_id = %s)
+               WHERE employee_id = %s
                  AND password = %s AND is_active = 1""",
-            (identifier, identifier, hash_password(password))
+            (identifier, hash_password(password))
         )
         user = cur.fetchone()
         cur.close(); db.close()
