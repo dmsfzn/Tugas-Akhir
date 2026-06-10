@@ -28,7 +28,7 @@
     </div>
     <div class="kop-right">
       <div class="kop-doctype">Laporan Statistik Operasional</div>
-      Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}
+      Dicetak: {{ format_date_id(now(), show_time=True) }}
     </div>
   </div>
   <div class="kop-address-bar">
@@ -100,7 +100,7 @@
   {% set max_day = trend|map(attribute='total')|max %}
   {% for row in trend %}
   <div class="bar-row">
-    <div class="bar-date">{{ row.day.strftime('%d %b') if row.day else '—' }}</div>
+    <div class="bar-date">{{ format_date_id(row.day, show_year=False, short_month=True) if row.day else '—' }}</div>
     <div class="bar-stacked">
       {% if max_day > 0 %}
         <div class="bar-pos" data-pct="{{ (row.pos / max_day * 100)|round }}"></div>
@@ -140,7 +140,7 @@
     </div>
 
     <div class="signature-block">
-      <div class="signature-place-date">Jakarta, {{ now().strftime('%d %B %Y') }}</div>
+      <div class="signature-place-date">Jakarta, {{ format_date_id(now()) }}</div>
       <div class="signature-name">{{ session.get('username', '—') }}</div>
       <div class="signature-role">{% if session.get('role') == 'owner' %}Pemilik{% else %}{{ session.get('role', '')|capitalize }}{% endif %}</div>
       <div class="signature-space"></div>

@@ -22,7 +22,7 @@
 
   <!-- ── LEFT COLUMN: DAFTAR PEGAWAI ──────────────── -->
   <div class="mm-table-wrap mb-3" style="grid-column: span 1;">
-    <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:between;align-items:center;">
+    <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
       <span style="font-size:11px;color:var(--text-3);font-weight:600;">
         DAFTAR STAF TERDAFTAR ({{ employees|length }})
       </span>
@@ -34,6 +34,7 @@
           <th>ID Pegawai</th>
           <th>Nama</th>
           <th>No. Telp</th>
+          <th>Status</th>
           <th>Aksi</th>
         </tr>
       </thead>
@@ -45,19 +46,38 @@
           <td>{{ emp.name }}</td>
           <td>{{ emp.phone }}</td>
           <td>
-            <form method="POST" action="{{ url_for('owner_employees') }}" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pegawai ini?');">
-              <input type="hidden" name="action" value="delete">
-              <input type="hidden" name="id" value="{{ emp.id }}">
-              <button type="submit" class="icon-btn" style="color:var(--negative);width:28px;height:28px;border-radius:6px;" title="Hapus Pegawai">
-                <i class="bi bi-trash" style="font-size:12px;"></i>
+            <span class="badge {% if emp.is_active %}positif{% else %}negatif{% endif %}" style="font-size: 10px; padding: 3px 8px;">
+              {% if emp.is_active %}AKTIF{% else %}NONAKTIF{% endif %}
+            </span>
+          </td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <!-- Edit -->
+              <button class="icon-btn" style="width:28px;height:28px;border-radius:6px;" 
+                data-id="{{ emp.id }}" 
+                data-name="{{ emp.name|e }}" 
+                data-phone="{{ emp.phone|e }}"
+                data-employee-id="{{ emp.employee_id|e }}" 
+                data-is-active="{{ emp.is_active }}"
+                onclick="openEditModal(this)" title="Edit Pegawai">
+                <i class="bi bi-pencil" style="font-size:12px;color:var(--accent);"></i>
               </button>
-            </form>
+
+              <!-- Delete -->
+              <form method="POST" action="{{ url_for('owner_employees') }}" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pegawai ini?');">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="{{ emp.id }}">
+                <button type="submit" class="icon-btn" style="color:var(--negative);width:28px;height:28px;border-radius:6px;" title="Hapus Pegawai">
+                  <i class="bi bi-trash" style="font-size:12px;"></i>
+                </button>
+              </form>
+            </div>
           </td>
         </tr>
         {% endfor %}
         {% else %}
         <tr>
-          <td colspan="4" class="text-center py-4 text-dimmer">Belum ada pegawai terdaftar</td>
+          <td colspan="5" class="text-center py-4 text-dimmer">Belum ada pegawai terdaftar</td>
         </tr>
         {% endif %}
       </tbody>
@@ -109,6 +129,62 @@
 
 </div>
 
+<!-- ══════════════════════════════════════════
+     MODAL — EDIT PEGAWAI
+══════════════════════════════════════════ -->
+<div class="mm-modal-backdrop" id="editEmployeeModal" style="display:none;">
+  <div class="mm-modal" style="max-width: 450px;">
+    <h5><i class="bi bi-pencil text-accent me-2"></i> Edit Data Pegawai</h5>
+    <form method="POST" action="{{ url_for('owner_employees') }}" id="editEmpForm">
+      <input type="hidden" name="action" value="edit">
+      <input type="hidden" name="id" id="editEmpId">
+
+      <div class="mm-input-group mb-3">
+        <label class="mm-label">Nama Lengkap</label>
+        <input type="text" name="name" id="editEmpName" class="mm-input" required>
+      </div>
+
+      <div class="mm-input-group mb-3">
+        <label class="mm-label">No. Telepon / WhatsApp</label>
+        <input type="text" name="phone" id="editEmpPhone" class="mm-input" required>
+      </div>
+
+      <div class="grid-2">
+        <div class="mm-input-group mb-3">
+          <label class="mm-label">ID Pegawai</label>
+          <input type="text" name="employee_id" id="editEmpEmployeeId" class="mm-input mono" required>
+        </div>
+        <div class="mm-input-group mb-3">
+          <label class="mm-label">Status Akun</label>
+          <select name="is_active" id="editEmpIsActive" class="mm-input">
+            <option value="1">Aktif</option>
+            <option value="0">Nonaktif</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mm-input-group mb-4">
+        <label class="mm-label">Password Baru <span class="text-dimmer">(Kosongkan jika tidak diubah)</span></label>
+        <div style="position:relative;">
+          <input type="password" name="password" id="editEmpPassword" class="mm-input" placeholder="••••••••">
+          <button type="button" class="icon-btn" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--text-3);" onclick="toggleEditEmpPw()">
+            <i class="bi bi-eye" id="editEmpPwIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button type="button" class="btn-mm btn-mm-ghost" onclick="closeModal('editEmployeeModal')">
+          Batal
+        </button>
+        <button type="submit" class="btn-mm btn-mm-primary">
+          <i class="bi bi-check-lg"></i> Simpan Perubahan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
   function toggleEmpPw() {
     var inp = document.getElementById('empPassword');
@@ -120,6 +196,33 @@
       inp.type = 'password';
       icon.className = 'bi bi-eye';
     }
+  }
+
+  function toggleEditEmpPw() {
+    var inp = document.getElementById('editEmpPassword');
+    var icon = document.getElementById('editEmpPwIcon');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      icon.className = 'bi bi-eye-slash';
+    } else {
+      inp.type = 'password';
+      icon.className = 'bi bi-eye';
+    }
+  }
+
+  function openEditModal(btn) {
+    document.getElementById('editEmpId').value = btn.getAttribute('data-id');
+    document.getElementById('editEmpName').value = btn.getAttribute('data-name');
+    document.getElementById('editEmpPhone').value = btn.getAttribute('data-phone');
+    document.getElementById('editEmpEmployeeId').value = btn.getAttribute('data-employee-id');
+    document.getElementById('editEmpIsActive').value = btn.getAttribute('data-is-active');
+    document.getElementById('editEmpPassword').value = '';
+    
+    document.getElementById('editEmployeeModal').style.display = 'flex';
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
   }
 
   function openReport(url) {

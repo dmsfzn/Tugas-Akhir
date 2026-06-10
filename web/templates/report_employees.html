@@ -28,7 +28,7 @@
     </div>
     <div class="kop-right">
       <div class="kop-doctype">Laporan Daftar Pegawai</div>
-      Dicetak: {{ now().strftime('%d %B %Y, %H:%M') }}<br>
+      Dicetak: {{ format_date_id(now(), show_time=True) }}<br>
       Total Pegawai: {{ employees|length }}
     </div>
   </div>
@@ -66,7 +66,7 @@
           <td style="color:#1a1a2e;font-size:12px;font-weight:600;">{{ emp.name }}</td>
           <td style="font-size:12px;">{{ emp.phone }}</td>
           <td style="font-family:'Space Mono',monospace;font-size:11px;color:#4a4a6a;">
-            {{ emp.created_at.strftime('%d %b %Y · %H:%M') if emp.created_at else '—' }}
+            {{ format_date_id(emp.created_at, show_time=True, short_month=True) if emp.created_at else '—' }}
           </td>
           <td>
             <span class="badge {% if emp.is_active %}positif{% else %}negatif{% endif %}">
@@ -94,7 +94,7 @@
     </div>
 
     <div class="signature-block">
-      <div class="signature-place-date">Jakarta, {{ now().strftime('%d %B %Y') }}</div>
+      <div class="signature-place-date">Jakarta, {{ format_date_id(now()) }}</div>
       <div class="signature-name">{{ session.get('username', '—') }}</div>
       <div class="signature-role">{% if session.get('role') == 'owner' %}Pemilik{% else %}{{ session.get('role', '')|capitalize }}{% endif %}</div>
       <div class="signature-space"></div>

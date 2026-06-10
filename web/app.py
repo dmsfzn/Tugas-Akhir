@@ -41,10 +41,46 @@ _stemmer    = Stemmer()
 # ─────────────────────────────────────────────
 # CONTEXT PROCESSOR
 # ─────────────────────────────────────────────
+def format_date_id(dt, show_time=False, short_month=False, show_year=True):
+    """Format datetime object or string to Indonesian date format."""
+    if not dt:
+        return '—'
+    if isinstance(dt, str):
+        try:
+            dt = datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            try:
+                dt = datetime.strptime(dt, '%Y-%m-%d')
+            except ValueError:
+                return dt
+                
+    months = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ]
+    short_months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+        'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'
+    ]
+    
+    day = dt.day
+    month_name = short_months[dt.month - 1] if short_month else months[dt.month - 1]
+    year = dt.year
+    
+    formatted = f"{day} {month_name}"
+    if show_year:
+        formatted += f" {year}"
+    if show_time:
+        formatted += f", {dt.strftime('%H:%M')}"
+    return formatted
+
 @app.context_processor
 def inject_now():
-    """Inject datetime.now ke semua template agar bisa dipakai langsung."""
-    return {'now': datetime.now}
+    """Inject datetime.now dan helper format_date_id ke semua template."""
+    return {
+        'now': datetime.now,
+        'format_date_id': format_date_id
+    }
 
 
 # ─────────────────────────────────────────────
@@ -464,6 +500,31 @@ def owner_employees():
                     flash(f'Pegawai "{name}" berhasil ditambahkan.', 'success')
             else:
                 flash('Semua kolom wajib diisi.', 'danger')
+
+        elif action == 'edit':
+            emp_id = int(request.form.get('id'))
+            name = request.form.get('name', '').strip()
+            phone = request.form.get('phone', '').strip()
+            employee_id = request.form.get('employee_id', '').strip()
+            password = request.form.get('password', '')
+            is_active = int(request.form.get('is_active', 1))
+
+            if name and phone and employee_id:
+                if password:
+                    hashed_pw = hash_password(password)
+                    cur.execute(
+                        "UPDATE users SET name = %s, phone = %s, employee_id = %s, password = %s, is_active = %s WHERE id = %s AND role = 'pegawai'",
+                        (name, phone, employee_id, hashed_pw, is_active, emp_id)
+                    )
+                else:
+                    cur.execute(
+                        "UPDATE users SET name = %s, phone = %s, employee_id = %s, is_active = %s WHERE id = %s AND role = 'pegawai'",
+                        (name, phone, employee_id, is_active, emp_id)
+                    )
+                db.commit()
+                flash('Pegawai berhasil diperbarui.', 'success')
+            else:
+                flash('Nama, No. Telp, dan ID Pegawai wajib diisi.', 'danger')
 
         elif action == 'delete':
             emp_id = int(request.form.get('id'))
