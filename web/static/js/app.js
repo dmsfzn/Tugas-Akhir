@@ -99,32 +99,27 @@ document.addEventListener('DOMContentLoaded', applyDataWidths);
   const sidebar = document.querySelector('.mm-sidebar');
 
   if (toggleBtn && wrapper && sidebar) {
-    // Periksa status tersimpan di localStorage khusus untuk ukuran layar desktop
-    if (window.innerWidth > 768) {
-      const sidebarState = localStorage.getItem('sidebar-state');
-      if (sidebarState === 'collapsed') {
-        wrapper.classList.add('sidebar-collapsed');
-      }
+    // Periksa status tersimpan di localStorage (default adalah collapsed/minim)
+    const sidebarState = localStorage.getItem('sidebar-state');
+    if (sidebarState === 'expanded') {
+      wrapper.classList.add('sidebar-expanded');
     }
 
     toggleBtn.addEventListener('click', function(e) {
       e.stopPropagation();
-      if (window.innerWidth > 768) {
-        wrapper.classList.toggle('sidebar-collapsed');
-        localStorage.setItem(
-          'sidebar-state',
-          wrapper.classList.contains('sidebar-collapsed') ? 'collapsed' : 'expanded'
-        );
-      } else {
-        wrapper.classList.toggle('sidebar-mobile-open');
-      }
+      wrapper.classList.toggle('sidebar-expanded');
+      localStorage.setItem(
+        'sidebar-state',
+        wrapper.classList.contains('sidebar-expanded') ? 'expanded' : 'collapsed'
+      );
     });
 
-    // Sembunyikan sidebar di mobile ketika mengklik di luar sidebar
+    // Sembunyikan/minimize sidebar di mobile ketika mengklik di luar sidebar
     document.addEventListener('click', function(e) {
-      if (window.innerWidth <= 768 && wrapper.classList.contains('sidebar-mobile-open')) {
+      if (wrapper.classList.contains('sidebar-expanded')) {
         if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
-          wrapper.classList.remove('sidebar-mobile-open');
+          wrapper.classList.remove('sidebar-expanded');
+          localStorage.setItem('sidebar-state', 'collapsed');
         }
       }
     });
