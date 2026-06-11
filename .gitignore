@@ -23,4 +23,5 @@ data/
 .vscode/
 listing_program_ta.md
 
-*.mysql
+*.sql
+plan.md
