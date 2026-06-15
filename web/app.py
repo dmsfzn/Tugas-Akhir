@@ -255,7 +255,7 @@ def pegawai_dashboard():
     negatif = cur.fetchone()['cnt']
 
     cur.execute(
-        """SELECT id, customer_name, motor_type, LEFT(text,80) AS snippet, sentiment, confidence, created_at
+        """SELECT id, customer_name, motor_type, LEFT(text,80) AS snippet, criticism_suggestion, sentiment, confidence, created_at
            FROM analyses ORDER BY created_at DESC LIMIT 5"""
     )
     recent = cur.fetchall()
@@ -308,7 +308,7 @@ def pegawai_history():
 
     offset = (page - 1) * per_page
     cur.execute(
-        f"""SELECT id, customer_name, motor_type, LEFT(text,100) AS snippet, sentiment, confidence, created_at
+        f"""SELECT id, customer_name, motor_type, LEFT(text,100) AS snippet, criticism_suggestion, sentiment, confidence, created_at
             FROM analyses WHERE {where}
             ORDER BY created_at DESC LIMIT %s OFFSET %s""",
         params + [per_page, offset]
@@ -414,7 +414,7 @@ def owner_dashboard():
     trend = cur.fetchall()
 
     cur.execute(
-        """SELECT id, customer_name, motor_type, LEFT(text,90) AS snippet, sentiment, confidence, created_at
+        """SELECT id, customer_name, motor_type, LEFT(text,90) AS snippet, criticism_suggestion, sentiment, confidence, created_at
            FROM analyses
            ORDER BY created_at DESC LIMIT 5"""
     )

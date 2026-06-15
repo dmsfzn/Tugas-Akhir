@@ -77,7 +77,14 @@
         </td>
         <td class="customer" style="font-weight:600;color:var(--text-1);">{{ row.customer_name or 'Anonim' }}</td>
         <td class="motor" style="color:var(--text-2);">{{ row.motor_type or '—' }}</td>
-        <td class="snippet">"{{ row.snippet }}…"</td>
+        <td class="snippet">
+          <div class="review-text">"{{ row.snippet }}…"</div>
+          {% if row.criticism_suggestion %}
+            <div class="criticism-suggestion" style="font-size: 11px; color: var(--text-3); margin-top: 5px; font-style: italic;">
+              <strong>Kritik &amp; Saran:</strong> "{{ row.criticism_suggestion }}"
+            </div>
+          {% endif %}
+        </td>
         <td><span class="badge-{{ row.sentiment }}">{{ row.sentiment|upper }}</span></td>
         <td>
           <div style="display:flex;align-items:center;gap:10px;min-width:120px;">

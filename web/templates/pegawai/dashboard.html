@@ -104,6 +104,12 @@
                        overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
           "{{ row.snippet }}…"
         </div>
+        {% if row.criticism_suggestion %}
+        <div style="font-size:10.5px;color:var(--text-3);margin-top:2px;font-style:italic;
+                       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          <strong>Kritik/Saran:</strong> "{{ row.criticism_suggestion }}"
+        </div>
+        {% endif %}
         <div style="font-size:10px;color:var(--text-3);margin-top:3px;">
           {{ row.created_at.strftime('%d %b %Y · %H:%M') if row.created_at else '—' }}
         </div>

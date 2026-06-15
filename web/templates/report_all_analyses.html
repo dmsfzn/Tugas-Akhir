@@ -101,7 +101,12 @@
           <td style="font-size:12px;color:#4a4a6a;font-weight:600;">{{ row.customer_name or 'Anonim' }}</td>
           <td style="font-size:12px;color:#4a4a6a;">{{ row.motor_type or '—' }}</td>
           <td style="max-width:220px;color:#1a1a2e;font-size:12px;">
-            {{ row.text[:90] }}{% if row.text|length > 90 %}…{% endif %}
+            <div class="review-text">{{ row.text[:90] }}{% if row.text|length > 90 %}…{% endif %}</div>
+            {% if row.criticism_suggestion %}
+              <div class="criticism-suggestion" style="font-size: 10px; color: #6b7280; margin-top: 4px; font-style: italic;">
+                <strong>Kritik/Saran:</strong> "{{ row.criticism_suggestion }}"
+              </div>
+            {% endif %}
           </td>
           <td>
             <span class="badge {{ row.sentiment }}">{{ row.sentiment|upper }}</span>

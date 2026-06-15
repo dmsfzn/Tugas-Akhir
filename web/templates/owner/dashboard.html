@@ -101,6 +101,11 @@
           {{ row.customer_name or 'Anonim' }} ({{ row.motor_type }})
         </div>
         <div style="font-size:11px;color:var(--text-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"{{ row.snippet }}…"</div>
+        {% if row.criticism_suggestion %}
+        <div style="font-size:10px;color:var(--text-3);margin-top:2px;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          <strong>Kritik/Saran:</strong> "{{ row.criticism_suggestion }}"
+        </div>
+        {% endif %}
         <span class="badge-{{ row.sentiment }}" style="margin-top:4px;display:inline-block;">{{ row.sentiment|upper }}</span>
       </div>
     </div>
