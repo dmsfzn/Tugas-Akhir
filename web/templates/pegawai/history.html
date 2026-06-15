@@ -142,12 +142,15 @@
         <circle cx="40" cy="40" r="30" fill="none" stroke="var(--bg-root)" stroke-width="12" />
         {% set pos_pct = (pos_count / (pos_count + neg_count) * 100)|round if (pos_count + neg_count) > 0 else 50 %}
         {% set circ = 188 %}
+        {% set pos_arc = (pos_pct / 100 * circ)|round %}
+        {% set neg_arc = circ - pos_arc %}
         <circle cx="40" cy="40" r="30" fill="none" stroke="var(--accent)" stroke-width="12"
-          stroke-dasharray="{{ (pos_pct/100*circ)|round }} {{ circ }}" stroke-dashoffset="{{ circ // 4 }}"
+          stroke-dasharray="{{ pos_arc }} {{ circ }}"
           transform="rotate(-90 40 40)" />
         <circle cx="40" cy="40" r="30" fill="none" stroke="var(--negative)" stroke-width="12"
-          stroke-dasharray="{{ ((100-pos_pct)/100*circ)|round }} {{ circ }}"
-          stroke-dashoffset="{{ -(pos_pct/100*circ - circ//4)|round }}" transform="rotate(-90 40 40)" />
+          stroke-dasharray="{{ neg_arc }} {{ circ }}"
+          stroke-dashoffset="{{ -pos_arc }}"
+          transform="rotate(-90 40 40)" />
       </svg>
       <div class="donut-labels">
         <div class="donut-label-item">
