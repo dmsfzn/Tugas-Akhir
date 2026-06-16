@@ -22,6 +22,7 @@ data/
 
 .vscode/
 listing_program_ta.md
+*.docx
 
 *.sql
 plan.md
