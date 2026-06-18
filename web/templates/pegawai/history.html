@@ -120,10 +120,26 @@
   <div class="mm-pagination">
     <a href="{{ url_for('pegawai_history', page=page-1, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}"
       class="page-btn {% if page <= 1 %}disabled{% endif %}"><i class="bi bi-chevron-left"></i></a>
+    
+    {% if page > 3 %}
+      <a href="{{ url_for('pegawai_history', page=1, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}" class="page-btn">1</a>
+      {% if page > 4 %}
+        <span class="page-btn disabled">...</span>
+      {% endif %}
+    {% endif %}
+
     {% for p in range([1, page-2]|max, [total_pages+1, page+3]|min) %}
-    <a href="{{ url_for('pegawai_history', page=p, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}"
-      class="page-btn {% if p == page %}active{% endif %}">{{ p }}</a>
+      <a href="{{ url_for('pegawai_history', page=p, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}"
+        class="page-btn {% if p == page %}active{% endif %}">{{ p }}</a>
     {% endfor %}
+
+    {% if page < total_pages - 2 %}
+      {% if page < total_pages - 3 %}
+        <span class="page-btn disabled">...</span>
+      {% endif %}
+      <a href="{{ url_for('pegawai_history', page=total_pages, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}" class="page-btn">{{ total_pages }}</a>
+    {% endif %}
+
     <a href="{{ url_for('pegawai_history', page=page+1, q=q, sentiment=sentiment, date_from=date_from, date_to=date_to) }}"
       class="page-btn {% if page >= total_pages %}disabled{% endif %}"><i class="bi bi-chevron-right"></i></a>
   </div>

@@ -279,7 +279,7 @@ def pegawai_history():
     date_from  = request.args.get('date_from', '')
     date_to    = request.args.get('date_to', '')
     page       = int(request.args.get('page', 1))
-    per_page   = 10
+    per_page   = 5
 
     db  = get_db()
     cur = db.cursor(dictionary=True)
@@ -370,6 +370,8 @@ def pegawai_lexicon():
 
     q_lex = request.args.get('q', '').strip()
     cat   = request.args.get('cat', 'all')
+    page  = int(request.args.get('page', 1))
+    per_page = 5
 
     cond   = ["1=1"]
     params = []
@@ -378,11 +380,20 @@ def pegawai_lexicon():
     if cat != 'all':
         cond.append("category = %s"); params.append(cat)
 
-    cur.execute(f"SELECT * FROM lexicon WHERE {' AND '.join(cond)} ORDER BY word ASC", params)
+    where = " AND ".join(cond)
+    cur.execute(f"SELECT COUNT(*) AS cnt FROM lexicon WHERE {where}", params)
+    total_rows = cur.fetchone()['cnt']
+    total_pages = max(1, (total_rows + per_page - 1) // per_page)
+    offset = (page - 1) * per_page
+
+    cur.execute(
+        f"SELECT * FROM lexicon WHERE {where} ORDER BY word ASC LIMIT %s OFFSET %s",
+        params + [per_page, offset]
+    )
     lexicons = cur.fetchall()
     cur.close(); db.close()
 
-    return render_template('pegawai/lexicon.html', lexicons=lexicons, q=q_lex, cat=cat)
+    return render_template('pegawai/lexicon.html', lexicons=lexicons, q=q_lex, cat=cat, page=page, total_pages=total_pages, total_rows=total_rows)
 
 
 # ─────────────────────────────────────────────
