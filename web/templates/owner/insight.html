@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}Insight — Analisis Negatif{% endblock %}
-{% block page_label %}Insight Sentimen{% endblock %}
+{% block title %}Insight Ulasan — Analisis Negatif{% endblock %}
+{% block page_label %}Insight Ulasan{% endblock %}
 
 {% block content %}
 
 <div class="page-header">
-  <h1>Insight Sentimen</h1>
+  <h1>Insight Ulasan</h1>
   <div style="display:flex;gap:10px;">
     <!-- Laporan Insight → buka popup laporan printable (bukan download CSV) -->
     <button class="btn-mm btn-mm-ghost" onclick="openReport('/report/insight')">
@@ -59,7 +59,7 @@
 
   <div style="display:flex;flex-direction:column;gap:16px;">
     <div class="mm-card">
-      <div class="card-label">Tren Sentimen Negatif (8 Minggu)</div>
+      <div class="card-label">Tren Ulasan Negatif (8 Minggu)</div>
       <div class="bar-chart" id="negTrend" style="height:80px;"></div>
       {% if neg_trend %}<div style="font-size:10px;color:var(--text-3);margin-top:8px;text-align:right;">REF: 8-WEEK
         DYNAMIC CYCLE</div>{% endif %}

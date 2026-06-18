@@ -33,7 +33,7 @@
     <div class="stat-icon-card">
       <div class="stat-icon green"><i class="bi bi-arrow-up-circle"></i></div>
       <div>
-        <div class="card-label">Sentimen Positif</div>
+        <div class="card-label">Ulasan Positif</div>
         <div class="stat-value text-mono" style="color:#6b87f5">{{ positif }}</div>
         <div class="stat-sub">
           {% if total > 0 %}
@@ -49,7 +49,7 @@
     <div class="stat-icon-card">
       <div class="stat-icon orange"><i class="bi bi-exclamation-triangle"></i></div>
       <div>
-        <div class="card-label">Sentimen Negatif</div>
+        <div class="card-label">Ulasan Negatif</div>
         <div class="stat-value text-mono" style="color:var(--negative)">{{ negatif }}</div>
         <div class="stat-sub">
           {% if total > 0 %}
@@ -66,13 +66,13 @@
 
   <!-- Velocity Trend Card -->
   <div class="mm-card" style="display:flex;flex-direction:column;">
-    <div class="card-label">Sentiment Velocity Trend</div>
+    <div class="card-label">Tren Kecepatan Ulasan</div>
     <!-- Chart fills remaining card height -->
     <div class="bar-chart" id="trendChart" style="flex:1;min-height:80px;align-items:flex-end;margin-top:8px;"></div>
     <div style="display:flex;gap:16px;margin-top:12px;font-size:11px;flex-shrink:0;">
       <span style="display:flex;align-items:center;gap:6px;">
         <span style="width:8px;height:8px;background:var(--accent);border-radius:50%;display:inline-block;"></span>
-        <span class="text-dim">Analyses Peak</span>
+        <span class="text-dim">Puncak Ulasan</span>
       </span>
       <span style="display:flex;align-items:center;gap:6px;">
         <span style="width:8px;height:8px;background:var(--text-3);border-radius:50%;display:inline-block;"></span>

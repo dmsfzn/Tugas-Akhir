@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Laporan Semua Analisis — MotorMind</title>
+  <title>Laporan Semua Ulasan — MotorMind</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
 </head>
 <body>
 
 <!-- ── TOOLBAR ── -->
 <div class="print-toolbar">
-  <div class="tb-info">Laporan Analisis · {{ rows|length }} data ditemukan</div>
+  <div class="tb-info">Laporan Ulasan · {{ rows|length }} data ditemukan</div>
   <button class="btn-print primary" onclick="doPrint()">⎙ Cetak / Simpan PDF</button>
   <a class="btn-print secondary" href="{{ url_for('report_export_csv', date_from=date_from, date_to=date_to, sentiment=sentiment, q=q) }}" target="_blank">↓ Download CSV</a>
   <button class="btn-print secondary" onclick="doClose()">✕ Tutup</button>
@@ -24,11 +24,11 @@
       <div class="kop-logo">⚡</div>
       <div class="kop-company">
         <div class="kop-company-name">BENGKEL STEAM MOTOR SENTOSA</div>
-        <div class="kop-company-tagline">Perawatan & Analisis Sentimen Pelanggan</div>
+        <div class="kop-company-tagline">Perawatan & Analisis Ulasan Pelanggan</div>
       </div>
     </div>
     <div class="kop-right">
-      <div class="kop-doctype">Laporan Analisis Sentimen</div>
+      <div class="kop-doctype">Laporan Analisis Ulasan</div>
       Dicetak: {{ format_date_id(now(), show_time=True) }}<br>
       Total data: {{ rows|length }}
     </div>
@@ -42,7 +42,7 @@
 
   <!-- ── JUDUL ── -->
   <div class="report-title-block">
-    <h2>Laporan Semua Analisis Sentimen</h2>
+    <h2>Laporan Semua Analisis Ulasan</h2>
   </div>
 
   <!-- Filter info -->
@@ -84,7 +84,7 @@
         <th>Tanggal &amp; Waktu</th>
         <th>Pelanggan</th>
         <th>Tipe Motor</th>
-        <th>Teks Analisis</th>
+        <th>Teks Ulasan</th>
         <th>Sentimen</th>
         <th class="hide-mobile">Confidence</th>
         <th class="hide-mobile">Lexicon</th>
@@ -130,7 +130,7 @@
       {% else %}
         <tr>
           <td colspan="8" style="text-align:center;padding:24px;color:#9ca3af;">
-            Tidak ada data analisis
+            Tidak ada data ulasan
           </td>
         </tr>
       {% endif %}
@@ -140,7 +140,7 @@
   <!-- ── FOOTER & TANDA TANGAN ── -->
   <div class="report-footer-section">
     <div class="footer-left">
-      MotorMind Sentiment Analysis System — Tugas Akhir<br>
+      MotorMind Review Analysis System — Tugas Akhir<br>
       <strong>Bengkel Steam Motor Sentosa</strong> · Jl. Kemang Raya No. 45, Jakarta Selatan<br>
       Model: Neural X2.4 TF-IDF + Naive Bayes + Lexicon Hybrid
     </div>

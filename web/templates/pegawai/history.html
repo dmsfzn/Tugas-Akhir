@@ -27,9 +27,9 @@
         </div>
       </div>
       <div>
-        <label class="mm-label">Sentiment Filter</label>
+        <label class="mm-label">Filter Ulasan</label>
         <select name="sentiment" class="mm-input" style="width:160px;">
-          <option value="all" {% if sentiment=='all' %}selected{% endif %}>All Sentiments</option>
+          <option value="all" {% if sentiment=='all' %}selected{% endif %}>Semua Ulasan</option>
           <option value="positif" {% if sentiment=='positif' %}selected{% endif %}>POSITIF</option>
           <option value="negatif" {% if sentiment=='negatif' %}selected{% endif %}>NEGATIF</option>
         </select>
@@ -64,7 +64,7 @@
         <th>Pelanggan</th>
         <th>Tipe Motor</th>
         <th>Review Snippet</th>
-        <th>Sentiment</th>
+        <th>Sentimen</th>
         <th>Confidence</th>
       </tr>
     </thead>
@@ -149,7 +149,7 @@
 <!-- ── BOTTOM CHARTS ──────────────────────── -->
 <div class="grid-2 mt-4">
   <div class="mm-card">
-    <div class="card-label">Sentiment Distribution</div>
+    <div class="card-label">Distribusi Ulasan</div>
     {% if total_rows and total_rows > 0 %}
     {% set pos_count = analyses|selectattr('sentiment','equalto','positif')|list|length %}
     {% set neg_count = analyses|selectattr('sentiment','equalto','negatif')|list|length %}
@@ -190,12 +190,12 @@
     {% endif %}
   </div>
   <div class="mm-card">
-    <div class="card-label">Laboratory Activity</div>
+    <div class="card-label">Aktivitas Ulasan</div>
     <div class="bar-chart" id="actChart" style="height:80px;"></div>
     <div style="display:flex;gap:16px;margin-top:10px;font-size:11px;">
       <span style="display:flex;align-items:center;gap:5px;"><span
           style="width:8px;height:8px;background:var(--accent);border-radius:50%;"></span><span
-          class="text-dim">Analyses Peak</span></span>
+          class="text-dim">Puncak Ulasan</span></span>
       <span style="display:flex;align-items:center;gap:5px;"><span
           style="width:8px;height:8px;background:var(--text-3);border-radius:50%;"></span><span
           class="text-dim">Baseline</span></span>
