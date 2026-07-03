@@ -41,7 +41,7 @@ _stemmer    = Stemmer()
 # ─────────────────────────────────────────────
 # CONTEXT PROCESSOR
 # ─────────────────────────────────────────────
-def format_date_id(dt, show_time=False, short_month=False, show_year=True):
+def format_date_id(dt, show_time=False, short_month=False, show_year=True, show_day=False):
     """Format datetime object or string to Indonesian date format."""
     if not dt:
         return '—'
@@ -63,11 +63,18 @@ def format_date_id(dt, show_time=False, short_month=False, show_year=True):
         'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'
     ]
     
-    day = dt.day
+    days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
+    
+    day_num = dt.day
     month_name = short_months[dt.month - 1] if short_month else months[dt.month - 1]
     year = dt.year
     
-    formatted = f"{day} {month_name}"
+    formatted = ""
+    if show_day and hasattr(dt, 'weekday'):
+        day_name = days[dt.weekday()]
+        formatted += f"{day_name}, "
+        
+    formatted += f"{day_num} {month_name}"
     if show_year:
         formatted += f" {year}"
     if show_time:
